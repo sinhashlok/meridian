@@ -58,12 +58,12 @@ in seconds, sound, what the Lock Screen showed).
 | 4 | Locked, **Silent** on (Ring/Silent switch or Action button) | Still rings with sound | Pass (16 Oct) | Reported as working; no detail recorded |
 | 5 | Locked, **Focus** on (Do Not Disturb, then repeat with Sleep) | Still rings | Pass (16 Oct) | Reported as working; no detail recorded |
 | 6 | App force-quit (swipe it away in the app switcher) | Still rings | Pass (16 Oct) | Reported as working; no detail recorded |
-| 7 | Tap Stop when it rings, then open the app | Status shows "Gone (stopped or cancelled)" | Pass (16 Oct) | Reported as working; no detail recorded |
+| 7 | Tap Stop when it rings, then open the app | Status shows "Gone (stopped or cancelled)" | Pass (16 Oct) | Reported as working; conditions not recorded. Test 9 suggests the app may have been in the foreground |
 | 8 | Schedule, then tap **Cancel alarm** | Never rings | Pass (16 Oct) | Reported as working; no detail recorded |
-| 9 | App suspended (home, not force-quit) when it rings; reopen after Stop | Note what status the app shows and whether it ever showed `alerting` | Open | Reported fine; observation not recorded yet |
+| 9 | App suspended (home, not force-quit) when it rings; reopen after Stop | Note what status the app shows and whether it ever showed `alerting` | Fail (16 Oct) | Status showed neither "Gone" nor "alerting" after reopening: the alarmUpdates stream did not deliver the change. Matches the iOS 27 report (FB23754550) |
 | 10 | Schedule, then Settings › General › Date & Time › turn off Set Automatically › Time Zone = New York | Rings at the same instant as planned: the countdown doesn't change and the "Rings at" clock time shifts | Pass (16 Oct) | Reported as working; no detail recorded |
-| 11 | Low alarm volume (iOS 27: Settings › Sounds › alarm volume, if present) | Note how loud it is | Open | Reported fine; observation not recorded yet |
-| 12 | Apple Watch paired (if you have one) | Alert also shows on the Watch | Open | Reported fine; observation not recorded yet |
+| 11 | Low alarm volume (iOS 27: Settings › Sounds › alarm volume, if present) | Note how loud it is | Observed (16 Oct) | Rang quietly: follows the iOS 27 system alarm volume. Nothing for the app to set |
+| 12 | Apple Watch paired (if you have one) | Alert also shows on the Watch | N/A | No Apple Watch |
 | 13 | Settings › Apps › Meridian › turn Alarms off, then tap Schedule | Red error line in the app, nothing scheduled | Pass (16 Oct) | Reported as working; no detail recorded |
 
 Afterwards: turn Set Automatically back on (test 10) and turn Alarms back on (test 13).
@@ -82,8 +82,22 @@ Afterwards: turn Set Automatically back on (test 10) and turn Alarms back on (te
 
 ## Results
 
-- Device / iOS: not recorded yet
+- Device / iOS: iPhone 16, iOS 27
 - Date tested: 16 Oct 2026
 - Verdict: AlarmKit works for M7. Tests 1 to 8, 10 and 13 passed: rings through lock,
   Silent, Focus and app force-quit, and a `.fixed` alarm survives a device time zone
-  change. Tests 9, 11 and 12 (observations, not pass/fail) still need details.
+  change. Test 12 not applicable (no Watch).
+
+## Decisions for M7
+
+- **Don't trust `alarmUpdates` for state.** Test 9: after the alarm rang and was
+  stopped while the app was suspended, the stream never told the app ("Gone" and
+  `alerting` were both never shown). M7 re-reads `AlarmManager.shared.alarms` on
+  launch and whenever the app comes to the foreground (`scenePhase == .active`) and
+  reconciles against what we stored; the stream is only a live hint while the app is
+  open. This is also when "Keep <zone> time" alarms get re-registered.
+- **Volume is the user's.** iOS 27 has an independent alarm volume, and AlarmKit
+  alarms follow it (test 11 rang quietly). No in-app volume control; the alarm edit
+  sheet can mention it in one line if testers miss alarms.
+- **Still open before M7:** whether `.relative` alarms follow a device time zone change,
+  and the real `maximumLimitReached` count. A second spike button can answer both.
