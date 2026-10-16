@@ -64,3 +64,26 @@ so the fields AND. Quartz needs `?` in exactly one day field. "Never runs" is ch
 over a full 400-year Gregorian cycle. DST: a skipped wall time runs at the next valid
 time and duplicates are dropped (02:00 → 03:00 when 03:00 is also scheduled runs once);
 a repeated wall time runs once, at its first occurrence.
+
+## 16 Oct 2026 · M3
+
+**H. Zone search data.** A curated list of ~150 cities (city, country, IANA id) lives in
+Core as plain Swift data; every other IANA zone is still found by its id or city part.
+Why: Foundation has no zone → country map, and Core stays dependency-free.
+
+**I. UTC mode in Zones.** Clocks rows keep each zone's own time (that's the world
+clock). The Planner switches its reference zone to UTC: the axis, ticks, scrubber,
+best-window times and DayPager follow the UTC day, with a `UTC` suffix. Copy text is
+unchanged (it always has a UTC line).
+
+**J. 24-hour display in M3.** All times Meridian draws are 24-hour; "Follow system"
+arrives with Settings in M8. Native `DatePicker` inputs (work hours) already follow the
+system setting, so on a 12-hour phone they show AM/PM.
+
+**K. Clocks day offsets are relative to the home zone** ("Today · −4h 30m"), matching
+the Planner, not the phone's current zone.
+
+**L. Copy/Share tags.** `early` (stretch before work), `late` (stretch after work),
+`asleep`, `weekend`; nothing in work hours. The "London changes clocks on Sun 25 Oct"
+note appears when a zone changes its clocks between now and the meeting (our reading
+of spec §5.3 "when crossing").
