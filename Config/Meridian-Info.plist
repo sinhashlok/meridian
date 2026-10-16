@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+  Info.plist keys Xcode has no build setting for. Xcode merges this file with the
+  Info.plist it generates (GENERATE_INFOPLIST_FILE = YES), so only add keys here that
+  INFOPLIST_KEY_* settings can't express. Kept outside Meridian/ so the synced folder
+  doesn't also copy it into the app as a resource.
+-->
+<dict>
+	<key>NSAlarmKitUsageDescription</key>
+	<string>Meridian uses alarms so your wake-ups and reminders ring even when your phone is on Silent or in a Focus.</string>
+</dict>
+</plist>

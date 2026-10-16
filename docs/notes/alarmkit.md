@@ -34,10 +34,13 @@ docs for the Info.plist key. Xcode's bundled AlarmKit guide (IDEIntelligenceChat
 
 ## Setup (Xcode clicks)
 
-1. Meridian target › **Info** › Custom iOS Target Properties › hover a row › **+** ›
-   key `NSAlarmKitUsageDescription` (Xcode may list it as "Privacy - AlarmKit Usage
-   Description"), type String, value:
-   `Meridian uses alarms so your wake-ups and reminders ring even when your phone is on Silent or in a Focus.`
+Xcode 27 has no `INFOPLIST_KEY_*` build setting for `NSAlarmKitUsageDescription`, and
+its Info tab no longer shows a "Custom iOS Target Properties" section. The key lives in
+`Config/Meridian-Info.plist`, which Xcode merges with its generated Info.plist.
+
+1. Meridian target › **Build Settings** › **All** › search `Info.plist File` › set
+   the value to `Config/Meridian-Info.plist` (on the target row, so Debug and Release
+   both get it).
 2. Plug in the iPhone, pick it as the run destination, ⌘R.
 
 ## Tests to run on the iPhone
