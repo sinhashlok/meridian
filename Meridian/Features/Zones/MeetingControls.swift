@@ -87,6 +87,7 @@ struct MeetingCard: View {
     let onNow: (() -> Void)?
 
     @ScaledMetric(relativeTo: .body) private var columnWidth: CGFloat = 100
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var copies = 0
     @State private var showsCopied = false
 
@@ -197,7 +198,11 @@ struct MeetingCard: View {
 
     private var actions: some View {
         let text = MeetingText.make(start: selection, minutes: minutes, zones: zones, now: now)
-        return HStack(spacing: Spacing.xs) {
+        // Side by side normally; stacked full-width at accessibility sizes so labels stay.
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xs))
+            : AnyLayout(HStackLayout(spacing: Spacing.xs))
+        return layout {
             Button {
                 UIPasteboard.general.string = text
                 copies += 1
@@ -216,7 +221,7 @@ struct MeetingCard: View {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.bordered)
-            Spacer(minLength: 0)
+            if !typeSize.isAccessibilitySize { Spacer(minLength: 0) }
             Button("Now") { onNow?() }
                 .disabled(onNow == nil)
                 .frame(minHeight: Spacing.minTapTarget)
