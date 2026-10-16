@@ -28,6 +28,8 @@ private struct ScreenChrome: ViewModifier {
                     Button("Settings", systemImage: "gearshape") {
                         appState.isSettingsPresented = true
                     }
+                    // A decorative icon, so never orange (§3.2).
+                    .tint(.textPrimary)
                 }
             }
     }

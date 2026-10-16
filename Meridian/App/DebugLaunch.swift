@@ -9,12 +9,49 @@ import MeridianCore
 ///       -MeridianZones "Asia/Kolkata=Mumbai,Europe/London=London,America/Los_Angeles=SF" \
 ///       -MeridianScreen clocks
 enum DebugLaunch {
-    /// `clocks`, `planner`, `addZone`, `editZone`, `changes`, …
+    /// `clocks`, `planner`, `plannerScrub`, `addZone`, `editZone`, `changes`, …
     static var screen: String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: "MeridianScreen")
         #else
         nil
+        #endif
+    }
+
+    /// `-MeridianDay 2026-10-25`: the Planner opens on this day instead of today.
+    static var plannerDay: CivilDate? {
+        #if DEBUG
+        UserDefaults.standard.string(forKey: "MeridianDay").flatMap(CivilDate.init(iso:))
+        #else
+        nil
+        #endif
+    }
+
+    /// `-MeridianSelect 2026-10-15T15:00:00Z`: the Planner's selected time.
+    static var plannerSelection: Date? {
+        #if DEBUG
+        UserDefaults.standard.string(forKey: "MeridianSelect").flatMap { try? EpochParser.parseISO8601($0).date }
+        #else
+        nil
+        #endif
+    }
+
+    /// `-MeridianBottom 1`: scroll views start at the bottom, to shoot what's below the fold.
+    static var startsAtBottom: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "MeridianBottom")
+        #else
+        false
+        #endif
+    }
+
+    /// `-MeridianWarn 1`: show the Clocks warn-before-clocks-change banner (a Settings
+    /// toggle from M8).
+    static var warnsBeforeClockChanges: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "MeridianWarn")
+        #else
+        false
         #endif
     }
 

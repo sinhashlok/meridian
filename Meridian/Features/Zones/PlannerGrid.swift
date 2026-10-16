@@ -3,26 +3,33 @@ import SwiftUI
 
 /// The Planner rows on one axis (spec §4.1): bars placed by real UTC instants on the
 /// reference zone's day, encoded by height first (work 26pt, stretch 16pt, sleep 4pt).
-/// Overlays: best-window bracket (text.primary), now-line (accent), selection line.
+/// Above the card, a bubble names the selected time. Inside: header with ticks, rows,
+/// and overlays (repeated-hour shading, fault lines, best-window bracket, the selected
+/// meeting as a band with a handle, the accent now-line).
 /// A horizontal drag that starts on a track scrubs; dragging away vertically fine-scrubs.
 struct PlannerGrid: View {
     let day: PlannerDay
     let reference: Zone
+    let referenceName: String
+    let home: PlannerZone?
     let now: Date
     @Binding var selection: Date
+    let minutes: Int
+    let counts: String
     let bracket: DateInterval?
-    let timeSuffix: String
+    @Binding var isScrubbing: Bool
 
-    @ScaledMetric(relativeTo: .headline) private var labelWidth: CGFloat = 96
+    @ScaledMetric(relativeTo: .headline) private var labelWidth: CGFloat = 116
+    @ScaledMetric(relativeTo: .headline) private var knobSize: CGFloat = 26
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var width: CGFloat = 0
-    @State private var bubbleWidth: CGFloat = 60
+    @State private var bubbleWidth: CGFloat = 120
     @State private var dragAxis: Axis?
     @State private var lastX: CGFloat = 0
     @State private var scrubFraction: Double = 0
 
     static let trackHeight: CGFloat = 32
-    @ScaledMetric(relativeTo: .footnote) private var bubbleHeight: CGFloat = 28
+    private static let cardPadding = Spacing.s
 
     private var isStacked: Bool { typeSize.isAccessibilitySize }
     private var trackX: CGFloat { isStacked ? 0 : labelWidth + Spacing.s }
@@ -33,64 +40,181 @@ struct PlannerGrid: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xxs) {
+        let faults = day.faultLines(reference: reference)
+        let change = day.referenceChange(reference: reference, referenceName: referenceName)
+        VStack(alignment: .leading, spacing: Spacing.xs) {
             bubble
-            rows
-            ticks
+            VStack(alignment: .leading, spacing: Spacing.s) {
+                header(change: change)
+                rows(faults: faults, change: change)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+            .padding(Self.cardPadding)
+            .padding(.bottom, knobSize / 2)
+            .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
         }
         .sensoryFeedback(Haptic.selection, trigger: Scrubber.wallTime(of: selection, in: reference).hour)
     }
 
-    // MARK: Parts
+    // MARK: Bubble
 
+    /// `Thu 21:30 IST  3 of 3 awake · Mumbai in stretch`; while scrubbing it adds UTC and
+    /// stacks. Centred on the selection, kept fully on screen.
     private var bubble: some View {
-        Text(ZoneClock.wallTime(selection, in: reference) + timeSuffix)
-            .meridianFont(.monoCaption)
+        let title = Text(Scrubber.bubbleText(selection, reference: reference, withUTC: isScrubbing))
+            .meridianFont(.monoCaption).bold()
             .foregroundStyle(.textPrimary)
-            .padding(.horizontal, Spacing.xs)
-            .padding(.vertical, Spacing.xxs)
-            .background(.bgElevated, in: .capsule)
-            .fixedSize()
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { bubbleWidth = $0 }
-            // Centre on the selection, but keep the whole bubble on screen at any text size.
-            .position(x: min(max(x(selection), bubbleWidth / 2), max(width - bubbleWidth / 2, bubbleWidth / 2)),
-                      y: bubbleHeight / 2)
-            .frame(height: bubbleHeight)
-            .accessibilityHidden(true)               // the scrub controls speak the time
-    }
-
-    private var rows: some View {
-        VStack(spacing: Spacing.xs) {
-            ForEach(day.rows, id: \.zone) { row in
-                PlannerRowView(row: row, axis: day.axis, selection: selection,
-                               markers: day.transitions.filter { $0.zoneName == row.zone.name }.map(\.transition),
-                               isStacked: isStacked, labelWidth: labelWidth, trackWidth: trackWidth)
+        let detail = Text(counts)
+            .meridianFont(.caption)
+            .foregroundStyle(.textSecondary)
+        let full = width + 2 * Self.cardPadding
+        let centre = Self.cardPadding + x(selection)
+        return Group {
+            if isScrubbing {
+                VStack(alignment: .leading, spacing: 2) { title; detail }
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.xs) { title; detail }
+                    VStack(alignment: .leading, spacing: 2) { title; detail }
+                }
             }
         }
-        // Take the whole column first: the tracks size from this width, so measuring an
-        // unconstrained VStack would feed their own size back in.
+        .padding(.horizontal, Spacing.s)
+        .padding(.vertical, Spacing.xs)
+        .background(.bgElevated, in: .rect(cornerRadius: Radius.chip, style: .continuous))
+        // Measure the bubble itself, before the frame that lets it wrap at full width.
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { bubbleWidth = $0 }
+        .frame(maxWidth: full, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
+        .offset(x: min(max(centre - bubbleWidth / 2, 0), max(full - bubbleWidth, 0)))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
-        .overlay(alignment: .topLeading) { lines }
+        .accessibilityHidden(true)               // the meeting card speaks the time
+    }
+
+    // MARK: Header
+
+    /// `IST · Thu 15` (+ `25-hour day`) beside hour ticks at 00, 06, 12, 18 on the reference
+    /// zone's wall clock, so a 25-hour day shows its extra hour between ticks. A reference
+    /// clock change adds its label (`01 BST · 01 GMT`) above the ticks.
+    @ViewBuilder
+    private func header(change: ReferenceChange?) -> some View {
+        let title = VStack(alignment: .leading, spacing: 0) {
+            Text(day.headerTitle(reference: reference, referenceName: referenceName))
+                .meridianFont(.caption)
+                .foregroundStyle(.textSecondary)
+            if let length = day.lengthNote {
+                Text(length)
+                    .meridianFont(.caption).bold()
+                    .foregroundStyle(.textPrimary)
+            }
+        }
+        let ticks = VStack(alignment: .leading, spacing: 2) {
+            if let change { changeLabel(change) }
+            ZStack(alignment: .topLeading) {
+                ForEach([0, 6, 12, 18], id: \.self) { hour in
+                    let instant = Scrubber.instant(keeping: ClockTime(hour, 0), on: day.date, in: reference)
+                    Text(hour < 10 ? "0\(hour)" : "\(hour)")
+                        .meridianFont(.tick)
+                        .monospaced()
+                        .foregroundStyle(.textTertiary)
+                        .fixedSize()
+                        .offset(x: x(instant) - trackX)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .accessibilityHidden(true)
+
+        if isStacked {
+            VStack(alignment: .leading, spacing: Spacing.xs) { title; ticks }
+        } else {
+            HStack(alignment: .bottom, spacing: Spacing.s) {
+                title.frame(width: labelWidth, alignment: .leading)
+                ticks
+            }
+        }
+    }
+
+    private func changeLabel(_ change: ReferenceChange) -> some View {
+        let start = change.repeated.map { x($0.start) } ?? x(change.instant)
+        let bracketWidth = change.repeated.map { x($0.end) - x($0.start) } ?? 0
+        return HStack(spacing: Spacing.xxs) {
+            if bracketWidth > 0 {
+                // ⌐¬ over both occurrences of the repeated hour.
+                Path { path in
+                    path.move(to: CGPoint(x: 0, y: 8))
+                    path.addLine(to: CGPoint(x: 0, y: 2))
+                    path.addLine(to: CGPoint(x: bracketWidth, y: 2))
+                    path.addLine(to: CGPoint(x: bracketWidth, y: 8))
+                }
+                .stroke(Color.textSecondary, lineWidth: 1)
+                .frame(width: bracketWidth, height: 8)
+            }
+            Text(change.label)
+                .meridianFont(.monoCaption)
+                .foregroundStyle(.textPrimary)
+                .fixedSize()
+        }
+        .offset(x: max(start - trackX, 0))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: Rows and overlays
+
+    private func rows(faults: [FaultLine], change: ReferenceChange?) -> some View {
+        VStack(spacing: Spacing.s) {
+            ForEach(day.rows, id: \.zone) { row in
+                PlannerRowView(row: row, axis: day.axis, caption: day.caption(for: row.zone, now: now),
+                               selection: selection, isScrubbing: isScrubbing, isHome: row.zone == home,
+                               markers: day.transitions.filter { $0.zoneName == row.zone.name }.map(\.transition),
+                               fault: faults.first { $0.zoneName == row.zone.name },
+                               isStacked: isStacked, labelWidth: labelWidth, trackX: trackX, trackWidth: trackWidth)
+            }
+        }
+        .overlay(alignment: .topLeading) { lines(faults: faults, change: change) }
         .contentShape(.rect)
         .simultaneousGesture(scrub)
     }
 
-    private var lines: some View {
+    private func lines(faults: [FaultLine], change: ReferenceChange?) -> some View {
         GeometryReader { geometry in
             let height = geometry.size.height
             ZStack(alignment: .topLeading) {
-                if let bracket, bracket.intersects(day.axis) {
+                if let repeated = change?.repeated {
+                    Rectangle()
+                        .fill(Color.textPrimary.opacity(0.07))
+                        .frame(width: x(repeated.end) - x(repeated.start), height: height)
+                        .offset(x: x(repeated.start))
+                }
+                ForEach(faults, id: \.instant) { fault in
+                    dashedLine(height: height, color: .textTertiary, width: 1).offset(x: x(fault.instant))
+                }
+                if let bracket, bracket.intersects(day.axis), bracket != meeting {
                     let start = x(max(bracket.start, day.axis.start)), end = x(min(bracket.end, day.axis.end))
                     RoundedRectangle(cornerRadius: Radius.bar, style: .continuous)
                         .strokeBorder(Color.textPrimary, lineWidth: 1.5)
                         .frame(width: max(end - start, 2), height: height)
                         .offset(x: start)
                 }
-                Rectangle().fill(Color.textPrimary).frame(width: 2, height: height).offset(x: x(selection) - 1)
+                // The selected meeting: a band as long as the meeting, a leading line, a handle.
+                let start = x(selection), end = x(min(meeting.end, day.axis.end))
+                Rectangle()
+                    .fill(Color.textPrimary.opacity(0.14))
+                    .frame(width: max(end - start, 2), height: height)
+                    .offset(x: start)
+                Rectangle().fill(Color.textPrimary).frame(width: 2, height: height).offset(x: start - 1)
+                Circle()
+                    .fill(Color.textPrimary)
+                    .frame(width: knobSize, height: knobSize)
+                    .scaleEffect(isScrubbing ? 1.25 : 1)
+                    .dragShadow()
+                    .offset(x: start - knobSize / 2, y: height - knobSize / 2 + Self.cardPadding / 2)
+                    .animation(Motion.press, value: isScrubbing)
                 // Drawn last so "now" stays visible when the selection sits on it.
                 if day.axis.contains(now) {
                     Rectangle().fill(Color.accent).frame(width: 2, height: height).offset(x: x(now) - 1)
+                    Circle().fill(Color.accent).frame(width: 8, height: 8).offset(x: x(now) - 4, y: -4)
                 }
             }
         }
@@ -98,22 +222,7 @@ struct PlannerGrid: View {
         .accessibilityHidden(true)
     }
 
-    /// Hour ticks at 00, 06, 12, 18 on the reference zone's wall clock, so a 25-hour
-    /// day shows its extra hour between ticks.
-    private var ticks: some View {
-        ZStack(alignment: .topLeading) {
-            ForEach([0, 6, 12, 18], id: \.self) { hour in
-                let instant = Scrubber.instant(keeping: ClockTime(hour, 0), on: day.date, in: reference)
-                Text(hour < 10 ? "0\(hour)" : "\(hour)")
-                    .meridianFont(.tick)
-                    .foregroundStyle(.textTertiary)
-                    .fixedSize()
-                    .position(x: x(instant) + 8, y: 8)
-            }
-        }
-        .frame(height: 16)
-        .accessibilityHidden(true)
-    }
+    private var meeting: DateInterval { DateInterval(start: selection, duration: TimeInterval(minutes * 60)) }
 
     // MARK: Scrubbing
 
@@ -126,6 +235,7 @@ struct PlannerGrid: View {
                     let isHorizontal = abs(value.translation.width) >= abs(value.translation.height)
                     dragAxis = startsOnTrack && isHorizontal ? .horizontal : .vertical
                     guard dragAxis == .horizontal else { return }
+                    isScrubbing = true
                     lastX = value.startLocation.x
                     scrubFraction = Double((value.startLocation.x - trackX) / trackWidth)
                 }
@@ -137,32 +247,54 @@ struct PlannerGrid: View {
                 lastX = value.location.x
                 selection = Scrubber.instant(atFraction: scrubFraction, in: day.axis)
             }
-            .onEnded { _ in dragAxis = nil }
+            .onEnded { _ in
+                dragAxis = nil
+                isScrubbing = false
+            }
     }
 }
 
-/// One zone: name and its time at the selection, then the track.
+/// A vertical dashed line, `height` tall.
+private func dashedLine(height: CGFloat, color: Color, width: CGFloat) -> some View {
+    Path { path in
+        path.move(to: .zero)
+        path.addLine(to: CGPoint(x: 0, y: height))
+    }
+    .stroke(color, style: StrokeStyle(lineWidth: width, dash: [4, 3]))
+    .frame(width: width, height: height)
+}
+
+/// One zone: name (house for home) and a caption, then the track. The caption is the
+/// zone's time now or its offsets; while scrubbing, the selected time and hour kind.
 private struct PlannerRowView: View {
     let row: PlannerRow
     let axis: DateInterval
+    let caption: String
     let selection: Date
+    let isScrubbing: Bool
+    let isHome: Bool
     let markers: [MeridianCore.Transition]   // SwiftUI also has a `Transition`
+    let fault: FaultLine?
     let isStacked: Bool
     let labelWidth: CGFloat
+    let trackX: CGFloat
     let trackWidth: CGFloat
+
+    @State private var chipWidth: CGFloat = 0
 
     var body: some View {
         let kind = OverlapEngine.window(starting: selection, minutes: OverlapEngine.slotMinutes, zones: [row.zone]).kinds[0]
         let time = ZoneClock.wallTime(selection, in: row.zone.zone)
-        Group {
+        VStack(alignment: .leading, spacing: Spacing.xxs) {
+            if let fault { chip(fault) }
             if isStacked {
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    label(time: time)
+                    label(time: time, kind: kind)
                     track
                 }
             } else {
                 HStack(spacing: Spacing.s) {
-                    label(time: time).frame(width: labelWidth, alignment: .leading)
+                    label(time: time, kind: kind).frame(width: labelWidth, alignment: .leading)
                     track
                 }
             }
@@ -171,16 +303,46 @@ private struct PlannerRowView: View {
         .accessibilityLabel("\(row.zone.name), \(time), \(kind.spokenName)")
     }
 
-    private func label(time: String) -> some View {
+    private func label(time: String, kind: HourKind) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(row.zone.name)
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-            Text(time)
-                .meridianFont(.sub)
-                .monospacedDigit()
-                .foregroundStyle(.textSecondary)
+            HStack(spacing: Spacing.xxs) {
+                if isHome {
+                    Image(systemName: "house.fill")
+                        .meridianFont(.caption)
+                        .foregroundStyle(.textSecondary)
+                }
+                Text(row.zone.name)
+                    .meridianFont(.headline)
+                    .foregroundStyle(.textPrimary)
+            }
+            if isScrubbing {
+                Text("\(Text(time).bold().foregroundStyle(.textPrimary)) \(kind.shortName)")
+                    .meridianFont(.monoCaption)
+                    .foregroundStyle(.textSecondary)
+            } else {
+                Text(caption)
+                    .meridianFont(.monoCaption)
+                    .foregroundStyle(.textSecondary)
+            }
         }
+    }
+
+    /// `↺ London −1h, Sun 25 Oct` starting at the fault line, kept inside the row.
+    private func chip(_ fault: FaultLine) -> some View {
+        let x = trackX + CGFloat(Scrubber.fraction(of: fault.instant, in: axis)) * trackWidth
+        return Label(fault.chip, systemImage: "clock.arrow.circlepath")
+            .meridianFont(.caption).bold()
+            .foregroundStyle(.textPrimary)
+            .padding(.horizontal, Spacing.xs)
+            .padding(.vertical, Spacing.xxs)
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.chip, style: .continuous)
+                    .strokeBorder(Color.textSecondary, lineWidth: 1)
+            }
+            .fixedSize()
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { chipWidth = $0 }
+            .offset(x: max(0, min(x, trackX + trackWidth - chipWidth)))
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var track: some View {
@@ -195,13 +357,8 @@ private struct PlannerRowView: View {
             }
             // Skipped/repeated-hour marker where this zone's clocks change.
             ForEach(markers, id: \.instant) { marker in
-                Path { path in
-                    path.move(to: .zero)
-                    path.addLine(to: CGPoint(x: 0, y: PlannerGrid.trackHeight))
-                }
-                .stroke(Color.textSecondary, style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
-                .frame(width: 1, height: PlannerGrid.trackHeight)
-                .offset(x: CGFloat(Scrubber.fraction(of: marker.instant, in: axis)) * trackWidth)
+                dashedLine(height: PlannerGrid.trackHeight, color: .textPrimary, width: 2)
+                    .offset(x: CGFloat(Scrubber.fraction(of: marker.instant, in: axis)) * trackWidth - 1)
             }
         }
         .frame(width: trackWidth, height: PlannerGrid.trackHeight, alignment: .leading)
@@ -223,6 +380,15 @@ extension HourKind {
         case .work: .accent
         case .stretch: .tintStretch
         case .sleep: .tintSleep
+        }
+    }
+
+    /// Row caption while scrubbing (board PlannerScrub).
+    var shortName: String {
+        switch self {
+        case .work: "work"
+        case .stretch: "stretch"
+        case .sleep: "asleep"
         }
     }
 

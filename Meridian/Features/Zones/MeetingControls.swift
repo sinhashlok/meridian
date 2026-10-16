@@ -2,41 +2,191 @@ import MeridianCore
 import SwiftUI
 import UIKit  // UIPasteboard
 
-/// −15 · selected time · +15 (spec §4.1 scrubber buttons). VoiceOver adjusts by ±30 min.
-struct ScrubControls: View {
-    @Binding var selection: Date
-    let axis: DateInterval
-    let reference: Zone
-    let timeSuffix: String
-    let onNow: (() -> Void)?
+/// BestWindowChip (spec §4.1) as a card: `BEST COMPROMISE`, the range in UTC (decision N),
+/// counts, and the weekend-skip note. Outlined with a checkmark while it is the selection.
+struct BestWindowCard: View {
+    let best: BestWindow
+    let viewedDay: CivilDate
+    let isSelected: Bool
+    let onSelect: () -> Void
 
     var body: some View {
-        HStack(spacing: Spacing.s) {
+        Button(action: onSelect) {
+            HStack(spacing: Spacing.s) {
+                VStack(alignment: .leading, spacing: Spacing.xxs) {
+                    Text(best.window.isAllWork ? "Best time" : "Best compromise")
+                        .meridianFont(.caption)
+                        .textCase(.uppercase)
+                        .tracking(0.8)
+                        .foregroundStyle(.textSecondary)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
+                            range
+                            Spacer(minLength: 0)
+                            counts.multilineTextAlignment(.trailing)
+                        }
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                            range
+                            counts
+                        }
+                    }
+                    if let skip = best.skipNote {
+                        Text(skip)
+                            .meridianFont(.sub)
+                            .foregroundStyle(.textSecondary)
+                    }
+                }
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .meridianFont(.headline)
+                        .foregroundStyle(.textPrimary)
+                        .transition(.symbolEffect)
+                }
+            }
+            .padding(Spacing.m)
+            .frame(maxWidth: .infinity, minHeight: Spacing.minRowHeight, alignment: .leading)
+            .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                    .strokeBorder(isSelected ? Color.textPrimary : Color.separatorLine, lineWidth: isSelected ? 1.5 : 1)
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .animation(Motion.stateChange, value: isSelected)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityHint("Moves the scrubber to this time")
+    }
+
+    private var range: some View {
+        Text(MeetingText.utcRange(start: best.window.interval.start, minutes: minutes, showsDay: best.day != viewedDay))
+            .meridianFont(.monoBody).bold()
+            .foregroundStyle(.textPrimary)
+    }
+
+    private var counts: some View {
+        // "3 of 3 awake · Mumbai in stretch" reads as two lines on the board.
+        Text(best.countsText.replacingOccurrences(of: " · ", with: "\n"))
+            .meridianFont(.sub)
+            .foregroundStyle(.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var minutes: Int { Int(best.window.interval.duration / 60) }
+}
+
+/// The selected meeting (board Planner): UTC range, date and length, −15/+15, each zone's
+/// local time with its tag, and Copy · Share · Now. VoiceOver adjusts by ±30 min.
+struct MeetingCard: View {
+    @Binding var selection: Date
+    @Binding var minutes: Int
+    let axis: DateInterval
+    let zones: [PlannerZone]
+    let now: Date
+    let onNow: (() -> Void)?
+
+    @ScaledMetric(relativeTo: .body) private var columnWidth: CGFloat = 100
+    @State private var copies = 0
+    @State private var showsCopied = false
+
+    var body: some View {
+        let tags = MeetingText.tags(start: selection, minutes: minutes, zones: zones)
+        VStack(alignment: .leading, spacing: Spacing.m) {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: Spacing.s) {
+                    heading
+                    Spacer(minLength: 0)
+                    steppers
+                }
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    heading
+                    steppers
+                }
+            }
+
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), alignment: .leading)],
+                      alignment: .leading, spacing: Spacing.s) {
+                ForEach(Array(zip(zones, tags)), id: \.0) { zone, tag in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(zone.name)
+                            .meridianFont(.sub)
+                            .foregroundStyle(.textSecondary)
+                        // A time never breaks; its tag moves under it when the column is narrow.
+                        ViewThatFits(in: .horizontal) {
+                            HStack(spacing: Spacing.xs) { time(in: zone); tagChip(tag) }
+                            VStack(alignment: .leading, spacing: Spacing.xxs) { time(in: zone); tagChip(tag) }
+                        }
+                    }
+                    .accessibilityElement(children: .combine)
+                }
+            }
+
+            actions
+        }
+        .padding(Spacing.m)
+        .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
+    }
+
+    private func time(in zone: PlannerZone) -> some View {
+        Text(ZoneClock.wallTime(selection, in: zone.zone))
+            .meridianFont(.monoBody).bold()
+            .foregroundStyle(.textPrimary)
+            .contentTransition(.numericText())
+            .fixedSize()
+    }
+
+    @ViewBuilder
+    private func tagChip(_ tag: String?) -> some View {
+        if let tag {
+            Text(tag)
+                .meridianFont(.caption)
+                .foregroundStyle(.textPrimary)
+                .padding(.horizontal, Spacing.xs)
+                .padding(.vertical, 2)
+                .background(.tintStretch, in: .rect(cornerRadius: Radius.chip, style: .continuous))
+                .fixedSize()
+        }
+    }
+
+    private var heading: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(MeetingText.utcRange(start: selection, minutes: minutes))
+                .meridianFont(.monoBody).bold()
+                .foregroundStyle(.textPrimary)
+                .contentTransition(.numericText())
+                .accessibilityLabel("Meeting time")
+                .accessibilityValue(MeetingText.utcRange(start: selection, minutes: minutes))
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: selection = Scrubber.step(selection, byMinutes: 30, in: axis)
+                    case .decrement: selection = Scrubber.step(selection, byMinutes: -30, in: axis)
+                    @unknown default: break
+                    }
+                }
+            Menu {
+                Picker("Length", selection: $minutes) {
+                    ForEach([15, 30, 45, 60, 90], id: \.self) { Text("\($0) min").tag($0) }
+                }
+            } label: {
+                HStack(spacing: Spacing.xxs) {
+                    Text(MeetingText.summary(start: selection, minutes: minutes))
+                    Image(systemName: "chevron.up.chevron.down")
+                        .imageScale(.small)
+                }
+                .meridianFont(.sub)
+                .foregroundStyle(.textSecondary)
+                .frame(minHeight: Spacing.minTapTarget)
+                .contentShape(.rect)
+            }
+            .accessibilityLabel("Meeting length, \(minutes) minutes")
+        }
+    }
+
+    private var steppers: some View {
+        HStack(spacing: Spacing.xs) {
             Button("−15") { selection = Scrubber.step(selection, byMinutes: -15, in: axis) }
                 .accessibilityLabel("15 minutes earlier")
-            Spacer(minLength: 0)
-            VStack(spacing: 0) {
-                Text(ZoneClock.wallTime(selection, in: reference) + timeSuffix)
-                    .meridianFont(.monoTime)
-                    .foregroundStyle(.textPrimary)
-                    .contentTransition(.numericText())
-                if let onNow {
-                    Button("Back to now", action: onNow)
-                        .meridianFont(.caption)
-                        .frame(minHeight: Spacing.minTapTarget)
-                }
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Meeting time")
-            .accessibilityValue(ZoneClock.wallTime(selection, in: reference) + timeSuffix)
-            .accessibilityAdjustableAction { direction in
-                switch direction {
-                case .increment: selection = Scrubber.step(selection, byMinutes: 30, in: axis)
-                case .decrement: selection = Scrubber.step(selection, byMinutes: -30, in: axis)
-                @unknown default: break
-                }
-            }
-            Spacer(minLength: 0)
             Button("+15") { selection = Scrubber.step(selection, byMinutes: 15, in: axis) }
                 .accessibilityLabel("15 minutes later")
         }
@@ -44,78 +194,10 @@ struct ScrubControls: View {
         .controlSize(.large)
         .tint(.textPrimary)          // secondary controls stay neutral (§3.2)
     }
-}
 
-/// BestWindowChip (spec §4.1) with the no-overlap banner and the weekend-skip note.
-struct BestWindowSection: View {
-    let best: BestWindow
-    let reference: Zone
-    let referenceName: String
-    let viewedDay: CivilDate
-    let onSelect: () -> Void
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
-            if let banner = best.noOverlapBanner { InlineBanner(text: banner) }
-            if let skip = best.skipNote {
-                Text(skip)
-                    .meridianFont(.caption)
-                    .foregroundStyle(.textSecondary)
-            }
-            Button(action: onSelect) {
-                HStack(spacing: Spacing.s) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(best.window.isAllWork ? "Best time" : "Best compromise")
-                            .meridianFont(.caption)
-                            .foregroundStyle(.textSecondary)
-                        Text(rangeText)
-                            .meridianFont(.headline)
-                            .foregroundStyle(.textPrimary)
-                        Text(best.countsText)
-                            .meridianFont(.sub)
-                            .foregroundStyle(.textSecondary)
-                    }
-                    Spacer(minLength: Spacing.s)
-                    Image(systemName: "arrow.forward.to.line")
-                        .foregroundStyle(.textSecondary)
-                }
-                .padding(Spacing.s)
-                .frame(minHeight: Spacing.minRowHeight)
-                .background(.bgSurface, in: .rect(cornerRadius: Radius.row, style: .continuous))
-                .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("Moves the scrubber to this time")
-        }
-    }
-
-    private var rangeText: String {
-        let start = ZoneClock.wallTime(best.window.interval.start, in: reference)
-        let end = ZoneClock.wallTime(best.window.interval.end, in: reference)
-        let day = best.day == viewedDay ? "" : "\(best.day.shortText) · "
-        return "\(day)\(start)–\(end) \(referenceName)"
-    }
-}
-
-/// Meeting length, Copy and Share (spec §4.1 Copy/Share text).
-struct MeetingActions: View {
-    @Binding var minutes: Int
-    let text: String
-
-    @State private var copies = 0
-    @State private var showsCopied = false
-
-    var body: some View {
-        HStack(spacing: Spacing.s) {
-            Menu {
-                Picker("Length", selection: $minutes) {
-                    ForEach([15, 30, 45, 60, 90], id: \.self) { Text("\($0) min").tag($0) }
-                }
-            } label: {
-                Label("\(minutes) min", systemImage: "timer")
-                    .frame(minHeight: Spacing.minTapTarget)
-            }
-            Spacer(minLength: 0)
+    private var actions: some View {
+        let text = MeetingText.make(start: selection, minutes: minutes, zones: zones, now: now)
+        return HStack(spacing: Spacing.xs) {
             Button {
                 UIPasteboard.general.string = text
                 copies += 1
@@ -134,9 +216,34 @@ struct MeetingActions: View {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.bordered)
+            Spacer(minLength: 0)
+            Button("Now") { onNow?() }
+                .disabled(onNow == nil)
+                .frame(minHeight: Spacing.minTapTarget)
+                .accessibilityHint("Moves the scrubber back to the current time")
         }
         .controlSize(.large)
         .tint(.textPrimary)          // secondary controls stay neutral (§3.2)
         .sensoryFeedback(Haptic.success, trigger: copies)
+    }
+}
+
+/// Full-width outlined `+ Add zone` (boards Planner and ClocksBanner).
+struct AddZoneButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("Add zone", systemImage: "plus")
+                .meridianFont(.headline)
+                .foregroundStyle(.textPrimary)
+                .frame(maxWidth: .infinity, minHeight: Spacing.minTapTarget + Spacing.xxs)
+                .overlay {
+                    RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
+                        .strokeBorder(Color.fillControl, lineWidth: 1)
+                }
+                .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
     }
 }

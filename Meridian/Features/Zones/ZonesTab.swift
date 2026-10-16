@@ -57,7 +57,7 @@ struct ZonesTab: View {
             isSeeded = true
         }
         switch DebugLaunch.screen {
-        case "planner": segment = .planner
+        case "planner", "plannerScrub": segment = .planner
         case "clocks", "addZone", "editZone", "changes": segment = .clocks
         default: break
         }

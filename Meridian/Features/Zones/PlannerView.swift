@@ -1,16 +1,18 @@
 import MeridianCore
 import SwiftUI
 
-/// Zones › Planner (spec §4.1): DayPager, rows on the reference zone's real day, the
-/// scrubber, the best window and Copy/Share. In UTC mode the reference is UTC
-/// (decision I); otherwise the home zone.
+/// Zones › Planner (spec §4.1), conclusion first (decision O): DayPager, the day's banner,
+/// the best window, the grid with its scrubber and DST notes, then the selected meeting.
+/// In UTC mode the reference is UTC (decision I); otherwise the home zone.
 struct PlannerView: View {
     let zones: [SavedZone]
 
     @Environment(AppState.self) private var appState
-    @State private var day: CivilDate?
-    @State private var selection: Date?
+    @State private var day: CivilDate? = DebugLaunch.plannerDay
+    @State private var selection: Date? = DebugLaunch.plannerSelection
     @State private var meetingMinutes = 30
+    @State private var isScrubbing = DebugLaunch.screen == "plannerScrub"
+    @State private var isAdding = false
     @State private var snaps = 0
     @State private var cache = PlannerCache()
 
@@ -23,54 +25,70 @@ struct PlannerView: View {
             let homeSaved = zones.first(where: \.isHome)
             let reference = isUTC ? Zone.utc : (homeSaved?.zone ?? .utc)
             let referenceName = isUTC ? "UTC" : (homeSaved?.name ?? "UTC")
-            let suffix = isUTC ? " UTC" : ""
             let today = ZoneClock.local(now, in: reference).date
             let date = day ?? today
             let result = cache.result(date: date, today: today, reference: reference, zones: plannerZones,
                                       minutes: meetingMinutes, now: now)
-            let selected = Scrubber.snap(selection ?? now, in: result.day.axis)
+            // On another day with nothing picked yet, keep the current wall time (as paging does).
+            let fallback = result.day.axis.contains(now) ? now
+                : Scrubber.instant(keeping: Scrubber.wallTime(of: now, in: reference), on: date, in: reference)
+            let selected = Scrubber.snap(selection ?? fallback, in: result.day.axis)
+            let selectedBinding = Binding(get: { selected }, set: { selection = $0 })
+            let bestOnDay = result.best.flatMap { $0.day == date ? $0.window.interval : nil }
 
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.m) {
+                VStack(alignment: .leading, spacing: Spacing.s) {
                     DayPager(text: result.pager, isToday: date == today,
                              onPrevious: { go(to: date.adding(days: -1), from: selected, reference: reference) },
                              onNext: { go(to: date.adding(days: 1), from: selected, reference: reference) },
                              onToday: { day = nil; selection = nil })
 
-                    if let note = result.day.lengthNote {
-                        Label(note, systemImage: "clock.arrow.circlepath")
-                            .meridianFont(.caption)
-                            .foregroundStyle(.textSecondary)
-                    }
-
                     if plannerZones.isEmpty {
                         ContentUnavailableView("No zones", systemImage: "globe",
                                                description: Text("Add a zone to plan across time zones."))
                     } else {
-                        PlannerGrid(day: result.day, reference: reference, now: now,
-                                    selection: Binding(get: { selected }, set: { selection = $0 }),
-                                    bracket: result.best.flatMap { $0.day == date ? $0.window.interval : nil },
-                                    timeSuffix: suffix)
-
-                        ScrubControls(selection: Binding(get: { selected }, set: { selection = $0 }),
-                                      axis: result.day.axis, reference: reference, timeSuffix: suffix,
-                                      onNow: selection == nil && day == nil ? nil : { day = nil; selection = nil })
+                        if let banner = result.day.banner {
+                            InlineBanner(title: banner.title, detail: banner.detail)
+                        }
 
                         if let best = result.best {
-                            BestWindowSection(best: best, reference: reference, referenceName: referenceName,
-                                              viewedDay: date) {
+                            BestWindowCard(best: best, viewedDay: date,
+                                           isSelected: best.day == date && best.window.interval.start == selected) {
                                 day = best.day == today ? nil : best.day
                                 selection = best.window.interval.start
                                 snaps += 1
                             }
                         }
 
-                        MeetingActions(minutes: $meetingMinutes,
-                                       text: MeetingText.make(start: selected, minutes: meetingMinutes,
-                                                              zones: plannerZones, now: now))
+                        PlannerGrid(day: result.day, reference: reference, referenceName: referenceName,
+                                    home: homeSaved?.plannerZone, now: now, selection: selectedBinding,
+                                    minutes: meetingMinutes,
+                                    counts: OverlapEngine.window(starting: selected, minutes: meetingMinutes,
+                                                                 zones: plannerZones).countsText,
+                                    bracket: bestOnDay, isScrubbing: $isScrubbing)
+                            .padding(.top, Spacing.xs)
+
+                        let notes = [result.day.referenceChange(reference: reference, referenceName: referenceName)?.note,
+                                     result.day.faultLineNote(reference: reference, referenceName: referenceName)]
+                        ForEach(notes.compactMap(\.self), id: \.self) { note in
+                            DSTNote(text: note)
+                        }
+
+                        if isScrubbing {
+                            Text("Release to pick this time. Snaps every 15 min.")
+                                .meridianFont(.sub)
+                                .foregroundStyle(.textTertiary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, Spacing.xs)
+                        } else {
+                            AddZoneButton { isAdding = true }
+                            MeetingCard(selection: selectedBinding, minutes: $meetingMinutes, axis: result.day.axis,
+                                        zones: plannerZones, now: now,
+                                        onNow: selection == nil && day == nil ? nil : { day = nil; selection = nil })
+                        }
                     }
 
-                    if zones.count < 3 {
+                    if zones.count < 3, !isScrubbing {
                         Text("Suggestions")
                             .meridianFont(.caption)
                             .foregroundStyle(.textSecondary)
@@ -80,8 +98,11 @@ struct PlannerView: View {
                 .padding(.horizontal, Spacing.screenMargin)
                 .padding(.bottom, Spacing.sectionGap)
             }
+            .scrollDisabled(isScrubbing)
+            .defaultScrollAnchor(DebugLaunch.startsAtBottom ? .bottom : .top)
             .sensoryFeedback(Haptic.snap, trigger: snaps)
         }
+        .sheet(isPresented: $isAdding) { AddZoneSheet(zones: zones) }
     }
 
     /// Changing day keeps the scrubber's wall time; a skipped time moves to the next
@@ -90,6 +111,25 @@ struct PlannerView: View {
         let wall = Scrubber.wallTime(of: current, in: reference)
         day = newDay
         selection = Scrubber.instant(keeping: wall, on: newDay, in: reference)
+    }
+}
+
+/// DSTNote (spec §5.1): clock-arrow symbol and text.secondary prose under the grid.
+struct DSTNote: View {
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
+            Image(systemName: "clock.arrow.circlepath")
+                .foregroundStyle(.textSecondary)
+                .accessibilityHidden(true)
+            Text(text)
+                .foregroundStyle(.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .meridianFont(.body)
+        .padding(.horizontal, Spacing.xs)
+        .padding(.top, Spacing.xs)
     }
 }
 
