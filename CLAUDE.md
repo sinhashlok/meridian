@@ -171,7 +171,11 @@ Rules:
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
 2. M4 Tools UI (Epoch, Cron, Dates, fiscal profile sheet): plan first. Boards are listed
    under M4 in the boards README.
-3. Still open for M7 (from M0.5): do `.relative` alarms follow a device zone change, and
+3. Parked (owner's call, 16 Oct): the Planner feels laggy on an iPhone 16 in Debug; not
+   yet tried without the debugger or in Release. Core work per scrub frame measured at
+   ~0.1 ms, so if it's real the suspect is the whole Planner body rebuilding on every drag
+   (selection state lives in `PlannerView`). Fix: redraw only grid + bubble while dragging.
+4. Still open for M7 (from M0.5): do `.relative` alarms follow a device zone change, and
    what is AlarmKit's real alarm limit?
 
 ## How we work
