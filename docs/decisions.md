@@ -34,3 +34,33 @@ date (12 digits as ms = 1973–2001; as seconds = year 5138+). The override alwa
 is Julian before 15 Oct 1582, and going through `Date` would put nanoseconds in a
 `Double`. Checked against every day 0001–9999 and against Foundation after 1582.
 Fraction digits: omitted when zero, otherwise the unit's precision (`.800` for ms).
+
+## 16 Oct 2026 · M2
+
+**D. Best-window ranking: fewest asleep, then fewest in stretch, then soonest.**
+Spec §4.1 says "all in work hours > fewest zones in stretch > nobody asleep > soonest".
+Taken literally, Thu 15 Oct picks 08:00Z (Mumbai and London working, SF asleep: zero in
+stretch), but fixtures.md expects 16:00–16:30Z "3 of 3 awake · Mumbai in stretch", and
+the Mon 26 Oct row needs the same. Swapping the middle two criteria matches both rows;
+all-in-work windows still rank first (none asleep, none in stretch). Why: never propose
+a meeting where someone is asleep while an awake option exists. Treat as a spec wording
+fix; spec.md is unchanged.
+
+**E. Weekend skip.** A home-zone day is skipped only if every 15-minute slot in it has
+some zone on its local weekend. Why: zones are on different dates; an SF-home Friday's
+09:00 PDT slot is still Friday in Mumbai and must not be skipped.
+
+**F. Every N min / Every N hours follow the wall clock**, like cron `*/N`, in the job's
+zone. N must divide the hour (1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30) or the day (1, 2, 3,
+4, 6, 8, 12). Why: these jobs mirror real schedulers.
+
+**G. Defaults.** Stretch = 2 h before work and 4 h after (07–09 and 18–22 for 09–18).
+Work hours start and end on the same local day (night shifts later). Counts wording with
+someone asleep: "2 of 3 awake · SF asleep".
+
+**Cron details.** Unix follows Vixie cron: when both day fields are restricted a day
+matching either runs; a day field starting with `*` (even `*/2`) counts as unrestricted,
+so the fields AND. Quartz needs `?` in exactly one day field. "Never runs" is checked
+over a full 400-year Gregorian cycle. DST: a skipped wall time runs at the next valid
+time and duplicates are dropped (02:00 → 03:00 when 03:00 is also scheduled runs once);
+a repeated wall time runs once, at its first occurrence.
