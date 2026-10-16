@@ -74,10 +74,9 @@ extension PlannerDay {
     /// Clock changes of zones other than the reference (whose own change is the axis length).
     public func faultLines(reference: Zone) -> [FaultLine] {
         faultTransitions(reference: reference).map { zone, change in
-            let shift = change.after.offsetSeconds - change.before.offsetSeconds
             let date = ZoneClock.local(change.instant, in: zone.zone).date
             return FaultLine(zoneName: zone.name, instant: change.instant,
-                             chip: "\(zone.name) \(ZoneClock.durationText(seconds: shift)), \(date.shortText)")
+                             chip: "\(zone.name) \(ZoneClock.durationText(seconds: change.shiftSeconds)), \(date.shortText)")
         }
     }
 
@@ -93,10 +92,10 @@ extension PlannerDay {
             let before = change.before.offsetSeconds - ZoneClock.state(reference, at: change.instant.addingTimeInterval(-1)).offsetSeconds
             let after = change.after.offsetSeconds - ZoneClock.state(reference, at: change.instant).offsetSeconds
             guard before != after else { continue }
-            let shift = change.after.offsetSeconds - change.before.offsetSeconds
-            let old = before.signum() == after.signum() ? Self.amount(before) : Self.relation(before, to: nil)
-            sentences[sentences.count - 1] += " Its day moves \(Self.amount(shift)) \(shift < 0 ? "later" : "earlier") on "
-                + "this timeline: \(zone.name) is now \(Self.relation(after, to: referenceName)), not \(old)."
+            let shift = change.shiftSeconds
+            sentences[sentences.count - 1] += " Its day moves \(ZoneClock.amountText(shift)) \(shift < 0 ? "later" : "earlier") "
+                + "on this timeline: \(zone.name) is now \(ZoneClock.relationText(after, to: referenceName)), "
+                + "not \(ZoneClock.previousRelationText(before, now: after))."
         }
 
         // Zones that change soon after, so the reader knows the gap moves again.
@@ -124,10 +123,8 @@ extension PlannerDay {
     /// with a skipped/repeated-hour marker).
     public func referenceChange(reference: Zone, referenceName: String) -> ReferenceChange? {
         guard let change = ZoneClock.transitions(in: reference, from: axis.start, to: axis.end).first else { return nil }
-        let shift = change.after.offsetSeconds - change.before.offsetSeconds
-        // Wall clock just before the change, and what it jumps to.
-        let from = ZoneClock.wallTime(change.instant.addingTimeInterval(TimeInterval(change.before.offsetSeconds)), in: .utc)
-        let to = ZoneClock.wallTime(change.instant.addingTimeInterval(TimeInterval(change.after.offsetSeconds)), in: .utc)
+        let shift = change.shiftSeconds
+        let (from, to) = change.wallTimes
         let length = "The axis is \(hoursText) hours long, and every row is placed by real time."
 
         if shift < 0 {
@@ -170,18 +167,6 @@ extension PlannerDay {
     var hoursText: String {
         let hours = axis.duration / 3600
         return hours == hours.rounded() ? "\(Int(hours))" : String(format: "%.1f", hours)
-    }
-
-    /// `5h 30m`, `1h`, `30m` with no sign.
-    private static func amount(_ seconds: Int) -> String {
-        String(ZoneClock.durationText(seconds: abs(seconds)).dropFirst())
-    }
-
-    /// `5h 30m behind Mumbai`, `1h ahead`, `level with UTC`.
-    private static func relation(_ seconds: Int, to name: String?) -> String {
-        let suffix = name.map { " \($0)" } ?? ""
-        if seconds == 0 { return name.map { "level with \($0)" } ?? "level" }
-        return seconds < 0 ? "\(amount(seconds)) behind\(suffix)" : "\(amount(seconds)) ahead" + (name.map { " of \($0)" } ?? "")
     }
 }
 
