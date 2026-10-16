@@ -9,3 +9,7 @@ DerivedData/
 # Swift Package Manager build output
 .build/
 .swiftpm/xcode/xcuserdata/
+
+# Editor swap files
+*.swp
+*.swo
