@@ -173,7 +173,7 @@ public enum EpochParser {
 
     // MARK: Private
 
-    private static func detectUnit(significantDigits: Int) -> (EpochUnit, [EpochUnit]) {
+    static func detectUnit(significantDigits: Int) -> (EpochUnit, [EpochUnit]) {
         switch significantDigits {
         case ...10: (.seconds, [])
         case 11...12: (.milliseconds, [.seconds])
