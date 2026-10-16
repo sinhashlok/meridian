@@ -105,35 +105,28 @@ struct MeetingCard: View {
                 }
             }
 
-            // Every tag stays on its time's line: columns when they all fit, else one zone per row.
+            // One zone per row (owner's choice, decision V): name, then times in one aligned
+            // column with tags beside them. At accessibility sizes each zone stacks.
             let entries = Array(zip(zones, tags))
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: Spacing.s) {
+            if typeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: Spacing.s) {
                     ForEach(entries, id: \.0) { zone, tag in
                         VStack(alignment: .leading, spacing: 2) {
                             zoneName(zone)
                             HStack(spacing: Spacing.xs) { time(in: zone); tagChip(tag) }
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityElement(children: .combine)
                     }
                 }
-                VStack(alignment: .leading, spacing: Spacing.xs) {
+            } else {
+                Grid(alignment: .leading, horizontalSpacing: Spacing.xs, verticalSpacing: Spacing.xs) {
                     ForEach(entries, id: \.0) { zone, tag in
-                        Group {
-                            if typeSize.isAccessibilitySize {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    zoneName(zone)
-                                    HStack(spacing: Spacing.xs) { time(in: zone); tagChip(tag) }
-                                }
-                            } else {
-                                HStack(spacing: Spacing.xs) {
-                                    zoneName(zone)
-                                    Spacer(minLength: Spacing.xs)
-                                    time(in: zone)
-                                    tagChip(tag)
-                                }
-                            }
+                        GridRow {
+                            zoneName(zone)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            time(in: zone)
+                                .gridColumnAlignment(.trailing)
+                            tagChip(tag)
                         }
                         .accessibilityElement(children: .combine)
                     }
@@ -142,6 +135,7 @@ struct MeetingCard: View {
 
             actions
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(Spacing.m)
         .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
     }
