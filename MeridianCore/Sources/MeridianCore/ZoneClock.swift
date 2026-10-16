@@ -129,6 +129,16 @@ public enum ZoneClock {
         return Int(interval.duration)
     }
 
+    /// The first instant of `date` in `zone` (local midnight, or the first valid time
+    /// if midnight was skipped).
+    public static func startOfDay(_ date: CivilDate, in zone: Zone) -> Date {
+        let calendar = zone.calendar
+        guard let start = calendar.dateInterval(of: .day, for: noon(of: date, calendar: calendar))?.start else {
+            preconditionFailure("no day start for \(date) in \(zone.id)")
+        }
+        return start
+    }
+
     /// The gap/overlap rule (spec §5.2): a skipped time moves to the next valid time
     /// (02:30 → 03:00 EDT); a repeated time uses `occurrence`.
     ///
