@@ -36,6 +36,9 @@ final class SavedZone {
     var workStart: ClockTime { ClockTime(minutesAfterMidnight: workStartMinutes) }
     var workEnd: ClockTime { ClockTime(minutesAfterMidnight: workEndMinutes) }
 
+    /// `(zone, name)` for Core's clock-change texts; `nil` for an unknown id.
+    var named: (zone: Zone, name: String)? { zone.map { ($0, name) } }
+
     /// What OverlapEngine works with.
     var plannerZone: PlannerZone? {
         guard let zone, workStart < workEnd else { return nil }

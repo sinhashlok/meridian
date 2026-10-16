@@ -9,6 +9,9 @@ import Observation
     /// UTC pill flipped on: every displayed time is shown in UTC (spec §4.1).
     var isUTCMode = false
     var isSettingsPresented = false
+    /// Settings › Warn before clocks change (spec §2: off; in-app banner only). The toggle
+    /// arrives with Settings in M8; `-MeridianWarn 1` turns it on for screenshots.
+    var warnsBeforeClockChanges = DebugLaunch.warnsBeforeClockChanges
 
     /// Debug builds only: `-MeridianNow 2026-10-15T15:32:00Z` freezes the clock so
     /// screenshots match the fixtures and design boards. Release builds ignore it.

@@ -19,6 +19,16 @@ struct ClocksView: View {
         TimelineView(.everyMinute) { timeline in
             let now = appState.now(timeline.date)
             List {
+                if appState.warnsBeforeClockChanges, let home,
+                   let warning = ZoneClock.changeWarning(for: zones.compactMap(\.named), home: home, now: now) {
+                    Section {
+                        InlineBanner(title: warning.title, detail: warning.detail, systemImage: "clock.arrow.circlepath",
+                                     action: ("All clock changes", { showsChanges = true }))
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Color.clear)
+                    }
+                }
+
                 Section {
                     ForEach(zones) { saved in
                         Button { editing = saved } label: {
@@ -32,18 +42,16 @@ struct ClocksView: View {
                     .onDelete { offsets in
                         for saved in offsets.map({ zones[$0] }) { ZoneStore.delete(saved, from: zones, in: context) }
                     }
-
-                    Button { isAdding = true } label: {
-                        Label("Add zone", systemImage: "plus")
-                            .meridianFont(.headline)
-                            .frame(maxWidth: .infinity, minHeight: Spacing.minTapTarget, alignment: .leading)
-                    }
-                    .listRowBackground(Color.bgSurface)
                 } header: {
                     HStack {
                         Spacer()
                         EditButton()
                     }
+                } footer: {
+                    // A footer, not a row: List clips rows to its rounded section shape.
+                    AddZoneButton { isAdding = true }
+                        .padding(.top, Spacing.xs)
+                        .padding(.horizontal, -Spacing.m)
                 }
 
                 if zones.count < 3 {
@@ -53,8 +61,10 @@ struct ClocksView: View {
                     .listRowBackground(Color.clear)
                 }
             }
+            .listSectionSpacing(Spacing.s)
+            .contentMargins(.top, Spacing.xs, for: .scrollContent)
             .scrollContentBackground(.hidden)
-            // Edit and Add zone are orange text under 20pt: accent.text (§3.1).
+            // Edit is orange text under 20pt: accent.text (§3.1).
             .tint(.accentText)
         }
         .sheet(isPresented: $isAdding) { AddZoneSheet(zones: zones) }
