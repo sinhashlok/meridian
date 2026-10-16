@@ -37,11 +37,13 @@ struct ToolsTab: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal, Spacing.screenMargin)
 
-                ContentUnavailableView(
-                    segment.title,
-                    systemImage: segment.systemImage,
-                    description: Text("Coming in M4")
-                )
+                switch segment {
+                case .epoch:
+                    EpochView()
+                case .cron, .dates:
+                    ContentUnavailableView(segment.title, systemImage: segment.systemImage,
+                                           description: Text("Coming in M4"))
+                }
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .meridianScreen(title: "Tools")

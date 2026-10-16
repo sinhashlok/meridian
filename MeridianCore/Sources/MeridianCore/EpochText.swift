@@ -198,6 +198,14 @@ public enum EpochText {
         return EpochNote(title: "\(count) digits is not a standard length", detail: detail)
     }
 
+    /// The units an ambiguous length could be, smallest first (`seconds`, `milliseconds`);
+    /// empty for standard lengths.
+    public static func candidateUnits(for input: String) -> [EpochUnit] {
+        let (preferred, others) = EpochParser.detectUnit(significantDigits: significantDigits(of: input).count)
+        guard !others.isEmpty else { return [] }
+        return EpochUnit.allCases.filter { $0 == preferred || others.contains($0) }
+    }
+
     /// The reading cards for an ambiguous input: `18 Nov 2537` per unit.
     public static func readings(of input: String, units: [EpochUnit]) -> [EpochReading] {
         let digits = significantDigits(of: input)

@@ -101,6 +101,8 @@ struct EpochTextTests {
         let chosen = try EpochParser.parse("17920608000", as: .seconds)
         #expect(EpochText.ambiguity(chosen, input: "17920608000", now: Self.boardNow)?.detail
                 == "Showing seconds, as you chose. Neither reading is recent, so a digit may be missing.")
+        #expect(EpochText.candidateUnits(for: "17920608000") == [.seconds, .milliseconds])
+        #expect(EpochText.candidateUnits(for: "1792060800000").isEmpty)
         #expect(EpochText.readings(of: "17920608000", units: [.seconds, .milliseconds]).map(\.dateText)
                 == ["18 Nov 2537", "27 Jul 1970"])
         #expect(EpochText.ambiguity(try EpochParser.parse("1792060800000"), input: "1792060800000", now: Self.boardNow) == nil)
