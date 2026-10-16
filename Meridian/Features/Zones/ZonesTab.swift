@@ -1,0 +1,45 @@
+import SwiftUI
+
+enum ZonesSegment: String, CaseIterable, Identifiable {
+    case planner, clocks
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .planner: "Planner"
+        case .clocks: "Clocks"
+        }
+    }
+}
+
+struct ZonesTab: View {
+    /// Remembered across launches (spec §2: each tab remembers its last segment).
+    @AppStorage("zones.segment") private var segment: ZonesSegment = .planner
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: Spacing.m) {
+                Picker("View", selection: $segment) {
+                    ForEach(ZonesSegment.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, Spacing.screenMargin)
+
+                ContentUnavailableView(
+                    segment.title,
+                    systemImage: segment == .planner ? "chart.bar.xaxis" : "clock",
+                    description: Text("Coming in M3")
+                )
+            }
+            .frame(maxHeight: .infinity, alignment: .top)
+            .meridianScreen(title: "Zones")
+        }
+    }
+}
+
+#Preview {
+    ZonesTab()
+        .environment(AppState())
+        .preferredColorScheme(.dark)
+}

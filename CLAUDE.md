@@ -94,10 +94,18 @@ Rules:
 
 ## Current state (update as milestones land)
 
-- Template app: `Meridian/MyApp.swift` (`struct MyApp`) and `ContentView.swift`
-  (imports `Playgrounds` with a `#Playground` block). M0 renames the entry point to
-  `MeridianApp` in `Meridian/App/MeridianApp.swift` and removes the Playground code.
-- `MeridianCore` package exists with a placeholder `CoreInfo` and one smoke test.
+- M0 shell done: `App/MeridianApp.swift` (entry point, dark, accent tint),
+  `App/RootView.swift` (5-tab `TabView`), `App/AppState.swift` (`@Observable`:
+  `isUTCMode`, `isSettingsPresented`; in-memory until M8), `App/ScreenChrome.swift`
+  (`.meridianScreen(title:)` = header with UTCPill + gear, `bgBase` background),
+  `App/SettingsSheet.swift` (static stub rows), `DesignSystem/Tokens.swift`,
+  `DesignSystem/UTCPill.swift`. Each tab shows segmented placeholders; segments are
+  remembered via `@AppStorage("<tab>.segment")`.
+- Token naming: spec `separator` is `separatorLine` (SwiftUI has a built-in
+  `.separator`). The `AccentColor` asset must stay empty: giving it a colour makes
+  Xcode generate a `.accent` symbol that clashes with the token.
+- `MeridianCore`: `ClockFormat.utcTime` (tested) plus placeholder `CoreInfo` and a
+  smoke test.
 - No app test target yet. Add one (Xcode clicks) when the first UI logic needs tests.
 
 ## How we work
