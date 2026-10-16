@@ -1,9 +1,10 @@
 import Foundation
 
 /// A company's fiscal calendar (spec §4.6). Up to 3 are saved; one is active.
-public struct FiscalProfile: Hashable, Sendable {
+/// `Codable` so the app can store it as JSON (decision Y), like a dataclass with to/from JSON.
+public struct FiscalProfile: Hashable, Sendable, Codable {
     /// Which week is week 1, for calendar-month profiles (decision A, docs/decisions.md).
-    public enum Week1Rule: Hashable, Sendable {
+    public enum Week1Rule: Hashable, Sendable, Codable {
         /// Week 1 is the whole calendar week containing the year start. Days before the
         /// start in that week are week 1 of the new year, like ISO week-years.
         case containsYearStart
@@ -12,7 +13,7 @@ public struct FiscalProfile: Hashable, Sendable {
     }
 
     /// Weeks per period in each quarter.
-    public enum Pattern: Hashable, Sendable {
+    public enum Pattern: Hashable, Sendable, Codable {
         case p445, p454, p544
 
         var weeksPerQuarter: [Int] {
@@ -25,14 +26,14 @@ public struct FiscalProfile: Hashable, Sendable {
     }
 
     /// Where a week-based year ends: on the week's last weekday...
-    public enum YearEndRule: Hashable, Sendable {
+    public enum YearEndRule: Hashable, Sendable, Codable {
         /// ...that is the last one in the end month.
         case lastInMonth
         /// ...nearest the end month's last day (up to 3 days either side).
         case nearestMonthEnd
     }
 
-    public enum Basis: Hashable, Sendable {
+    public enum Basis: Hashable, Sendable, Codable {
         /// Periods are calendar months; the year starts on the 1st of `startMonth`.
         case calendarMonths(week1: Week1Rule)
         /// Periods are whole weeks in a 4-4-5-style pattern; a 53rd week joins the last period.
@@ -40,7 +41,7 @@ public struct FiscalProfile: Hashable, Sendable {
     }
 
     /// `FY27` (named by the year it ends in) or `FY2026-27`.
-    public enum Naming: Hashable, Sendable { case short, long }
+    public enum Naming: Hashable, Sendable, Codable { case short, long }
 
     public let name: String
     /// 1 = January … 12 = December.
