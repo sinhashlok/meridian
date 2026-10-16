@@ -87,3 +87,46 @@ the Planner, not the phone's current zone.
 `asleep`, `weekend`; nothing in work hours. The "London changes clocks on Sun 25 Oct"
 note appears when a zone changes its clocks between now and the meeting (our reading
 of spec §5.3 "when crossing").
+
+## 16 Oct 2026 · M3 board review
+
+Compared the M3 screens with boards Planner, PlannerScrub, PlannerDST, PlannerLondon25h,
+ClocksBanner and ClockChanges. Where the spec and a board disagree, the spec wins.
+
+**M. Day counts are calendar days** in the changing zone ("DST in 9d", "in 9 days"),
+where the boards say 8 for Fri 16 Oct → Sun 25 Oct. Why: the boards counted whole 24-hour
+periods, which would call a change tomorrow at 02:00 "in 0 days"; calendar days agree with
+"today/tomorrow" and with the Sunday the user sees.
+
+**N. Best window and meeting headline are in UTC** (`16:00–16:30 UTC`, `Mon …` when on
+another day), with each zone's local time underneath. Matches the copy text's second line.
+
+**O. Planner order is conclusion first:** DayPager, banner, best window, grid, DST notes,
+Add zone, meeting card. The banner is about the viewed day ("Weekend in all 3 cities", or
+"No hour works for all 3 cities" plus the first zone on its weekend or pair that never
+meets), not the best window's day.
+
+**P. Other days keep the selection and meeting card** (the DST boards leave them out);
+meetings are planned for future days. With nothing picked, another day keeps the current
+wall time, as paging does.
+
+**Q. Today button always shown**, dimmed and disabled on today; the "Today" label is
+dropped then. Other labels (Tomorrow, Weekend, Clocks change in …) stay.
+
+**R. Warn-before-clocks-change banner exists now**, behind `AppState.warnsBeforeClockChanges`
+(off). Settings owns the toggle from M8; `-MeridianWarn 1` shows it. It names the soonest
+change within 14 days, compared with home ("you").
+
+**S. Upcoming clock changes shows each zone's next change**, soonest first, then zones
+that never change ("IST all year"). "Also used by alarms and jobs" arrives in M7.
+
+**T. Kept against the boards:** Planner · Clocks segment order (spec §2), the visible
+Edit button on Clocks, the native close button on sheets.
+
+**U. While scrubbing**, the hint "Release to pick this time. Snaps every 15 min." replaces
+Add zone and the meeting card, and row captions show the selected time and hour kind.
+
+Row captions: today shows each zone's time now (`21:02 IST`); another day, or any day with
+a clock change, shows offsets (`IST · +5:30`) or the change (`BST → GMT`). DST fault lines
+and notes cover non-reference zones; the reference zone's own change gives the 23/25-hour
+label (`01 BST · 01 GMT`, `01–02 skipped`), shaded repeated hour and note.
