@@ -172,11 +172,12 @@ struct PlannerTextTests {
 
     // MARK: Scrub bubble and UTC ranges
 
-    @Test("Scrub bubble: day, time and abbreviation; UTC added while scrubbing", arguments: [
-        ("2026-10-15T16:00:00Z", ist, false, "Thu 21:30 IST"),
-        ("2026-10-15T15:00:00Z", ist, true, "Thu 20:30 IST · 15:00 UTC"),
-        ("2026-10-15T15:00:00Z", Zone.utc, true, "Thu 15:00 UTC"),
-        ("2026-10-15T15:30:00Z", kathmandu, false, "Thu 21:15 UTC+5:45"),
+    /// No weekday: the grid header names the day, and "Fri 22:15" read like a date (decision V).
+    @Test("Scrub bubble: time and abbreviation; UTC added while scrubbing", arguments: [
+        ("2026-10-15T16:00:00Z", ist, false, "21:30 IST"),
+        ("2026-10-15T15:00:00Z", ist, true, "20:30 IST · 15:00 UTC"),
+        ("2026-10-15T15:00:00Z", Zone.utc, true, "15:00 UTC"),
+        ("2026-10-15T15:30:00Z", kathmandu, false, "21:15 UTC+5:45"),
     ])
     func bubble(instant: String, reference: Zone, withUTC: Bool, text: String) {
         #expect(Scrubber.bubbleText(Self.utc(instant), reference: reference, withUTC: withUTC) == text)

@@ -59,8 +59,8 @@ struct PlannerGrid: View {
 
     // MARK: Bubble
 
-    /// `Thu 21:30 IST  3 of 3 awake · Mumbai in stretch`; while scrubbing it adds UTC and
-    /// stacks. Centred on the selection, kept fully on screen.
+    /// `21:30 IST  3 of 3 awake · Mumbai in stretch`; while scrubbing it adds UTC and
+    /// stacks. Centred on the selection (a pointer marks it), kept fully on screen.
     private var bubble: some View {
         let title = Text(Scrubber.bubbleText(selection, reference: reference, withUTC: isScrubbing))
             .meridianFont(.monoCaption).bold()
@@ -70,6 +70,9 @@ struct PlannerGrid: View {
             .foregroundStyle(.textSecondary)
         let full = width + 2 * Self.cardPadding
         let centre = Self.cardPadding + x(selection)
+        let offset = min(max(centre - bubbleWidth / 2, 0), max(full - bubbleWidth, 0))
+        // The pointer stays under the selection line, inside the bubble's rounded corners.
+        let pointerX = min(max(centre - offset, Radius.chip + 6), bubbleWidth - Radius.chip - 6)
         return Group {
             if isScrubbing {
                 VStack(alignment: .leading, spacing: 2) { title; detail }
@@ -83,11 +86,18 @@ struct PlannerGrid: View {
         .padding(.horizontal, Spacing.s)
         .padding(.vertical, Spacing.xs)
         .background(.bgElevated, in: .rect(cornerRadius: Radius.chip, style: .continuous))
+        .background(alignment: .bottomLeading) {
+            Rectangle()
+                .fill(Color.bgElevated)
+                .frame(width: 10, height: 10)
+                .rotationEffect(.degrees(45))
+                .offset(x: pointerX - 5, y: 5)
+        }
         // Measure the bubble itself, before the frame that lets it wrap at full width.
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { bubbleWidth = $0 }
         .frame(maxWidth: full, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
-        .offset(x: min(max(centre - bubbleWidth / 2, 0), max(full - bubbleWidth, 0)))
+        .offset(x: offset)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityHidden(true)               // the meeting card speaks the time
     }
@@ -191,11 +201,23 @@ struct PlannerGrid: View {
                     dashedLine(height: height, color: .textTertiary, width: 1).offset(x: x(fault.instant))
                 }
                 if let bracket, bracket.intersects(day.axis), bracket != meeting {
+                    // Corner caps, not a full outline: an outline next to the selection band
+                    // read as a second selection line.
                     let start = x(max(bracket.start, day.axis.start)), end = x(min(bracket.end, day.axis.end))
-                    RoundedRectangle(cornerRadius: Radius.bar, style: .continuous)
-                        .strokeBorder(Color.textPrimary, lineWidth: 1.5)
-                        .frame(width: max(end - start, 2), height: height)
-                        .offset(x: start)
+                    let width = max(end - start, 2), cap: CGFloat = 6
+                    Path { path in
+                        path.move(to: CGPoint(x: 0, y: cap))
+                        path.addLine(to: .zero)
+                        path.addLine(to: CGPoint(x: width, y: 0))
+                        path.addLine(to: CGPoint(x: width, y: cap))
+                        path.move(to: CGPoint(x: 0, y: height - cap))
+                        path.addLine(to: CGPoint(x: 0, y: height))
+                        path.addLine(to: CGPoint(x: width, y: height))
+                        path.addLine(to: CGPoint(x: width, y: height - cap))
+                    }
+                    .stroke(Color.textPrimary, lineWidth: 1.5)
+                    .frame(width: width, height: height)
+                    .offset(x: start)
                 }
                 // The selected meeting: a band as long as the meeting, a leading line, a handle.
                 let start = x(selection), end = x(min(meeting.end, day.axis.end))

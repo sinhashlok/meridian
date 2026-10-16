@@ -183,10 +183,10 @@ extension ZoneClock {
 }
 
 extension Scrubber {
-    /// The bubble over the scrubber: `Thu 21:30 IST`; while scrubbing `Thu 20:30 IST · 15:00 UTC`.
+    /// The bubble over the scrubber: `21:30 IST`; while scrubbing `20:30 IST · 15:00 UTC`.
+    /// No weekday: the grid header names the day (decision V).
     public static func bubbleText(_ instant: Date, reference: Zone, withUTC: Bool) -> String {
-        let day = ZoneClock.local(instant, in: reference).date.weekdayText
-        let text = "\(day) \(ZoneClock.wallTime(instant, in: reference)) \(ZoneClock.shortName(reference, at: instant))"
+        let text = "\(ZoneClock.wallTime(instant, in: reference)) \(ZoneClock.shortName(reference, at: instant))"
         guard withUTC, !reference.isUTC else { return text }
         return text + " · \(ZoneClock.wallTime(instant, in: .utc)) UTC"
     }

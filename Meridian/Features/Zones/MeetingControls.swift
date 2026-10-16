@@ -86,7 +86,6 @@ struct MeetingCard: View {
     let now: Date
     let onNow: (() -> Void)?
 
-    @ScaledMetric(relativeTo: .body) private var columnWidth: CGFloat = 100
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var copies = 0
     @State private var showsCopied = false
@@ -106,20 +105,38 @@ struct MeetingCard: View {
                 }
             }
 
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: columnWidth), alignment: .leading)],
-                      alignment: .leading, spacing: Spacing.s) {
-                ForEach(Array(zip(zones, tags)), id: \.0) { zone, tag in
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(zone.name)
-                            .meridianFont(.sub)
-                            .foregroundStyle(.textSecondary)
-                        // A time never breaks; its tag moves under it when the column is narrow.
-                        ViewThatFits(in: .horizontal) {
+            // Every tag stays on its time's line: columns when they all fit, else one zone per row.
+            let entries = Array(zip(zones, tags))
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: Spacing.s) {
+                    ForEach(entries, id: \.0) { zone, tag in
+                        VStack(alignment: .leading, spacing: 2) {
+                            zoneName(zone)
                             HStack(spacing: Spacing.xs) { time(in: zone); tagChip(tag) }
-                            VStack(alignment: .leading, spacing: Spacing.xxs) { time(in: zone); tagChip(tag) }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .combine)
+                }
+                VStack(alignment: .leading, spacing: Spacing.xs) {
+                    ForEach(entries, id: \.0) { zone, tag in
+                        Group {
+                            if typeSize.isAccessibilitySize {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    zoneName(zone)
+                                    HStack(spacing: Spacing.xs) { time(in: zone); tagChip(tag) }
+                                }
+                            } else {
+                                HStack(spacing: Spacing.xs) {
+                                    zoneName(zone)
+                                    Spacer(minLength: Spacing.xs)
+                                    time(in: zone)
+                                    tagChip(tag)
+                                }
+                            }
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
                 }
             }
 
@@ -127,6 +144,12 @@ struct MeetingCard: View {
         }
         .padding(Spacing.m)
         .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
+    }
+
+    private func zoneName(_ zone: PlannerZone) -> some View {
+        Text(zone.name)
+            .meridianFont(.sub)
+            .foregroundStyle(.textSecondary)
     }
 
     private func time(in zone: PlannerZone) -> some View {

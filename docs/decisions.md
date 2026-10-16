@@ -130,3 +130,10 @@ Row captions: today shows each zone's time now (`21:02 IST`); another day, or an
 a clock change, shows offsets (`IST · +5:30`) or the change (`BST → GMT`). DST fault lines
 and notes cover non-reference zones; the reference zone's own change gives the 23/25-hour
 label (`01 BST · 01 GMT`, `01–02 skipped`), shaded repeated hour and note.
+
+**V. Owner review of the Planner (16 Oct 2026).** The scrub bubble drops its weekday
+(`22:15 IST`, not `Fri 22:15 IST`: it read like the date "Fri 22", and the grid header
+already names the day) and gets a pointer to the selection line. Meeting-card tags always
+sit on their time's line: three columns when every zone fits, else one zone per row. The
+best-window bracket is drawn as corner caps, because a full outline beside the selection
+band looked like a second selection line.
