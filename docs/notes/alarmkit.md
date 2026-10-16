@@ -52,7 +52,7 @@ in seconds, sound, what the Lock Screen showed).
 
 | # | Setup before it rings | Expect | Result | Notes |
 |---|---|---|---|---|
-| 1 | First tap on a fresh install | System prompt shows the usage text; Allow | | |
+| 1 | First tap on a fresh install | System prompt shows the usage text; Allow | Pass (16 Oct) | Prompt showed the NSAlarmKitUsageDescription text |
 | 2 | App open, phone unlocked | Full alarm UI with sound and a Stop control | | |
 | 3 | App in background, phone locked | Rings on the Lock Screen | | |
 | 4 | Locked, **Silent** on (Ring/Silent switch or Action button) | Still rings with sound | | |
