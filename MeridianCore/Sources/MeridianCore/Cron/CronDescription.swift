@@ -150,5 +150,4 @@ extension CronExpression: CustomStringConvertible {
         }
     }
 
-    private func twoDigits(_ value: Int) -> String { value < 10 ? "0\(value)" : "\(value)" }
 }

@@ -13,6 +13,11 @@ public struct Zone: Hashable, Sendable {
 
     public static let utc = Zone("UTC")!
 
+    /// `New York` from `America/New_York`; `UTC` for UTC. For schedule lines and notes.
+    public var cityName: String {
+        isUTC ? "UTC" : (id.split(separator: "/").last.map(String.init) ?? id).replacingOccurrences(of: "_", with: " ")
+    }
+
     /// Ids that mean plain UTC and are written `UTC` (CLAUDE.md time rules).
     var isUTC: Bool {
         ["UTC", "Etc/UTC", "UCT", "Etc/UCT", "Universal", "Etc/Universal", "Zulu", "Etc/Zulu", "GMT", "Etc/GMT"]
@@ -185,9 +190,5 @@ public enum ZoneClock {
         guard let noon = calendar.date(from: DateComponents(year: date.year, month: date.month, day: date.day, hour: 12))
         else { preconditionFailure("no noon on \(date)") }
         return noon
-    }
-
-    private static func twoDigits(_ value: Int) -> String {
-        value < 10 ? "0\(value)" : "\(value)"
     }
 }

@@ -50,6 +50,13 @@ public struct CivilDate: Hashable, Comparable, Sendable {
         Int(Int64(daysSinceEpoch + 3) - floorDiv(Int64(daysSinceEpoch + 3), 7) * 7) + 1
     }
 
+    /// `Mon 26 Oct`, for notes and labels.
+    public var shortText: String {
+        let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        return "\(weekdays[isoWeekday - 1]) \(day) \(months[month - 1])"
+    }
+
     public static func < (a: CivilDate, b: CivilDate) -> Bool {
         (a.year, a.month, a.day) < (b.year, b.month, b.day)
     }
@@ -73,3 +80,6 @@ public struct LocalDateTime: Hashable, Sendable {
         self.minute = minute
     }
 }
+
+/// `07` for 7: zero-padded to two digits, for clock text.
+func twoDigits(_ value: Int) -> String { value < 10 ? "0\(value)" : "\(value)" }
