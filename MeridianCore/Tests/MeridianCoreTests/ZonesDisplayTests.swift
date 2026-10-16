@@ -49,16 +49,6 @@ struct ZonesDisplayTests {
         #expect(ZoneClock.dstBadgeText(.utc, now: Self.utc("2026-10-17T12:00:00Z")) == nil)
     }
 
-    @Test("Upcoming clock changes across saved zones, soonest first")
-    func upcomingChanges() {
-        let changes = ZoneClock.upcomingChanges(in: [Self.ist, Self.london, Self.sf], after: Self.utc("2026-10-15T00:00:00Z"),
-                                                limit: 3)
-        #expect(changes.map(\.zone.id) == ["Europe/London", "America/Los_Angeles", "America/Los_Angeles"])
-        #expect(changes.map(\.transition.instant) == [
-            Self.utc("2026-10-25T01:00:00Z"), Self.utc("2026-11-01T09:00:00Z"), Self.utc("2027-03-14T10:00:00Z"),
-        ])
-    }
-
     // MARK: DayPager
 
     static let planner = [

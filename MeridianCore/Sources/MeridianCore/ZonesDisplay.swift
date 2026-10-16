@@ -1,11 +1,5 @@
 import Foundation
 
-/// A clock change in one of the user's zones (for Upcoming clock changes).
-public struct ZoneChange: Equatable, Sendable {
-    public let zone: Zone
-    public let transition: Transition
-}
-
 /// The DayPager's three lines: `Thu 15 Oct`, `W42 · day 288`, `Today`.
 public struct DayPagerText: Equatable, Sendable {
     public let title: String
@@ -37,15 +31,6 @@ extension ZoneClock {
         case 2...14: return "DST in \(days)d"
         default: return nil
         }
-    }
-
-    /// The next clock changes across `zones`, soonest first (spec §5.1 Upcoming clock changes).
-    public static func upcomingChanges(in zones: [Zone], after instant: Date, limit: Int) -> [ZoneChange] {
-        let horizon = instant.addingTimeInterval(2 * 366 * 86_400)
-        let all = zones.flatMap { zone in
-            transitions(in: zone, from: instant, to: horizon).prefix(limit).map { ZoneChange(zone: zone, transition: $0) }
-        }
-        return Array(all.sorted { $0.transition.instant < $1.transition.instant }.prefix(limit))
     }
 
     /// `+5h 30m`, `−4h 30m`, `+8h`, `−30m` (U+2212 minus).
