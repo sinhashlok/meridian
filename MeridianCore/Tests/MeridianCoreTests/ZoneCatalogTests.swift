@@ -76,3 +76,33 @@ struct ZoneCatalogTests {
         #expect(ZoneCatalog.search("  ", at: Self.october).isEmpty)
     }
 }
+
+/// Small helpers the app's saved zones and pickers use (M3 step 2).
+@Suite("Zone helpers")
+struct ZoneHelperTests {
+    @Test("Display name prefers the catalog's first city for a zone")
+    func displayName() {
+        #expect(ZoneCatalog.displayName(for: Zone("Asia/Kolkata")!) == "Mumbai")
+        #expect(ZoneCatalog.displayName(for: Zone("America/Los_Angeles")!) == "San Francisco")
+        #expect(ZoneCatalog.displayName(for: Zone("Pacific/Tarawa")!) == "Tarawa")
+        #expect(ZoneCatalog.displayName(for: .utc) == "UTC")
+    }
+
+    @Test("ClockTime round-trips through minutes after midnight and the picker reference date")
+    func clockTimeConversions() {
+        #expect(ClockTime(9, 30).minutesAfterMidnight == 570)
+        #expect(ClockTime(minutesAfterMidnight: 570) == ClockTime(9, 30))
+        #expect(ClockTime(minutesAfterMidnight: 1439) == ClockTime(23, 59))
+        for minutes in stride(from: 0, to: 1440, by: 15) {
+            let time = ClockTime(minutesAfterMidnight: minutes)
+            #expect(ClockTime(referenceDate: time.referenceDate) == time)
+        }
+        // The reference date is a fixed UTC day, so the device zone can't shift it.
+        #expect(ClockTime(9, 0).referenceDate == (try! EpochParser.parseISO8601("2000-01-01T09:00:00Z")).date)
+    }
+
+    @Test("The device zone is a real zone")
+    func device() {
+        #expect(Zone(Zone.device.id) != nil)
+    }
+}

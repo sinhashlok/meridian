@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 enum ZonesSegment: String, CaseIterable, Identifiable {
@@ -16,6 +17,10 @@ enum ZonesSegment: String, CaseIterable, Identifiable {
 struct ZonesTab: View {
     /// Remembered across launches (spec §2: each tab remembers its last segment).
     @AppStorage("zones.segment") private var segment: ZonesSegment = .planner
+    /// Set once the device zone has been added, so deleting every zone doesn't re-add it.
+    @AppStorage("zones.seeded") private var isSeeded = false
+    @Query(sort: \SavedZone.order) private var zones: [SavedZone]
+    @Environment(\.modelContext) private var context
 
     var body: some View {
         NavigationStack {
@@ -35,11 +40,18 @@ struct ZonesTab: View {
             .frame(maxHeight: .infinity, alignment: .top)
             .meridianScreen(title: "Zones")
         }
+        .task {
+            if !isSeeded {
+                if zones.isEmpty { ZoneStore.seed(into: context) }
+                isSeeded = true
+            }
+        }
     }
 }
 
 #Preview {
     ZonesTab()
         .environment(AppState())
+        .modelContainer(for: SavedZone.self, inMemory: true)
         .preferredColorScheme(.dark)
 }

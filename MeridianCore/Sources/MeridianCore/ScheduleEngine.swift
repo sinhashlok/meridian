@@ -169,3 +169,24 @@ public enum ScheduleEngine {
         return sorted.map { weekdayShortNames[$0 - 1] }.joined(separator: ", ")
     }
 }
+
+extension ClockTime {
+    /// 0…1439, for storage (SwiftData keeps an Int, not a struct).
+    public init(minutesAfterMidnight minutes: Int) {
+        self.init(minutes / 60, minutes % 60)
+    }
+
+    public var minutesAfterMidnight: Int { hour * 60 + minute }
+
+    /// This time on 2000-01-01 in UTC, for a `DatePicker` shown in UTC
+    /// (`Zone.utc.foundationTimeZone`), so the device's zone can never shift it.
+    public var referenceDate: Date {
+        Date(timeIntervalSince1970: 946_684_800 + TimeInterval(minutesAfterMidnight * 60))   // 2000-01-01T00:00Z
+    }
+
+    /// The time of day of `date` read in UTC (inverse of `referenceDate`).
+    public init(referenceDate date: Date) {
+        let local = ZoneClock.local(date, in: .utc)
+        self.init(local.hour, local.minute)
+    }
+}

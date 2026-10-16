@@ -254,3 +254,11 @@ private let cities: [ZoneCatalogEntry] = [
     ZoneCatalogEntry("Wellington", "New Zealand", "Pacific/Auckland"),
     ZoneCatalogEntry("Suva", "Fiji", "Pacific/Fiji"),
 ]
+
+extension ZoneCatalog {
+    /// A friendly name for a zone: the first catalog city in it (`Mumbai` for
+    /// Asia/Kolkata), else the city part of its id. Used when adding the device zone.
+    public static func displayName(for zone: Zone) -> String {
+        entries.first { $0.zoneID == zone.id }?.city ?? zone.cityName
+    }
+}

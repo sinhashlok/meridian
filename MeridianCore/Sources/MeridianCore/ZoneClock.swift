@@ -192,3 +192,12 @@ public enum ZoneClock {
         return noon
     }
 }
+
+extension Zone {
+    /// The phone's current zone (UTC if Foundation reports an unknown id).
+    public static var device: Zone { Zone(TimeZone.current.identifier) ?? .utc }
+
+    /// For APIs that need a Foundation `TimeZone`, e.g. a `DatePicker` environment.
+    /// Views use this instead of creating a `TimeZone` themselves.
+    public var foundationTimeZone: TimeZone { timeZone }
+}

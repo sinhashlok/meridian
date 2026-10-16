@@ -16,7 +16,7 @@ struct UTCPill: View {
             appState.isUTCMode.toggle()
         } label: {
             TimelineView(Self.everySecond) { context in
-                let time = ClockFormat.utcTime(context.date)
+                let time = ClockFormat.utcTime(appState.now(context.date))
                 Text("UTC \(time)")
                     .meridianFont(.monoCaption)
                     .foregroundStyle(.textPrimary)

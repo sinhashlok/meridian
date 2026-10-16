@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// The 5-tab shell from spec §2. First launch opens Zones.
@@ -23,6 +24,7 @@ struct RootView: View {
 #Preview {
     RootView()
         .environment(AppState())
+        .modelContainer(for: SavedZone.self, inMemory: true)
         .tint(.accent)
         .preferredColorScheme(.dark)
 }

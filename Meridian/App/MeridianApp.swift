@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 @main struct MeridianApp: App {
@@ -10,5 +11,6 @@ import SwiftUI
                 .tint(.accent)
                 .preferredColorScheme(.dark)
         }
+        .modelContainer(for: SavedZone.self)
     }
 }
