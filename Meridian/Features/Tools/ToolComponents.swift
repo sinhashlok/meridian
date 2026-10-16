@@ -251,7 +251,7 @@ struct ToolZoneMenu: View {
     var body: some View {
         let device = Zone.device
         Menu {
-            Picker(prefix, selection: $zoneID) {
+            Picker(prefix.isEmpty ? "Zone" : prefix, selection: $zoneID) {
                 Text("UTC").tag(Zone.utc.id)
                 if device != .utc {
                     Text("This phone · \(ZoneCatalog.displayName(for: device))").tag(device.id)
@@ -262,7 +262,7 @@ struct ToolZoneMenu: View {
             }
         } label: {
             HStack(spacing: Spacing.xxs) {
-                Text("\(prefix) \(Self.name(for: zoneID, zones: zones))")
+                Text(prefix.isEmpty ? Self.name(for: zoneID, zones: zones) : "\(prefix) \(Self.name(for: zoneID, zones: zones))")
                 Image(systemName: "chevron.down").imageScale(.small)
             }
             .meridianFont(.headline)

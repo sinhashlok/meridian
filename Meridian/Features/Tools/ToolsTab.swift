@@ -40,7 +40,9 @@ struct ToolsTab: View {
                 switch segment {
                 case .epoch:
                     EpochView()
-                case .cron, .dates:
+                case .cron:
+                    CronView()
+                case .dates:
                     ContentUnavailableView(segment.title, systemImage: segment.systemImage,
                                            description: Text("Coming in M4"))
                 }
