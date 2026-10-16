@@ -23,7 +23,6 @@ struct PlannerGrid: View {
     @ScaledMetric(relativeTo: .headline) private var knobSize: CGFloat = 26
     @Environment(\.dynamicTypeSize) private var typeSize
     @State private var width: CGFloat = 0
-    @State private var bubbleWidth: CGFloat = 120
     @State private var dragAxis: Axis?
     @State private var lastX: CGFloat = 0
     @State private var scrubFraction: Double = 0
@@ -59,32 +58,30 @@ struct PlannerGrid: View {
 
     // MARK: Bubble
 
-    /// `21:30 IST  3 of 3 awake · Mumbai in stretch`; while scrubbing it adds UTC and
-    /// stacks. Centred on the selection (a pointer marks it), kept fully on screen.
+    /// `21:30 IST` over `3 of 3 awake · Mumbai in stretch`; while scrubbing the first line
+    /// adds UTC. Always the grid card's full width so it never jumps as the text changes
+    /// (decision V); only its pointer follows the selection line.
     private var bubble: some View {
-        let title = Text(Scrubber.bubbleText(selection, reference: reference, withUTC: isScrubbing))
-            .meridianFont(.monoCaption).bold()
-            .foregroundStyle(.textPrimary)
-        let detail = Text(counts)
-            .meridianFont(.caption)
-            .foregroundStyle(.textSecondary)
         let full = width + 2 * Self.cardPadding
-        let centre = Self.cardPadding + x(selection)
-        let offset = min(max(centre - bubbleWidth / 2, 0), max(full - bubbleWidth, 0))
         // The pointer stays under the selection line, inside the bubble's rounded corners.
-        let pointerX = min(max(centre - offset, Radius.chip + 6), bubbleWidth - Radius.chip - 6)
-        return Group {
-            if isScrubbing {
-                VStack(alignment: .leading, spacing: 2) { title; detail }
-            } else {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: Spacing.xs) { title; detail }
-                    VStack(alignment: .leading, spacing: 2) { title; detail }
-                }
+        let pointerX = min(max(Self.cardPadding + x(selection), Radius.chip + 6), full - Radius.chip - 6)
+        return VStack(alignment: .leading, spacing: 2) {
+            Text(Scrubber.bubbleText(selection, reference: reference, withUTC: isScrubbing))
+                .meridianFont(.monoCaption).bold()
+                .foregroundStyle(.textPrimary)
+            // At least two lines tall, so the grid below doesn't jump while scrubbing;
+            // more zones can still grow it.
+            ZStack(alignment: .topLeading) {
+                Text("\n").hidden()
+                Text(counts)
+                    .foregroundStyle(.textSecondary)
             }
+            .meridianFont(.caption)
         }
+        .fixedSize(horizontal: false, vertical: true)
         .padding(.horizontal, Spacing.s)
         .padding(.vertical, Spacing.xs)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(.bgElevated, in: .rect(cornerRadius: Radius.chip, style: .continuous))
         .background(alignment: .bottomLeading) {
             Rectangle()
@@ -93,12 +90,6 @@ struct PlannerGrid: View {
                 .rotationEffect(.degrees(45))
                 .offset(x: pointerX - 5, y: 5)
         }
-        // Measure the bubble itself, before the frame that lets it wrap at full width.
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { bubbleWidth = $0 }
-        .frame(maxWidth: full, alignment: .leading)
-        .fixedSize(horizontal: false, vertical: true)
-        .offset(x: offset)
-        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityHidden(true)               // the meeting card speaks the time
     }
 

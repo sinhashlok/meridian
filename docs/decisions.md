@@ -133,7 +133,9 @@ label (`01 BST · 01 GMT`, `01–02 skipped`), shaded repeated hour and note.
 
 **V. Owner review of the Planner (16 Oct 2026).** The scrub bubble drops its weekday
 (`22:15 IST`, not `Fri 22:15 IST`: it read like the date "Fri 22", and the grid header
-already names the day) and gets a pointer to the selection line. The meeting card lists
+already names the day) and gets a pointer to the selection line. The bubble is a fixed size: the grid card's
+full width and at least two lines of counts, so it never jumps while scrubbing; only the
+pointer moves. The meeting card lists
 one zone per row (name, then times in one aligned column with their tags), the owner's
 chosen standard over the board's three columns; zones stack at accessibility sizes. The
 best-window bracket is drawn as corner caps, because a full outline beside the selection
