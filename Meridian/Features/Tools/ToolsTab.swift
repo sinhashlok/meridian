@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 enum ToolsSegment: String, CaseIterable, Identifiable {
@@ -24,6 +25,8 @@ enum ToolsSegment: String, CaseIterable, Identifiable {
 
 struct ToolsTab: View {
     @AppStorage("tools.segment") private var segment: ToolsSegment = .epoch
+    @Query(sort: \SavedFiscalProfile.order) private var fiscalProfiles: [SavedFiscalProfile]
+    @Environment(\.modelContext) private var context
 
     var body: some View {
         NavigationStack {
@@ -42,6 +45,10 @@ struct ToolsTab: View {
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .meridianScreen(title: "Tools")
+        }
+        .task {
+            if let tool = DebugLaunch.tool.flatMap(ToolsSegment.init(rawValue:)) { segment = tool }
+            FiscalStore.applyDebugLaunch(fiscalProfiles, in: context)
         }
     }
 }

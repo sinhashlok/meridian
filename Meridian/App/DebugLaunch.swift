@@ -9,7 +9,8 @@ import MeridianCore
 ///       -MeridianZones "Asia/Kolkata=Mumbai,Europe/London=London,America/Los_Angeles=SF" \
 ///       -MeridianScreen clocks
 enum DebugLaunch {
-    /// `clocks`, `planner`, `plannerScrub`, `addZone`, `editZone`, `changes`, …
+    /// `clocks`, `planner`, `plannerScrub`, `addZone`, `editZone`, `changes`, `fiscalEditor`,
+    /// `fiscalProfiles`, …
     static var screen: String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: "MeridianScreen")
@@ -52,6 +53,29 @@ enum DebugLaunch {
         UserDefaults.standard.bool(forKey: "MeridianWarn")
         #else
         false
+        #endif
+    }
+
+    /// `-MeridianTab tools`: the tab to open (zones, alarms, timer, sessions, tools).
+    static var tab: String? { string("MeridianTab") }
+
+    /// `-MeridianTool epoch|cron|dates`: the Tools segment.
+    static var tool: String? { string("MeridianTool") }
+
+    /// `-MeridianInput "1792060800000"`: the chosen tool's input.
+    static var input: String? { string("MeridianInput") }
+
+    /// `-MeridianZone Europe/London`: Interpret as (Epoch) or Evaluate in (Cron).
+    static var toolZone: String? { string("MeridianZone") }
+
+    /// `-MeridianFiscal india|retail|none`: replaces the saved fiscal profiles on launch.
+    static var fiscal: String? { string("MeridianFiscal") }
+
+    private static func string(_ key: String) -> String? {
+        #if DEBUG
+        UserDefaults.standard.string(forKey: key)
+        #else
+        nil
         #endif
     }
 
