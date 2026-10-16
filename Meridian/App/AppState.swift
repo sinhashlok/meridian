@@ -18,6 +18,7 @@ import Observation
         #if DEBUG
         frozenNow = UserDefaults.standard.string(forKey: "MeridianNow")
             .flatMap { try? EpochParser.parseISO8601($0).date }
+        isUTCMode = UserDefaults.standard.bool(forKey: "MeridianUTC")     // -MeridianUTC 1
         #else
         frozenNow = nil
         #endif

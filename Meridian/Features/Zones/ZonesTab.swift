@@ -35,7 +35,7 @@ struct ZonesTab: View {
 
                 switch segment {
                 case .planner:
-                    ContentUnavailableView("Planner", systemImage: "chart.bar.xaxis", description: Text("Coming in M3 step 4"))
+                    PlannerView(zones: zones)
                 case .clocks:
                     ClocksView(zones: zones)
                 }
