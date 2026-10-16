@@ -52,9 +52,13 @@ public struct CivilDate: Hashable, Comparable, Sendable {
 
     /// `Mon 26 Oct`, for notes and labels.
     public var shortText: String {
-        let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        return "\(weekdays[isoWeekday - 1]) \(day) \(months[month - 1])"
+        return "\(weekdayText) \(day) \(months[month - 1])"
+    }
+
+    /// `Mon`.
+    public var weekdayText: String {
+        ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][isoWeekday - 1]
     }
 
     public static func < (a: CivilDate, b: CivilDate) -> Bool {

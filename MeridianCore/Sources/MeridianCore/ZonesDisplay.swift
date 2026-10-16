@@ -93,9 +93,6 @@ extension OverlapEngine {
 extension PlannerDay {
     /// `25-hour day` / `23-hour day` when the home day isn't 24 hours.
     public var lengthNote: String? {
-        guard axis.duration != 86_400 else { return nil }
-        let hours = axis.duration / 3600
-        let text = hours == hours.rounded() ? "\(Int(hours))" : String(format: "%.1f", hours)
-        return "\(text)-hour day"
+        axis.duration == 86_400 ? nil : "\(hoursText)-hour day"
     }
 }
