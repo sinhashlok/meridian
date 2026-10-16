@@ -11,17 +11,20 @@ struct ToolInputBox<Trailing: View>: View {
     @Binding var text: String
     var isInvalid = false
     var keyboard: UIKeyboardType = .numbersAndPunctuation
+    /// Dates hides it: its Today button already resets the input.
+    var showsClear = true
     @ViewBuilder var trailing: () -> Trailing
 
     var body: some View {
         HStack(spacing: Spacing.s) {
-            TextField(placeholder, text: $text, axis: .vertical)
+            // Wraps long epochs; a single-line field (Dates) scrolls instead.
+            TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
                 .meridianFont(.monoTime)
                 .foregroundStyle(.textPrimary)
                 .keyboardType(keyboard)
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
-            if !text.isEmpty {
+            if showsClear, !text.isEmpty {
                 Button("Clear", systemImage: "xmark.circle.fill") { text = "" }
                     .labelStyle(.iconOnly)
                     .foregroundStyle(.textTertiary)
@@ -90,6 +93,7 @@ struct CopyRow: View {
                         valueText.multilineTextAlignment(.trailing)
                     }
                     VStack(alignment: .leading, spacing: 2) { labelText; valueText }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } else {
                 VStack(alignment: .leading, spacing: 2) { labelText; valueText }

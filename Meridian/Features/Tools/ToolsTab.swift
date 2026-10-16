@@ -43,8 +43,7 @@ struct ToolsTab: View {
                 case .cron:
                     CronView()
                 case .dates:
-                    ContentUnavailableView(segment.title, systemImage: segment.systemImage,
-                                           description: Text("Coming in M4"))
+                    DatesView()
                 }
             }
             .frame(maxHeight: .infinity, alignment: .top)
