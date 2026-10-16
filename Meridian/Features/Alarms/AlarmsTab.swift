@@ -25,11 +25,16 @@ struct AlarmsTab: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal, Spacing.screenMargin)
 
-                ContentUnavailableView(
-                    segment.title,
-                    systemImage: segment == .alarms ? "alarm" : "calendar.badge.clock",
-                    description: Text("Coming in M7")
-                )
+                switch segment {
+                case .alarms:
+                    AlarmSpikeView()  // M0.5 spike only
+                case .jobs:
+                    ContentUnavailableView(
+                        segment.title,
+                        systemImage: "calendar.badge.clock",
+                        description: Text("Coming in M7")
+                    )
+                }
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .meridianScreen(title: "Alarms")
