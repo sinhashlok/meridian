@@ -53,18 +53,18 @@ in seconds, sound, what the Lock Screen showed).
 | # | Setup before it rings | Expect | Result | Notes |
 |---|---|---|---|---|
 | 1 | First tap on a fresh install | System prompt shows the usage text; Allow | Pass (16 Oct) | Prompt showed the NSAlarmKitUsageDescription text |
-| 2 | App open, phone unlocked | Full alarm UI with sound and a Stop control | | |
-| 3 | App in background, phone locked | Rings on the Lock Screen | | |
-| 4 | Locked, **Silent** on (Ring/Silent switch or Action button) | Still rings with sound | | |
-| 5 | Locked, **Focus** on (Do Not Disturb, then repeat with Sleep) | Still rings | | |
-| 6 | App force-quit (swipe it away in the app switcher) | Still rings | | |
-| 7 | Tap Stop when it rings, then open the app | Status shows "Gone (stopped or cancelled)" | | |
-| 8 | Schedule, then tap **Cancel alarm** | Never rings | | |
-| 9 | App suspended (home, not force-quit) when it rings; reopen after Stop | Note what status the app shows and whether it ever showed `alerting` | | |
-| 10 | Schedule, then Settings › General › Date & Time › turn off Set Automatically › Time Zone = New York | Rings at the same instant as planned: the countdown doesn't change and the "Rings at" clock time shifts | | |
-| 11 | Low alarm volume (iOS 27: Settings › Sounds › alarm volume, if present) | Note how loud it is | | |
-| 12 | Apple Watch paired (if you have one) | Alert also shows on the Watch | | |
-| 13 | Settings › Apps › Meridian › turn Alarms off, then tap Schedule | Red error line in the app, nothing scheduled | | |
+| 2 | App open, phone unlocked | Full alarm UI with sound and a Stop control | Pass (16 Oct) | Reported as working; no detail recorded |
+| 3 | App in background, phone locked | Rings on the Lock Screen | Pass (16 Oct) | Reported as working; no detail recorded |
+| 4 | Locked, **Silent** on (Ring/Silent switch or Action button) | Still rings with sound | Pass (16 Oct) | Reported as working; no detail recorded |
+| 5 | Locked, **Focus** on (Do Not Disturb, then repeat with Sleep) | Still rings | Pass (16 Oct) | Reported as working; no detail recorded |
+| 6 | App force-quit (swipe it away in the app switcher) | Still rings | Pass (16 Oct) | Reported as working; no detail recorded |
+| 7 | Tap Stop when it rings, then open the app | Status shows "Gone (stopped or cancelled)" | Pass (16 Oct) | Reported as working; no detail recorded |
+| 8 | Schedule, then tap **Cancel alarm** | Never rings | Pass (16 Oct) | Reported as working; no detail recorded |
+| 9 | App suspended (home, not force-quit) when it rings; reopen after Stop | Note what status the app shows and whether it ever showed `alerting` | Open | Reported fine; observation not recorded yet |
+| 10 | Schedule, then Settings › General › Date & Time › turn off Set Automatically › Time Zone = New York | Rings at the same instant as planned: the countdown doesn't change and the "Rings at" clock time shifts | Pass (16 Oct) | Reported as working; no detail recorded |
+| 11 | Low alarm volume (iOS 27: Settings › Sounds › alarm volume, if present) | Note how loud it is | Open | Reported fine; observation not recorded yet |
+| 12 | Apple Watch paired (if you have one) | Alert also shows on the Watch | Open | Reported fine; observation not recorded yet |
+| 13 | Settings › Apps › Meridian › turn Alarms off, then tap Schedule | Red error line in the app, nothing scheduled | Pass (16 Oct) | Reported as working; no detail recorded |
 
 Afterwards: turn Set Automatically back on (test 10) and turn Alarms back on (test 13).
 
@@ -82,8 +82,8 @@ Afterwards: turn Set Automatically back on (test 10) and turn Alarms back on (te
 
 ## Results
 
-(fill in)
-
-- Device / iOS:
-- Date tested:
-- Verdict:
+- Device / iOS: not recorded yet
+- Date tested: 16 Oct 2026
+- Verdict: AlarmKit works for M7. Tests 1 to 8, 10 and 13 passed: rings through lock,
+  Silent, Focus and app force-quit, and a `.fixed` alarm survives a device time zone
+  change. Tests 9, 11 and 12 (observations, not pass/fail) still need details.
