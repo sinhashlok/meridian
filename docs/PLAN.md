@@ -44,19 +44,19 @@ Spark job.
 Each milestone ends with: tests green, app runs, commit made, and a short note of
 what to check on the phone.
 
-| # | Milestone | Done when |
-|---|---|---|
-| M0 | Skeleton: Tokens.swift, dark theme, 5-tab `TabView` with segmented placeholders, live UTCPill, Settings sheet stub | App runs in Simulator and on your iPhone |
-| M0.5 | **AlarmKit spike** (throwaway branch): schedule an alarm 2 min out, lock phone, Silent on, Focus on | You saw it ring through; notes written in `docs/notes/alarmkit.md` |
-| M1 | Core: `ZoneClock`, `EpochParser`, `PeriodEngine` (ISO + fiscal) | All matching fixtures pass in `swift test` |
-| M2 | Core: `CronParser` (Unix + Quartz), `ScheduleEngine` (presets + cron + gap/overlap), `OverlapEngine` | All remaining fixtures pass |
-| M3 | Zones UI: Clocks, Planner, DayPager, scrubber, BestWindowChip, Copy/Share | Planner board recreated; scrub feels right on the phone |
-| M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work |
-| M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone |
-| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown |
-| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 |
-| M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows |
-| M9 | App icon, name, TestFlight | Build installed via TestFlight |
+| # | Milestone | Done when | Status |
+|---|---|---|---|
+| M0 | Skeleton: Tokens.swift, dark theme, 5-tab `TabView` with segmented placeholders, live UTCPill, Settings sheet stub | App runs in Simulator and on your iPhone | Done 16 Oct 2026 (`8d331aa`) |
+| M0.5 | **AlarmKit spike** (throwaway branch): schedule an alarm 2 min out, lock phone, Silent on, Focus on | You saw it ring through; notes written in `docs/notes/alarmkit.md` | Done 16 Oct 2026; notes in `docs/notes/alarmkit.md` |
+| M1 | Core: `ZoneClock`, `EpochParser`, `PeriodEngine` (ISO + fiscal) | All matching fixtures pass in `swift test` | Done 16 Oct 2026 (`3ac49da`) |
+| M2 | Core: `CronParser` (Unix + Quartz), `ScheduleEngine` (presets + cron + gap/overlap), `OverlapEngine` | All remaining fixtures pass | Done 16 Oct 2026 (`648be8f`) |
+| M3 | Zones UI: Clocks, Planner, DayPager, scrubber, BestWindowChip, Copy/Share | Planner board recreated; scrub feels right on the phone | Built 16 Oct 2026 (`cbb5113`); board comparison and iPhone checks pending |
+| M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work |  |
+| M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone |  |
+| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown |  |
+| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 |  |
+| M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows |  |
+| M9 | App icon, name, TestFlight | Build installed via TestFlight |  |
 
 M3 is the riskiest UI (≈ 265pt track, gestures). M7 is the riskiest platform work.
 Do M0.5 early so any AlarmKit surprise changes the plan before M7.

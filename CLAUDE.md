@@ -144,7 +144,9 @@ Rules:
 - Gotchas: SwiftUI has its own `Transition`, so write `MeridianCore.Transition` in the
   app. Xcode 27 enforces member import visibility: import the module that defines a
   method (e.g. SwiftUI for `Array.move(fromOffsets:)`, SwiftData for `.modelContainer`).
-- Design boards are not in the repo yet; M3 screens were checked against the spec only.
+- Design boards: `docs/design/boards/` (40 PNGs; read its README first: spec wins, fonts
+  are substitutes, tab bar/segmented/sheets are system-drawn). M3 screens were built
+  before the boards arrived and have NOT been compared with them yet.
 - Decisions A–L, the integer-date choice and cron details: `docs/decisions.md`.
   Best-window ranking is decision D (fewest asleep before fewest in stretch), not the
   literal spec §4.1 order.
@@ -157,11 +159,24 @@ Rules:
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
 - No app test target yet. Add one (Xcode clicks) when the first UI logic needs tests.
 
+### Next up (as of 16 Oct 2026)
+
+1. Compare M3 screens with `Planner`, `PlannerDST`, `PlannerScrub`, `PlannerLondon25h`,
+   `ClockChanges` and `ClocksBanner` boards (`scripts/shoot.sh`); list and fix
+   differences, then push.
+2. M3 checks only the owner can do on the iPhone: scrub feel and hourly haptic, best
+   window snap haptic, Copy/Share, zone add/edit/reorder/delete, VoiceOver ±30 min.
+3. M4 Tools UI (Epoch, Cron, Dates, fiscal profile sheet): plan first. Boards are listed
+   under M4 in the boards README.
+4. Still open for M7 (from M0.5): do `.relative` alarms follow a device zone change, and
+   what is AlarmKit's real alarm limit?
+
 ## How we work
 
 - Start each milestone in plan mode. Propose files and steps; wait for approval.
 - Core first: write the test from `fixtures.md`, see it fail, then implement.
 - Small commits, one logical change each. Commit messages say what and why.
+- After each milestone's tests pass, push to `origin`. Never push failing work.
 - Before saying "done": run Core tests and app tests (commands below) and report
   results. For UI work, run the app in the Simulator and screenshot the screen to
   compare with the matching design board.
@@ -180,4 +195,7 @@ xcodebuild -project Meridian.xcodeproj -scheme Meridian \
 
 # Screenshot the booted simulator
 xcrun simctl io booted screenshot /tmp/screen.png
+
+# Relaunch in a debug state (frozen clock, chosen zones, screen) and screenshot it
+scripts/shoot.sh planner planner 2026-10-15T15:32:00Z
 ```
