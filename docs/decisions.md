@@ -140,3 +140,40 @@ one zone per row (name, then times in one aligned column with their tags), the o
 chosen standard over the board's three columns; zones stack at accessibility sizes. The
 best-window bracket is drawn as corner caps, because a full outline beside the selection
 band looked like a second selection line.
+
+## 16 Oct 2026 · M4 Tools
+
+**W. "Lengths we read"** (input longer than 19 digits): what the first 10/13/16/19 digits
+would mean as seconds/ms/µs/ns, as dates, instead of the board's `…800000` suffixes.
+Why: it answers "were two values pasted together?".
+
+**X. Zone choices** for Interpret as (Epoch) and Evaluate in (Cron): UTC (default), this
+phone's zone and saved zones. No full search in M4.
+
+**Y. Fiscal storage.** One SwiftData row per profile (`SavedFiscalProfile`) holding the
+Core `FiscalProfile` as JSON, plus active flag and order. No profile on first launch.
+Presets: India FY (Apr, Mon weeks), US federal (Oct, Sun weeks), Retail 4-4-5 (Feb,
+Sat nearest 31 Jan), plus Custom.
+
+**Z. 53rd week is shown as "Last period"**, not a picker: Core supports only that rule.
+
+**AA. Fiscal-period input**: `FY27`, `FY2026-27`, `Q3 FY27`, `P7 FY27`, any order and case,
+read against the active profile. Without a profile the input asks for one.
+
+**AB. Today and Now.** Dates' Today follows the UTC pill (spec). Epoch's Now inserts the
+current epoch in the unit currently shown (seconds when empty).
+
+**AC. Each tool remembers its last input** (and Epoch/Cron their zone) across launches.
+
+**AD. Replace button only for look-alikes**: `O`/`o` → `0`, `l`/`I` → `1`.
+
+**AE. Relative time** is elapsed time: just now · N min · N h M min · N days (< 60) ·
+N months (< 2 years) · N years, with `ago` / `in`.
+
+**AF. Cron key row** above the keyboard: `* , - /`, plus `? L #` for Quartz.
+
+**AG. Fiscal list rules live in Core** (`FiscalProfileList`: max 3, exactly one active,
+removing the active one activates the first), so the app still needs no test target.
+
+Owner-review standards from M3 (decision V) applied: values in aligned rows, no
+date-like strings, siblings wrap the same way.
