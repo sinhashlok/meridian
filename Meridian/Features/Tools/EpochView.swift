@@ -117,22 +117,13 @@ struct EpochView: View {
                     ForEach(EpochUnit.allCases, id: \.self) { Text($0.rawValue.capitalized).tag(EpochUnit?.some($0)) }
                 }
             } label: {
-                HStack(spacing: Spacing.xxs) {
-                    Text(chip.digits)
-                        .meridianFont(.monoCaption)
-                        .foregroundStyle(tooLong ? Color.statusDanger : .textSecondary)
-                    Image(systemName: "arrow.right").imageScale(.small).foregroundStyle(.textSecondary)
-                    Text(chip.unit)
-                        .meridianFont(.sub)
-                        .fontWeight(tooLong ? .regular : .semibold)
-                        .foregroundStyle(tooLong ? Color.textSecondary : .textPrimary)
-                    if !tooLong {
-                        Image(systemName: "chevron.down").imageScale(.small).foregroundStyle(.textSecondary)
-                    }
+                // Side by side; stacked when it can't fit (large text), so words never break.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Spacing.xxs) { chipParts(chip, tooLong: tooLong) }
+                    VStack(alignment: .leading, spacing: 2) { chipParts(chip, tooLong: tooLong) }
                 }
                 .padding(.horizontal, Spacing.s)
                 .frame(minHeight: Spacing.minTapTarget)
-                .fixedSize()
                 .overlay {
                     RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
                         .strokeBorder(tooLong ? Color.statusDanger : .separatorLine, lineWidth: 1)
@@ -140,6 +131,23 @@ struct EpochView: View {
             }
             .disabled(tooLong)
             .accessibilityLabel("\(chip.digits), read as \(chip.unit)")
+        }
+    }
+
+    @ViewBuilder
+    private func chipParts(_ chip: (digits: String, unit: String), tooLong: Bool) -> some View {
+        Text(chip.digits)
+            .meridianFont(.monoCaption)
+            .foregroundStyle(tooLong ? Color.statusDanger : .textSecondary)
+        HStack(spacing: Spacing.xxs) {
+            Image(systemName: "arrow.right").imageScale(.small).foregroundStyle(.textSecondary)
+            Text(chip.unit)
+                .meridianFont(.sub)
+                .fontWeight(tooLong ? .regular : .semibold)
+                .foregroundStyle(tooLong ? Color.textSecondary : .textPrimary)
+            if !tooLong {
+                Image(systemName: "chevron.down").imageScale(.small).foregroundStyle(.textSecondary)
+            }
         }
     }
 

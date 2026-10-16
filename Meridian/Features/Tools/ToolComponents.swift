@@ -15,22 +15,30 @@ struct ToolInputBox<Trailing: View>: View {
     var showsClear = true
     @ViewBuilder var trailing: () -> Trailing
 
+    @Environment(\.dynamicTypeSize) private var typeSize
+
     var body: some View {
-        HStack(spacing: Spacing.s) {
-            // Wraps long epochs; a single-line field (Dates) scrolls instead.
-            TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
-                .meridianFont(.monoTime)
-                .foregroundStyle(.textPrimary)
-                .keyboardType(keyboard)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-            if showsClear, !text.isEmpty {
-                Button("Clear", systemImage: "xmark.circle.fill") { text = "" }
-                    .labelStyle(.iconOnly)
-                    .foregroundStyle(.textTertiary)
-                    .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
+        // At accessibility sizes the trailing controls move under the field.
+        let layout = typeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xs))
+            : AnyLayout(HStackLayout(spacing: Spacing.s))
+        layout {
+            HStack(spacing: Spacing.s) {
+                // Wraps long epochs; a single-line field (Dates) scrolls instead.
+                TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
+                    .meridianFont(.monoTime)
+                    .foregroundStyle(.textPrimary)
+                    .keyboardType(keyboard)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                if showsClear, !text.isEmpty {
+                    Button("Clear", systemImage: "xmark.circle.fill") { text = "" }
+                        .labelStyle(.iconOnly)
+                        .foregroundStyle(.textTertiary)
+                        .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
+                }
             }
-            trailing()
+            HStack(spacing: Spacing.s) { trailing() }
         }
         .padding(.leading, Spacing.m)
         .padding(.trailing, Spacing.xs)

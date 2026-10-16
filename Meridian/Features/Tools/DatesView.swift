@@ -11,6 +11,7 @@ struct DatesView: View {
     @State private var sheet: Sheet?
 
     @Environment(AppState.self) private var appState
+    @Environment(\.dynamicTypeSize) private var typeSize
     @Query(sort: \SavedFiscalProfile.order) private var saved: [SavedFiscalProfile]
 
     enum Sheet: Identifiable {
@@ -91,7 +92,7 @@ struct DatesView: View {
                 Text(label)
                     .meridianFont(.caption)
                     .foregroundStyle(.textSecondary)
-                    .fixedSize()
+                    .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: false)
             }
             Button("Today") { input = "" }
                 .meridianFont(.headline)
