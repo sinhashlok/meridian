@@ -14,6 +14,8 @@ struct JobsView: View {
 
     @State private var isAdding = false
     @State private var showsChanges = false
+    /// Debug: a job pushed on launch (`-MeridianScreen jobDetail|jobEdit|jobEditCron`).
+    @State private var debugJob: UUID?
 
     var body: some View {
         TimelineView(.everyMinute) { timeline in
@@ -59,10 +61,16 @@ struct JobsView: View {
             }
         }
         .navigationDestination(for: UUID.self) { id in
-            Text(saved.first { $0.job?.id == id }?.job?.title ?? "")
+            if let row = saved.first(where: { $0.job?.id == id }) { JobDetailView(row: row) }
+        }
+        .navigationDestination(item: $debugJob) { id in
+            if let row = saved.first(where: { $0.job?.id == id }) { JobDetailView(row: row) }
         }
         .sheet(isPresented: $isAdding) {
-            Text("New job")
+            JobEditSheet(original: nil) { job in
+                JobStore.add(job, to: saved, in: context)
+                JobReminders.shared.sync(in: context)
+            }
         }
         .sheet(isPresented: $showsChanges) {
             UpcomingChangesSheet(zones: zones, alsoUsed: jobZones)
@@ -70,6 +78,28 @@ struct JobsView: View {
         .onAppear {
             JobStore.applyDebugLaunch(saved, in: context)
             if DebugLaunch.jobs != nil { JobReminders.shared.sync(in: context) }
+        }
+        .task {
+            // Debug: open a board's job once the demo rows are in.
+            let title = switch DebugLaunch.screen {
+            case "jobDetail", "jobEdit": "Netsuite pipeline run"
+            case "jobEditCron": "Month-end close extract"
+            case "newJob": "new"
+            default: ""
+            }
+            guard !title.isEmpty else { return }
+            if title == "new" {
+                isAdding = true
+                return
+            }
+            // Wait for the demo rows, skipping the ones they replaced (deleted, not yet saved).
+            for _ in 0..<30 {
+                try? await Task.sleep(for: .milliseconds(100))
+                if let id = saved.filter({ !$0.isDeleted }).compactMap(\.job).first(where: { $0.title == title })?.id {
+                    debugJob = id
+                    return
+                }
+            }
         }
     }
 

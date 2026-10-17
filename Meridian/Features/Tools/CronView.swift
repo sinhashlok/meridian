@@ -170,36 +170,8 @@ struct CronView: View {
                     .frame(minHeight: Spacing.minTapTarget)
                     .buttonStyle(.plain)
             }
-            runTable(runs, now: now)
+            RunTable(runs: runs, now: now)
         }
-    }
-
-    private func runTable(_ runs: [ScheduledRun], now: Date) -> some View {
-        Grid(alignment: .leading, horizontalSpacing: Spacing.m, verticalSpacing: 0) {
-            GridRow {
-                Text("UTC")
-                Text(CronText.localHeader(device: .device, at: now)).gridColumnAlignment(.trailing)
-            }
-            .meridianFont(.sub)
-            .foregroundStyle(.textSecondary)
-            .frame(minHeight: Spacing.minTapTarget)
-            ForEach(runs, id: \.instant) { run in
-                let row = CronText.runRow(run, device: .device)
-                Divider().overlay(Color.separatorLine)
-                GridRow {
-                    Text(row.utc)
-                    Text(row.local)
-                }
-                .meridianFont(.monoBody)
-                .foregroundStyle(.textPrimary)
-                .frame(minHeight: Spacing.minRowHeight)
-                .accessibilityElement(children: .combine)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, Spacing.m)
-        .padding(.bottom, Spacing.xs)
-        .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
     }
 
     // MARK: Invalid

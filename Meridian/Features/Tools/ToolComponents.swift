@@ -204,6 +204,40 @@ struct ProblemBlock: View {
     }
 }
 
+/// Next runs as `UTC | Local · IST` rows (boards Cron, JobDetail, JobEditCron).
+struct RunTable: View {
+    let runs: [ScheduledRun]
+    let now: Date
+
+    var body: some View {
+        Grid(alignment: .leading, horizontalSpacing: Spacing.m, verticalSpacing: 0) {
+            GridRow {
+                Text("UTC")
+                Text(CronText.localHeader(device: .device, at: now)).gridColumnAlignment(.trailing)
+            }
+            .meridianFont(.sub)
+            .foregroundStyle(.textSecondary)
+            .frame(minHeight: Spacing.minTapTarget)
+            ForEach(runs, id: \.instant) { run in
+                let row = CronText.runRow(run, device: .device)
+                Divider().overlay(Color.separatorLine)
+                GridRow {
+                    Text(row.utc)
+                    Text(row.local)
+                }
+                .meridianFont(.monoBody)
+                .foregroundStyle(.textPrimary)
+                .frame(minHeight: Spacing.minRowHeight)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, Spacing.m)
+        .padding(.bottom, Spacing.xs)
+        .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
+    }
+}
+
 /// Dashed box saying what appears once the input is valid.
 struct PlaceholderBox: View {
     let text: String

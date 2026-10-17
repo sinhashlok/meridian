@@ -166,6 +166,27 @@ public enum JobText {
         return count == 0 ? nil : "Reminders for \(count) job\(count == 1 ? "" : "s") won't arrive."
     }
 
+    /// Why a schedule can't be saved, in one sentence.
+    public static func scheduleProblem(_ error: ScheduleError) -> String {
+        switch error {
+        case .noTimes: "Add at least one time."
+        case .noDays: "Pick at least one day."
+        case .invalidDay(let day): "Day \(day) isn't a day of the month."
+        case .invalidInterval(let n, let allowed): "Every \(n) isn't allowed; pick one of "
+            + allowed.map(String.init).joined(separator: ", ") + "."
+        case .cron(let error): error.message
+        }
+    }
+
+    /// `At the run`, `10 min`, `1 hour` (decision BK's lead choices).
+    public static func leadText(_ minutes: Int) -> String {
+        switch minutes {
+        case 0: "At the run"
+        case 60: "1 hour"
+        default: "\(minutes) min"
+        }
+    }
+
     /// `+0:45`, `+1:30`.
     public static func offsetText(_ minutes: Int) -> String {
         "+\(minutes / 60):" + twoDigits(minutes % 60)

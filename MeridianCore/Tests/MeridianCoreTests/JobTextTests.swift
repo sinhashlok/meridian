@@ -143,4 +143,21 @@ struct JobTextTests {
         #expect(JobText.notificationsOffDetail([Self.netsuite]) == "Reminders for 1 job won't arrive.")
         #expect(JobText.notificationsOffDetail([Self.marketing, Self.legacy]) == nil)
     }
+
+    @Test("Schedule problems shown in the edit sheet")
+    func scheduleProblems() throws {
+        #expect(JobText.scheduleProblem(.noTimes) == "Add at least one time.")
+        #expect(JobText.scheduleProblem(.noDays) == "Pick at least one day.")
+        let cron = try #require(Self.cronError("0 2 32 * *"))
+        #expect(JobText.scheduleProblem(.cron(cron)) == cron.message)
+    }
+
+    @Test("Lead time labels", arguments: [(0, "At the run"), (10, "10 min"), (60, "1 hour")] as [(Int, String)])
+    func leadText(minutes: Int, expected: String) {
+        #expect(JobText.leadText(minutes) == expected)
+    }
+
+    static func cronError(_ text: String) -> CronError? {
+        do { _ = try CronExpression.parse(text, dialect: .unix); return nil } catch { return error }
+    }
 }
