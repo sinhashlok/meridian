@@ -209,8 +209,9 @@ Rules:
 
 0. M5 + M6 checks on the iPhone: timers and session phase changes ring when locked, on
    Silent, in Focus and after force-quit; a session keeps advancing with the app killed;
-   timer pause / +1 min / resume / restart ring once at the new time; Live Activities
-   on the Lock Screen and Island (compact, minimal, expanded); every Live Activity button
+   timer pause / +1 min / resume / restart ring once at the new time; Live Activity
+   layout was fixed and accepted from the owner's iPhone screenshots (17 Oct); still to
+   check: Island minimal/expanded on device and that every Live Activity button
    (session Pause / Resume / Skip / +5 min / Stop, timer Pause / Resume / +1 min / Cancel)
    updates the app; tapping an activity opens its tab; the meeting line opens the Planner
    on its window; haptics on start, lap and session done; Copy CSV; denied-Alarms note.
