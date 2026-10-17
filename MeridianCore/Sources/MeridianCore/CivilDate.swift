@@ -51,9 +51,12 @@ public struct CivilDate: Hashable, Comparable, Codable, Sendable {
     }
 
     /// `Mon 26 Oct`, for notes and labels.
-    public var shortText: String {
+    public var shortText: String { "\(weekdayText) \(dayMonthText)" }
+
+    /// `26 Oct`.
+    public var dayMonthText: String {
         let months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        return "\(weekdayText) \(day) \(months[month - 1])"
+        return "\(day) \(months[month - 1])"
     }
 
     /// `Mon`.

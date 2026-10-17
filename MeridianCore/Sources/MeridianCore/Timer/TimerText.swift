@@ -75,7 +75,7 @@ public enum TimerText {
             let zone = target.zone
             let untilTime = ZoneClock.timeWithAbbreviation(end, in: zone)
             var localLine: String?
-            if !sameZone(zone, display) {
+            if !zone.isSame(as: display) {
                 localLine = ZoneClock.timeWithAbbreviation(end, in: display) + (displayIsPhone ? " on this phone" : "")
                 if isOtherDay(end, in: display, now: now) {
                     localLine! += " · " + ZoneClock.local(end, in: display).date.weekdayText
@@ -86,7 +86,7 @@ public enum TimerText {
             var line: String?
             if status == .finished {
                 line = "Passed " + EpochText.relative(epoch(end), now: now)
-            } else if ruleNote == nil || !sameZone(zone, display) {
+            } else if ruleNote == nil || !zone.isSame(as: display) {
                 // A §5.2 note already says this zone changes clocks; don't say it twice.
                 notes += ZoneClock.clockChangeNotes(in: display, from: now, to: end)
             }
@@ -144,10 +144,6 @@ public enum TimerText {
 
     private static func isOtherDay(_ instant: Date, in zone: Zone, now: Date) -> Bool {
         ZoneClock.local(instant, in: zone).date != ZoneClock.local(now, in: zone).date
-    }
-
-    private static func sameZone(_ a: Zone, _ b: Zone) -> Bool {
-        a == b || (a.isUTC && b.isUTC)
     }
 
     /// §5.2 note when the rule decided the target.
