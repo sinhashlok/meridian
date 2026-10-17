@@ -23,6 +23,9 @@ struct MeetingLineTests {
         let line = Self.line(at: "2026-10-15T15:39:18Z")
         #expect(line?.title == "Best compromise in 21 min")
         #expect(line?.detail == "16:00 UTC · 3 of 3 awake · Mumbai in stretch")
+        // Board LiveActivity splits it the other way: time on the first line.
+        #expect(line?.headline == "Best compromise in 21 min · 16:00 UTC")
+        #expect(line?.counts == "3 of 3 awake · Mumbai in stretch")
         #expect(line?.start == Self.utc("2026-10-15T16:00:00Z"))
         #expect(line?.day == CivilDate(2026, 10, 15))
     }
@@ -47,6 +50,8 @@ struct MeetingLineTests {
         let line = Self.line(at: "2026-10-17T06:00:00Z")
         #expect(line?.title == "No shared window today")
         #expect(line?.detail == "Next: Mon 16:00 UTC · 3 of 3 awake · Mumbai in stretch")
+        #expect(line?.headline == "No shared window today · next Mon 16:00 UTC")
+        #expect(line?.counts == "3 of 3 awake · Mumbai in stretch")
         #expect(line?.day == CivilDate(2026, 10, 19))
     }
 

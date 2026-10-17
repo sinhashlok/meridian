@@ -204,8 +204,10 @@ struct SessionActivityTests {
     static let ist = Zone("Asia/Kolkata")!
     static func utc(_ iso: String) -> Date { try! EpochParser.parseISO8601(iso).date }
     static let now = utc("2026-10-15T15:39:18Z")
-    static let meeting = MeetingLine(title: "Best compromise in 21 min", detail: "16:00 UTC · 3 of 3 awake · Mumbai in stretch",
-                                     start: utc("2026-10-15T16:00:00Z"), day: CivilDate(2026, 10, 15))
+    static let meeting = MeridianCore.MeetingLine.make(
+        zones: [PlannerZone(zone: Zone("Asia/Kolkata")!, name: "Mumbai"), PlannerZone(zone: Zone("Europe/London")!, name: "London"),
+                PlannerZone(zone: Zone("America/Los_Angeles")!, name: "SF")],
+        home: Zone("Asia/Kolkata")!, now: utc("2026-10-15T15:39:18Z"))
 
     @Test("Board LiveActivity: Focus · 1 of 4, ends 21:28 IST, counts down to 15:58Z, with the meeting line")
     func board() {
@@ -215,7 +217,7 @@ struct SessionActivityTests {
             phase: "Focus · 1 of 4", ends: "Ends 21:28 IST", isFocus: true,
             endDate: Self.utc("2026-10-15T15:58:00Z"), phaseStart: Self.utc("2026-10-15T15:33:00Z"),
             pausedRemaining: nil, pausedFraction: nil,
-            meetingTitle: "Best compromise in 21 min", meetingDetail: "16:00 UTC · 3 of 3 awake · Mumbai in stretch"))
+            meetingTitle: "Best compromise in 21 min · 16:00 UTC", meetingDetail: "3 of 3 awake · Mumbai in stretch"))
     }
 
     @Test("Paused: frozen time and ring, no countdown")

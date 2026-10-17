@@ -17,7 +17,8 @@ public struct SessionActivityContent: Equatable, Sendable {
     /// Paused: the frozen time left and ring fraction.
     public let pausedRemaining: String?
     public let pausedFraction: Double?
-    /// The meeting line (decision AY), if shown.
+    /// The meeting line (decision AY), split as on board LiveActivity: `Best compromise
+    /// in 21 min · 16:00 UTC` over `3 of 3 awake · Mumbai in stretch`.
     public let meetingTitle: String?
     public let meetingDetail: String?
 
@@ -47,6 +48,6 @@ public struct SessionActivityContent: Equatable, Sendable {
             phaseStart: isPaused ? nil : phase.end.addingTimeInterval(-TimeInterval(phase.seconds)),
             pausedRemaining: isPaused ? text.remaining : nil,
             pausedFraction: isPaused ? session.fraction(at: now) : nil,
-            meetingTitle: meeting?.title, meetingDetail: meeting?.detail)
+            meetingTitle: meeting?.headline, meetingDetail: meeting?.counts)
     }
 }

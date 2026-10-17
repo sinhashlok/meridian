@@ -19,6 +19,9 @@ struct RootView: View {
         .sheet(isPresented: $appState.isSettingsPresented) {
             SettingsSheet()
         }
+        #if DEBUG
+        .fullScreenCover(isPresented: .constant(DebugLaunch.screen == "liveActivity")) { LiveActivityPreview() }
+        #endif
         // The Live Activities link here (meridian://timer, meridian://sessions).
         .onOpenURL { url in
             if url.scheme == "meridian", let host = url.host(), ["timer", "sessions"].contains(host) {
