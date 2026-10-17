@@ -213,30 +213,36 @@ struct EpochView: View {
 
     /// Both readings of an ambiguous length; tapping one overrides the unit.
     private func readingCards(selected: EpochUnit) -> some View {
-        return HStack(spacing: Spacing.s) {
+        HStack(spacing: Spacing.s) {
             ForEach(EpochText.readings(of: input, units: EpochText.candidateUnits(for: input)), id: \.unit) { reading in
-                let isSelected = reading.unit == selected
-                Button { unitOverride = reading.unit } label: {
-                    HStack(alignment: .top) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(reading.unit.rawValue.capitalized).meridianFont(.headline).foregroundStyle(.textPrimary)
-                            Text(reading.dateText).meridianFont(.monoBody).foregroundStyle(.textSecondary)
-                        }
-                        Spacer(minLength: 0)
-                        if isSelected { Image(systemName: "checkmark").foregroundStyle(.textPrimary) }
-                    }
-                    .padding(Spacing.s)
-                    .frame(maxWidth: .infinity, minHeight: Spacing.minRowHeight, alignment: .leading)
-                    .background(.bgSurface, in: .rect(cornerRadius: Radius.row, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
-                            .strokeBorder(isSelected ? Color.textPrimary : .separatorLine, lineWidth: isSelected ? 1.5 : 1)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityAddTraits(isSelected ? .isSelected : [])
+                choiceCard(title: reading.unit.rawValue.capitalized, detail: reading.dateText, detailFont: .monoBody,
+                           isSelected: reading.unit == selected) { unitOverride = reading.unit }
             }
         }
+    }
+
+    /// One of two side-by-side choices: outlined in `textPrimary` with a checkmark when picked.
+    private func choiceCard(title: String, detail: String, detailFont: FontToken, isSelected: Bool,
+                            action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).meridianFont(.headline).foregroundStyle(.textPrimary)
+                    Text(detail).meridianFont(detailFont).foregroundStyle(.textSecondary)
+                }
+                Spacer(minLength: 0)
+                if isSelected { Image(systemName: "checkmark").foregroundStyle(.textPrimary) }
+            }
+            .padding(Spacing.s)
+            .frame(maxWidth: .infinity, minHeight: Spacing.minRowHeight, alignment: .leading)
+            .background(.bgSurface, in: .rect(cornerRadius: Radius.row, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
+                    .strokeBorder(isSelected ? Color.textPrimary : .separatorLine, lineWidth: isSelected ? 1.5 : 1)
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: Date-time
@@ -295,7 +301,8 @@ struct EpochView: View {
         if reading.options.count == 2 {
             HStack(spacing: Spacing.s) {
                 ForEach(reading.options, id: \.title) { option in
-                    occurrenceCard(option, isSelected: option.occurrence == occurrence)
+                    choiceCard(title: option.title, detail: option.detail, detailFont: .monoCaption,
+                               isSelected: option.occurrence == occurrence) { occurrence = option.occurrence }
                 }
             }
         }
@@ -315,28 +322,6 @@ struct EpochView: View {
         Text("Date & time · no zone")
             .meridianFont(.sub)
             .foregroundStyle(.textSecondary)
-    }
-
-    private func occurrenceCard(_ option: ZonelessOption, isSelected: Bool) -> some View {
-        Button { occurrence = option.occurrence } label: {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(option.title).meridianFont(.headline).foregroundStyle(.textPrimary)
-                    Text(option.detail).meridianFont(.monoCaption).foregroundStyle(.textSecondary)
-                }
-                Spacer(minLength: 0)
-                if isSelected { Image(systemName: "checkmark").foregroundStyle(.textPrimary) }
-            }
-            .padding(Spacing.s)
-            .frame(maxWidth: .infinity, minHeight: Spacing.minRowHeight, alignment: .leading)
-            .background(.bgSurface, in: .rect(cornerRadius: Radius.row, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: Radius.row, style: .continuous)
-                    .strokeBorder(isSelected ? Color.textPrimary : .separatorLine, lineWidth: isSelected ? 1.5 : 1)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     // MARK: Results
