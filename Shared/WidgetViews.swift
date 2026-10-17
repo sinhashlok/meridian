@@ -13,9 +13,13 @@ import WidgetKit
 // Text follows Dynamic Type up to a cap (decision CE): a widget can't grow, and past
 // xxLarge (xLarge on the Lock Screen) its content no longer fits.
 
+// VoiceOver reads each widget as one element (decision CC).
+
 extension View {
-    /// Home Screen widgets: Dynamic Type up to xxLarge.
-    func homeWidgetTypeSize() -> some View { dynamicTypeSize(...DynamicTypeSize.xxLarge) }
+    /// Home Screen widgets: Dynamic Type up to xxLarge, read as one VoiceOver element.
+    func homeWidgetStyle() -> some View {
+        dynamicTypeSize(...DynamicTypeSize.xxLarge).accessibilityElement(children: .combine)
+    }
     /// Lock Screen accessories: Dynamic Type up to xLarge.
     func accessoryTypeSize() -> some View { dynamicTypeSize(...DynamicTypeSize.xLarge) }
 }
@@ -103,7 +107,7 @@ struct ClockWidgetView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .homeWidgetTypeSize()
+        .homeWidgetStyle()
     }
 }
 
@@ -114,7 +118,7 @@ struct PlannerWidgetView: View {
     let text: PlannerWidgetText?
 
     var body: some View {
-        content.homeWidgetTypeSize()
+        content.homeWidgetStyle()
     }
 
     @ViewBuilder private var content: some View {
@@ -273,7 +277,7 @@ struct JobsSmallView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .homeWidgetTypeSize()
+        .homeWidgetStyle()
     }
 
     private func content(_ row: JobWidgetRow, titleLines: Int, showsLine: Bool) -> some View {
@@ -323,7 +327,7 @@ struct JobsMediumView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .homeWidgetTypeSize()
+        .homeWidgetStyle()
     }
 }
 
@@ -349,7 +353,7 @@ struct JobsLargeView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .homeWidgetTypeSize()
+        .homeWidgetStyle()
     }
 
     private func hero(_ row: JobWidgetRow) -> some View {
@@ -490,6 +494,7 @@ struct NextJobRectangularView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
         .accessoryTypeSize()
     }
 }
