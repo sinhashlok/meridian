@@ -83,6 +83,12 @@ enum DebugLaunch {
     /// `-MeridianAlarms demo|none`: replaces saved alarms (see `AlarmStore.applyDebugLaunch`).
     static var alarms: String? { string("MeridianAlarms") }
 
+    /// `-MeridianJobs demo|none`: replaces saved jobs (see `JobStore.applyDebugLaunch`).
+    static var jobs: String? { string("MeridianJobs") }
+
+    /// `-MeridianNotif off`: show the Jobs "Notifications are off" banner (board JobsNotifOff).
+    static var notificationsOff: Bool { string("MeridianNotif") == "off" }
+
     private static func string(_ key: String) -> String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: key)

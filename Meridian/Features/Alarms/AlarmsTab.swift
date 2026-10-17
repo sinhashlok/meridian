@@ -19,8 +19,7 @@ struct AlarmsTab: View {
         SegmentedScreen(title: "Alarms", segment: $segment) { segment in
             switch segment {
             case .alarms: AlarmsView()
-            case .jobs:
-                ContentUnavailableView("Jobs", systemImage: "calendar.badge.clock", description: Text("Coming in M7"))
+            case .jobs: JobsView()
             }
         }
     }

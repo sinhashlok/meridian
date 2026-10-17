@@ -136,4 +136,11 @@ struct JobTextTests {
         job.schedule = .cron(dialect: .quartz, expression: "0 0 1 ? * MON")
         #expect(try JSONDecoder().decode(Job.self, from: JSONEncoder().encode(job)) == job)
     }
+
+    @Test("JobsNotifOff banner counts unpaused jobs with reminders")
+    func notificationsOff() {
+        #expect(JobText.notificationsOffDetail(Self.board) == "Reminders for 2 jobs won't arrive.")
+        #expect(JobText.notificationsOffDetail([Self.netsuite]) == "Reminders for 1 job won't arrive.")
+        #expect(JobText.notificationsOffDetail([Self.marketing, Self.legacy]) == nil)
+    }
 }

@@ -128,6 +128,30 @@ import UserNotifications
             .add(UNNotificationRequest(identifier: "\(prefix)-\(id.uuidString)", content: content, trigger: trigger))
     }
 
+    // MARK: Notifications by identifier (job reminders, decision BK)
+
+    static func pendingNotificationIdentifiers(prefix: String) async -> Set<String> {
+        Set(await UNUserNotificationCenter.current().pendingNotificationRequests().map(\.identifier)
+            .filter { $0.hasPrefix(prefix) })
+    }
+
+    static func scheduleNotification(identifier: String, at date: Date, title: String, body: String,
+                                     now: Date) async {
+        guard date > now else { return }
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: date.timeIntervalSince(now), repeats: false)
+        try? await UNUserNotificationCenter.current()
+            .add(UNNotificationRequest(identifier: identifier, content: content, trigger: trigger))
+    }
+
+    static func removeNotifications(identifiers: [String]) {
+        guard !identifiers.isEmpty else { return }
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: identifiers)
+    }
+
     /// Removes the given fallback notifications, or all with `prefix` when `ids` is nil
     /// (Alarms allowed again: nothing should alert twice).
     static func removeNotifications(prefix: String, ids: [UUID]? = nil) async {

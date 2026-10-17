@@ -160,6 +160,12 @@ public enum JobText {
             + ZoneClock.local(change.instant, in: zone).date.dayMonthText
     }
 
+    /// Under "Notifications are off" (board JobsNotifOff); `nil` when no reminder is affected.
+    public static func notificationsOffDetail(_ jobs: [Job]) -> String? {
+        let count = jobs.filter { $0.remindsMe && !$0.isPaused }.count
+        return count == 0 ? nil : "Reminders for \(count) job\(count == 1 ? "" : "s") won't arrive."
+    }
+
     /// `+0:45`, `+1:30`.
     public static func offsetText(_ minutes: Int) -> String {
         "+\(minutes / 60):" + twoDigits(minutes % 60)

@@ -35,6 +35,7 @@ struct RootView: View {
             TimerAlarms.shared.sync(in: context)
             SessionAlarms.shared.sync()
             ClockAlarms.shared.sync(in: context)
+            JobReminders.shared.sync(in: context)
         }
     }
 }
