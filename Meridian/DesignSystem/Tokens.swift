@@ -201,8 +201,8 @@ extension View {
 
 // MARK: - Motion (§3.4)
 
-/// Number changes use `.contentTransition(.numericText())`.
-/// Reduce Motion → crossfade: check `accessibilityReduceMotion` at the call site.
+/// Number changes use `.numericTransition()`. Reduce Motion: movement becomes instant
+/// (`movingAnimation`, `Motion.moving`) and rolling digits crossfade.
 enum Motion {
     /// Press feedback, 120ms.
     static let press: Animation = .easeOut(duration: 0.12)
@@ -212,6 +212,44 @@ enum Motion {
     static let layout: Animation = .snappy(duration: 0.3)
     /// Layout change where a softer settle reads better.
     static let layoutSmooth: Animation = .smooth(duration: 0.3)
+
+    /// `animation`, or none under Reduce Motion: for changes that move, slide or scale
+    /// things (rows reordering, fields appearing). Colour and opacity fades don't need it.
+    /// Read `@Environment(\.accessibilityReduceMotion)` in the view and pass it in.
+    static func moving(_ animation: Animation, reduceMotion: Bool) -> Animation? {
+        reduceMotion ? nil : animation
+    }
+}
+
+extension View {
+    /// `.animation(_:value:)` for movement: none under Reduce Motion.
+    func movingAnimation(_ animation: Animation, value: some Equatable) -> some View {
+        modifier(MovingAnimation(animation: animation, value: value))
+    }
+
+    /// Digits roll when a number changes; under Reduce Motion they crossfade.
+    func numericTransition(countsDown: Bool = false) -> some View {
+        modifier(NumericTransition(countsDown: countsDown))
+    }
+}
+
+private struct MovingAnimation<Value: Equatable>: ViewModifier {
+    let animation: Animation
+    let value: Value
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content.animation(Motion.moving(animation, reduceMotion: reduceMotion), value: value)
+    }
+}
+
+private struct NumericTransition: ViewModifier {
+    let countsDown: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content.contentTransition(reduceMotion ? .opacity : .numericText(countsDown: countsDown))
+    }
 }
 
 // MARK: - Haptics (§3.4, used with `.sensoryFeedback`)

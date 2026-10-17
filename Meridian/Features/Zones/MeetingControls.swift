@@ -147,7 +147,7 @@ struct MeetingCard: View {
         Text(ZoneClock.wallTime(selection, in: zone.zone))
             .meridianFont(.monoBody).bold()
             .foregroundStyle(.textPrimary)
-            .contentTransition(.numericText())
+            .numericTransition()
             .fixedSize()
     }
 
@@ -169,7 +169,7 @@ struct MeetingCard: View {
             Text(MeetingText.utcRange(start: selection, minutes: minutes))
                 .meridianFont(.monoBody).bold()
                 .foregroundStyle(.textPrimary)
-                .contentTransition(.numericText())
+                .numericTransition()
                 .accessibilityLabel("Meeting time")
                 .accessibilityValue(MeetingText.utcRange(start: selection, minutes: minutes))
                 .accessibilityAdjustableAction { direction in

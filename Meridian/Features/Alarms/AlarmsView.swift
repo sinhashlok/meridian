@@ -10,6 +10,9 @@ struct AlarmsView: View {
     @Environment(\.modelContext) private var context
     @Environment(AppState.self) private var appState
     @Environment(\.openURL) private var openURL
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// `Motion.stateChange`, or none under Reduce Motion (rows and fields move).
+    private var stateChange: Animation? { Motion.moving(Motion.stateChange, reduceMotion: reduceMotion) }
 
     @State private var editing: EditTarget?
     @State private var showsChanges = false
@@ -64,7 +67,7 @@ struct AlarmsView: View {
                 }
                 .padding(.horizontal, Spacing.screenMargin)
                 .padding(.bottom, Spacing.sectionGap)
-                .animation(Motion.layout, value: sorted.map(\.id))
+                .movingAnimation(Motion.layout, value: sorted.map(\.id))
             }
         }
         .sheet(item: $editing) { target in
@@ -124,7 +127,7 @@ struct AlarmsView: View {
     }
 
     private func toggle(_ row: SavedAlarm, _ isOn: Bool) {
-        withAnimation(Motion.stateChange) {
+        withAnimation(stateChange) {
             AlarmStore.update(row) { $0.isOn = isOn }
         }
         ClockAlarms.shared.sync(in: context)

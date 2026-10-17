@@ -77,6 +77,9 @@ struct JobEditSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// `Motion.stateChange`, or none under Reduce Motion (rows and fields move).
+    private var stateChange: Animation? { Motion.moving(Motion.stateChange, reduceMotion: reduceMotion) }
 
     init(original: Job?, onSave: @escaping (Job) -> Void) {
         self.original = original
@@ -219,7 +222,7 @@ struct JobEditSheet: View {
     /// Selected = outlined in `textPrimary`; a choice, not an "on" state, so never orange.
     private func chip(_ preset: SchedulePreset) -> some View {
         let isSelected = draft.preset == preset
-        return Button { withAnimation(Motion.stateChange) { draft.preset = preset } } label: {
+        return Button { withAnimation(stateChange) { draft.preset = preset } } label: {
             Text(preset.title)
                 .meridianFont(isSelected ? .headline : .body)
                 .foregroundStyle(.textPrimary)

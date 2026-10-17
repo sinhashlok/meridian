@@ -8,6 +8,9 @@ struct TimersView: View {
     @Query(sort: \SavedTimer.order) private var saved: [SavedTimer]
     @Environment(\.modelContext) private var context
     @Environment(AppState.self) private var appState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// `Motion.stateChange`, or none under Reduce Motion (rows and fields move).
+    private var stateChange: Animation? { Motion.moving(Motion.stateChange, reduceMotion: reduceMotion) }
 
     @State private var isAdding = false
     @State private var starts = 0
@@ -39,7 +42,7 @@ struct TimersView: View {
                 }
                 .padding(.horizontal, Spacing.screenMargin)
                 .padding(.bottom, Spacing.sectionGap)
-                .animation(Motion.layout, value: sorted.map(\.id))
+                .movingAnimation(Motion.layout, value: sorted.map(\.id))
             }
         }
         .sheet(isPresented: $isAdding) {
@@ -67,7 +70,7 @@ struct TimersView: View {
     }
 
     private func perform(_ action: TimerAction, on row: SavedTimer, now: Date) {
-        withAnimation(Motion.stateChange) {
+        withAnimation(stateChange) {
             switch action {
             case .pause: TimerStore.update(row) { $0.pause(at: now) }
             case .resume: TimerStore.update(row) { $0.resume(at: now) }

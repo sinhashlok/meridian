@@ -80,6 +80,6 @@ struct TimezoneRow: View {
         Text(ZoneClock.wallTime(now, in: zone))
             .meridianFont(.timeRow)
             .foregroundStyle(.textPrimary)
-            .contentTransition(.numericText())
+            .numericTransition()
     }
 }

@@ -16,6 +16,9 @@ struct JobDetailView: View {
     @State private var isConfirmingDelete = false
     @State private var reviewed = 0
     @Environment(\.dynamicTypeSize) private var typeSize
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// `Motion.stateChange`, or none under Reduce Motion (rows and fields move).
+    private var stateChange: Animation? { Motion.moving(Motion.stateChange, reduceMotion: reduceMotion) }
 
     var body: some View {
         TimelineView(.everyMinute) { timeline in
@@ -317,12 +320,12 @@ struct JobDetailView: View {
     }
 
     private func change(_ edit: (inout Job) -> Void) {
-        withAnimation(Motion.stateChange) { JobStore.update(row, edit) }
+        withAnimation(stateChange) { JobStore.update(row, edit) }
         JobReminders.shared.sync(in: context)
     }
 
     private func markReviewed(now: Date) {
-        withAnimation(Motion.stateChange) { JobStore.markReviewed(row, now: now) }
+        withAnimation(stateChange) { JobStore.markReviewed(row, now: now) }
         reviewed += 1
     }
 }

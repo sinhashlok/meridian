@@ -205,7 +205,7 @@ struct SessionsView: View {
                     Text(hero)
                         .meridianFont(.timeHero)
                         .foregroundStyle(.textPrimary)
-                        .contentTransition(.numericText(countsDown: true))
+                        .numericTransition(countsDown: true)
                         .minimumScaleFactor(0.6)
                         .lineLimit(1)
                     if !typeSize.isAccessibilitySize { captionText }
