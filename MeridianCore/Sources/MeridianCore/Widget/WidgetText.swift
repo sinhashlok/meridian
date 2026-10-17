@@ -171,6 +171,13 @@ public enum WidgetText {
         return JobsWidgetText(zoneName: ZoneClock.shortName(display, at: now), rows: rows)
     }
 
+    /// Timeline entry dates (decision BS): `now`, then every whole minute for `minutes`.
+    /// Whole UTC minutes are whole minutes in every zone, so each entry is a new clock time.
+    public static func timelineDates(from now: Date, minutes: Int = 120) -> [Date] {
+        let next = (now.timeIntervalSince1970 / 60).rounded(.down) * 60 + 60
+        return [now] + (0..<minutes).map { Date(timeIntervalSince1970: next + Double($0) * 60) }
+    }
+
     /// `UTC 15:32`.
     public static func utcInline(now: Date) -> String { "UTC " + ZoneClock.wallTime(now, in: .utc) }
 

@@ -135,4 +135,18 @@ struct WidgetTextTests {
         #expect(none.rows.isEmpty)
         #expect(WidgetText.nextJobInline(none) == "No upcoming jobs")
     }
+
+    // MARK: Timeline
+
+    @Test("Timeline: now, then each whole UTC minute for 2 hours (decision BS)")
+    func timeline() {
+        let dates = WidgetText.timelineDates(from: Self.now)            // 15:32:07Z
+        #expect(dates.count == 121)
+        #expect(dates[0] == Self.now)
+        #expect(dates[1] == Date(timeIntervalSince1970: 1_792_078_380))  // 15:33:00Z
+        #expect(dates.last == Date(timeIntervalSince1970: 1_792_085_520)) // 17:32:00Z
+        let onMinute = Date(timeIntervalSince1970: 1_792_078_380)
+        #expect(WidgetText.timelineDates(from: onMinute)[1] == onMinute + 60)
+        #expect(WidgetText.timelineDates(from: Date(timeIntervalSince1970: -30))[1] == Date(timeIntervalSince1970: 0))
+    }
 }
