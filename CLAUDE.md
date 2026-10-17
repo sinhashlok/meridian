@@ -240,19 +240,22 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    - Done: step 1 `SettingsValues.swift` (WeekStart, Weekdays summary/spoken, hours range,
      `ZoneClock.dataVersion`), step 2 `Widget/WidgetSnapshot.swift`, step 3
      `Widget/WidgetText.swift` + `PlannerZone.spokenRow`. 318 Core tests green.
-   - Step 4 (Settings) code committed as WIP, builds, **not yet checked against board
-     Settings**: `Shared/SharedDefaults.swift` (App Group suite), `AppState` settings
+   - Step 4 (Settings) done and checked against board Settings at default size and AX5
+     (17 Oct): `Shared/SharedDefaults.swift` (App Group suite), `AppState` settings
      persisted with `didSet` (debug `-MeridianUTC`/`-MeridianWarn` via `DebugLaunch.flag`,
      `-MeridianScreen settings`), `SettingsSheet` rebuilt, `ZoneStore` takes `ZoneDefaults`,
-     `WeekdayPicker(first:)`, `AlarmService.Permission`, `-MeridianTimers none`.
-     Next: reboot the Simulator (a stuck AlarmKit alert from old demo timers; they're
-     cleared now), then `EXTRA="-MeridianFiscal india -MeridianNotif off" scripts/shoot.sh
-     settings settings` (+ `-MeridianBottom 1`; check it scrolls the Form), compare with
-     the board, check AX5, then commit step 4 properly.
-   - Owner's Xcode clicks still to do (step 0): App Groups `group.com.shloksinha.meridian`
-     on Meridian and MeridianWidgetsExtension; add MeridianCore to the widget target's
-     Frameworks. Check them in `project.pbxproj` before step 5.
-   - Then steps 5–8: snapshot writer + deep links, widgets + debug gallery, UI test target
+     `WeekdayPicker(first:)`, `AlarmService.Permission`, `-MeridianTimers none`. Shoot it
+     with `EXTRA="-MeridianTab tools -MeridianFiscal india -MeridianNotif off"`
+     (`-MeridianFiscal` is applied by the Tools tab). A `Form` ignores
+     `defaultScrollAnchor`, so `-MeridianBottom 1` scrolls it with `ScrollViewReader`.
+     Differences from the board are system-drawn (iOS 27 title-case section headers, the
+     glass close button) or decision BQ (no 24-hour row).
+   - Step 0 Xcode clicks done (17 Oct): App Group on both targets, Debug and Release
+     (files `Meridian/MeridianDebug.entitlements`, `MeridianWidgetsExtensionDebug.entitlements`;
+     the "Debug" in the names is only Xcode's label), MeridianCore linked to the widget.
+     Still unproven: that the free Personal Team signs App Groups (first Release build on
+     the iPhone, step 5).
+   - Next: steps 5–8: snapshot writer + deep links, widgets + debug gallery, UI test target
      with accessibility audits, docs. Noticed: Planner banner says "Weekend in all 1
      cities" with one zone (M3 wording bug, fix separately).
 

@@ -17,6 +17,8 @@ struct SettingsSheet: View {
     @State private var alarms: AlarmService.Permission?
     @State private var notifications: AlarmService.Permission?
 
+    private static let lastRow = "about.timeZoneData"
+
     private var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "–"
     }
@@ -25,88 +27,94 @@ struct SettingsSheet: View {
         @Bindable var appState = appState
 
         NavigationStack {
-            Form {
-                Section {
-                    Picker("Week start", selection: $appState.weekStart) {
-                        ForEach(WeekStart.allCases, id: \.self) { Text($0.title).tag($0) }
-                    }
-                    .pickerStyle(.navigationLink)
-                } header: {
-                    Text("Time")
-                } footer: {
-                    Text("Used by the Planner and weekly schedules. ISO weeks always start Monday; fiscal profiles set their own.")
-                }
-                .listRowBackground(Color.bgSurface)
-
-                Section {
-                    NavigationLink {
-                        DefaultHoursPage()
-                    } label: {
-                        LabeledContent("Default working hours") {
-                            Text(ClockTime.rangeText(appState.defaultWorkStart, appState.defaultWorkEnd))
-                                .meridianFont(.monoBody)
+            ScrollViewReader { proxy in
+                Form {
+                    Section {
+                        Picker("Week start", selection: $appState.weekStart) {
+                            ForEach(WeekStart.allCases, id: \.self) { Text($0.title).tag($0) }
                         }
+                        .pickerStyle(.navigationLink)
+                    } header: {
+                        Text("Time")
+                    } footer: {
+                        Text("Used by the Planner and weekly schedules. ISO weeks always start Monday; fiscal profiles set their own.")
                     }
-                    NavigationLink {
-                        DefaultDaysPage()
-                    } label: {
-                        LabeledContent("Default work days",
-                                       value: Weekdays.summary(Set(appState.defaultWorkDays), from: appState.firstWeekday))
-                    }
-                } header: {
-                    Text("Work")
-                } footer: {
-                    Text("New zones start with these. Each zone can have its own in Zones.")
-                }
-                .listRowBackground(Color.bgSurface)
-
-                fiscalSection
                     .listRowBackground(Color.bgSurface)
 
-                Section {
-                    Toggle("Warn before clocks change", isOn: $appState.warnsBeforeClockChanges)
-                } header: {
-                    Text("Clock changes")
-                } footer: {
-                    Text("A banner in Zones 14 days before a change. In-app only; no notifications.")
-                }
-                .listRowBackground(Color.bgSurface)
-
-                Section {
-                    permissionRow("Alarms", alarms) {
-                        _ = await AlarmService.alarmsDenied(askingIf: true)
+                    Section {
+                        NavigationLink {
+                            DefaultHoursPage()
+                        } label: {
+                            LabeledContent("Default working hours") {
+                                Text(ClockTime.rangeText(appState.defaultWorkStart, appState.defaultWorkEnd))
+                                    .meridianFont(.monoBody)
+                            }
+                        }
+                        NavigationLink {
+                            DefaultDaysPage()
+                        } label: {
+                            LabeledContent("Default work days",
+                                           value: Weekdays.summary(Set(appState.defaultWorkDays), from: appState.firstWeekday))
+                        }
+                    } header: {
+                        Text("Work")
+                    } footer: {
+                        Text("New zones start with these. Each zone can have its own in Zones.")
                     }
-                    permissionRow("Notifications", notifications) {
-                        _ = await AlarmService.notificationsDenied(askingIf: true)
-                    }
-                    Button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
-                    } label: {
-                        LabeledContent("Open iOS Settings") { Image(systemName: "chevron.right") }
-                    }
-                    .foregroundStyle(.textPrimary)
-                } header: {
-                    Text("Permissions")
-                } footer: {
-                    Text("Job reminders need notifications.")
-                }
-                .listRowBackground(Color.bgSurface)
-
-                #if DEBUG
-                AlarmKitProbeSection()
                     .listRowBackground(Color.bgSurface)
-                #endif
 
-                Section("About") {
-                    LabeledContent("Version", value: appVersion)
-                    LabeledContent("Time zone data") {
-                        Text(ZoneClock.dataVersion).meridianFont(.monoBody)
+                    fiscalSection
+                        .listRowBackground(Color.bgSurface)
+
+                    Section {
+                        Toggle("Warn before clocks change", isOn: $appState.warnsBeforeClockChanges)
+                    } header: {
+                        Text("Clock changes")
+                    } footer: {
+                        Text("A banner in Zones 14 days before a change. In-app only; no notifications.")
                     }
+                    .listRowBackground(Color.bgSurface)
+
+                    Section {
+                        permissionRow("Alarms", alarms) {
+                            _ = await AlarmService.alarmsDenied(askingIf: true)
+                        }
+                        permissionRow("Notifications", notifications) {
+                            _ = await AlarmService.notificationsDenied(askingIf: true)
+                        }
+                        Button {
+                            if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
+                        } label: {
+                            LabeledContent("Open iOS Settings") { Image(systemName: "chevron.right") }
+                        }
+                        .foregroundStyle(.textPrimary)
+                    } header: {
+                        Text("Permissions")
+                    } footer: {
+                        Text("Job reminders need notifications.")
+                    }
+                    .listRowBackground(Color.bgSurface)
+
+                    #if DEBUG
+                    AlarmKitProbeSection()
+                        .listRowBackground(Color.bgSurface)
+                    #endif
+
+                    Section("About") {
+                        LabeledContent("Version", value: appVersion)
+                        LabeledContent("Time zone data") {
+                            Text(ZoneClock.dataVersion).meridianFont(.monoBody)
+                        }
+                        .id(Self.lastRow)
+                    }
+                    .listRowBackground(Color.bgSurface)
                 }
-                .listRowBackground(Color.bgSurface)
+                .scrollContentBackground(.hidden)
+                // A Form ignores `defaultScrollAnchor`, so debug `-MeridianBottom 1` scrolls by id.
+                .task {
+                    if DebugLaunch.startsAtBottom { proxy.scrollTo(Self.lastRow, anchor: .bottom) }
+                }
             }
-            .scrollContentBackground(.hidden)
-            .defaultScrollAnchor(DebugLaunch.startsAtBottom ? .bottom : .top)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
