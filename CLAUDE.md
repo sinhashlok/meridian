@@ -264,9 +264,24 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
      2 s after launch (`simctl openurl` stops at an "Open in Meridian?" alert nobody can
      tap). Snapshot file: `xcrun simctl get_app_container booted com.shloksinha.meridian
      group.com.shloksinha.meridian` › `widget-snapshot.json`.
-   - Next: steps 6–8: widgets + debug gallery, UI test target with accessibility audits,
-     docs. Reboot the Simulator first: a notification permission alert is stuck again. Noticed: Planner banner says "Weekend in all 1
-     cities" with one zone (M3 wording bug, fix separately).
+   - Step 6 done (17 Oct): widgets Clock (small), Planner (medium), Jobs (S/M/L),
+     accessories Next job (inline/circular/rect) and UTC (inline/circular). Views in
+     `Shared/WidgetViews.swift`, extension files `MeridianWidgets/SnapshotProvider.swift`
+     (one provider for all), `ClockWidget`, `PlannerWidget`, `JobsWidget`. Debug gallery
+     `-MeridianScreen widgets` (`App/WidgetGallery.swift`, board sizes, full colour only):
+     `EXTRA="-MeridianNotif off" scripts/shoot.sh widgets widgets 2026-10-15T15:32:07Z
+     "Asia/Kolkata=Mumbai,Europe/London=London,America/Los_Angeles=San Francisco"`.
+     Board data in `Shared/DemoData.swift`; bar style in `Shared/HourKind+Style.swift`;
+     widget fonts are `FontToken.widget*`. Dynamic Type capped (decision CE).
+     `-MeridianNotif off` no longer asks for notification permission.
+   - Step 7 code done: Planner rows speak `spokenRow`; Reduce Motion helpers
+     `movingAnimation`, `Motion.moving`, `numericTransition` (Tokens.swift); each widget
+     is one VoiceOver element. **Waiting on the owner's click 3** (UI Testing Bundle
+     `MeridianUITests`); then write the audits + Planner label test, fix findings.
+   - Step 8: decisions BQ–CE are in `docs/decisions.md`, spec §2 note done. Left:
+     PLAN.md M8 status, this section, push once UI tests pass.
+   - Noticed: Planner banner says "Weekend in all 1 cities" with one zone (M3 wording
+     bug, fix separately).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
