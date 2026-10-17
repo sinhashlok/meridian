@@ -33,11 +33,11 @@ public struct Zone: Hashable, Sendable {
 }
 
 /// Which instant to pick when a wall time happens twice (clocks going back).
-public enum Occurrence: Sendable { case first, second }
+public enum Occurrence: Codable, Sendable { case first, second }
 
 /// A wall time resolved to an instant under the gap/overlap rule (spec §5.2).
 public struct Resolution: Equatable, Sendable {
-    public enum Kind: Sendable {
+    public enum Kind: Codable, Sendable {
         /// The wall time exists once.
         case exact
         /// The wall time doesn't exist (clocks went forward); moved to the next valid time.

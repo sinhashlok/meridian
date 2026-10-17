@@ -2,7 +2,7 @@ import Foundation
 
 /// A calendar date with no time and no zone (`2026-10-25`). Day arithmetic is whole
 /// days on the proleptic Gregorian calendar, so a 23- or 25-hour day is still one day.
-public struct CivilDate: Hashable, Comparable, Sendable {
+public struct CivilDate: Hashable, Comparable, Codable, Sendable {
     public let year: Int
     public let month: Int
     public let day: Int
