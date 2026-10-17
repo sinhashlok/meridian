@@ -54,7 +54,7 @@ what to check on the phone.
 | M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work |  |
 | M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone | Built 17 Oct 2026; iPhone checks pending |
 | M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown | Built 17 Oct 2026; iPhone checks pending |
-| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 |  |
+| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 | Built 17 Oct 2026; reminders ≤ 48 proven in Core; iPhone checks pending |
 | M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows |  |
 | M9 | App icon, name, TestFlight | Build installed via TestFlight |  |
 
