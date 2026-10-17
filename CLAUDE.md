@@ -253,10 +253,19 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    - Step 0 Xcode clicks done (17 Oct): App Group on both targets, Debug and Release
      (files `Meridian/MeridianDebug.entitlements`, `MeridianWidgetsExtensionDebug.entitlements`;
      the "Debug" in the names is only Xcode's label), MeridianCore linked to the widget.
-     Still unproven: that the free Personal Team signs App Groups (first Release build on
-     the iPhone, step 5).
-   - Next: steps 5–8: snapshot writer + deep links, widgets + debug gallery, UI test target
-     with accessibility audits, docs. Noticed: Planner banner says "Weekend in all 1
+     The free Personal Team signs it: a Release device build carries the group in both
+     targets' signatures and profiles.
+   - Step 5 done (17 Oct): `App/WidgetSync.swift`. `WidgetSyncer` (invisible, in `RootView`'s
+     background) builds the snapshot from `@Query` zones + jobs + UTC mode and writes it
+     0.5 s after the last change, and on `.background`. Not `ModelContext.didSave`: it
+     wasn't posted for autosaves (tested in the Simulator). Equal snapshots aren't rewritten
+     (compared as values; JSONEncoder key order varies). Deep links `meridian://planner|
+     clocks|jobs` in `RootView.open`. Debug `-MeridianOpenURL meridian://jobs` follows a link
+     2 s after launch (`simctl openurl` stops at an "Open in Meridian?" alert nobody can
+     tap). Snapshot file: `xcrun simctl get_app_container booted com.shloksinha.meridian
+     group.com.shloksinha.meridian` › `widget-snapshot.json`.
+   - Next: steps 6–8: widgets + debug gallery, UI test target with accessibility audits,
+     docs. Reboot the Simulator first: a notification permission alert is stuck again. Noticed: Planner banner says "Weekend in all 1
      cities" with one zone (M3 wording bug, fix separately).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).

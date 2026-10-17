@@ -86,6 +86,10 @@ enum DebugLaunch {
     /// `-MeridianJobs demo|none`: replaces saved jobs (see `JobStore.applyDebugLaunch`).
     static var jobs: String? { string("MeridianJobs") }
 
+    /// `-MeridianOpenURL meridian://jobs`: follows that link 2 s after launch, like a widget
+    /// tap (`simctl openurl` stops at an "Open in Meridian?" alert nobody can tap).
+    static var openURL: URL? { string("MeridianOpenURL").flatMap { URL(string: $0) } }
+
     /// `-MeridianNotif off`: show the Jobs "Notifications are off" banner (board JobsNotifOff).
     static var notificationsOff: Bool { string("MeridianNotif") == "off" }
 
