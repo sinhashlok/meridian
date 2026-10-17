@@ -10,6 +10,7 @@
 		302B09603083455C00539511 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 302B095F3083455C00539511 /* WidgetKit.framework */; };
 		302B09623083455C00539511 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 302B09613083455C00539511 /* SwiftUI.framework */; };
 		302B096F3083455D00539511 /* MeridianWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3031944E3083BD67004AF1F8 /* MeridianCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3031944D3083BD67004AF1F8 /* MeridianCore */; };
 		30B3C71930821EA40018910C /* MeridianCore in Frameworks */ = {isa = PBXBuildFile; productRef = 30B3C71830821EA40018910C /* MeridianCore */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +41,7 @@
 		302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MeridianWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		302B095F3083455C00539511 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		302B09613083455C00539511 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeridianWidgetsExtensionDebug.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -102,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				302B09623083455C00539511 /* SwiftUI.framework in Frameworks */,
+				3031944E3083BD67004AF1F8 /* MeridianCore in Frameworks */,
 				302B09603083455C00539511 /* WidgetKit.framework in Frameworks */,
 			);
 		};
@@ -111,6 +114,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */,
 				302B0976308346D700539511 /* Shared */,
 				000000000000000000000010 /* Meridian */,
 				302B09633083455C00539511 /* MeridianWidgets */,
@@ -181,6 +185,9 @@
 				302B0976308346D700539511 /* Shared */,
 			);
 			name = MeridianWidgetsExtension;
+			packageProductDependencies = (
+				3031944D3083BD67004AF1F8 /* MeridianCore */,
+			);
 			productName = MeridianWidgetsExtension;
 			productReference = 302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -396,6 +403,7 @@
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "Meridian" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Meridian/MeridianDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W4D7987B7J;
@@ -439,6 +447,7 @@
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "Meridian" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Meridian/MeridianDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W4D7987B7J;
@@ -484,6 +493,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MeridianWidgetsExtensionDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W4D7987B7J;
@@ -501,6 +511,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian.MeridianWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -521,6 +532,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = MeridianWidgetsExtensionDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = W4D7987B7J;
@@ -538,6 +550,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian.MeridianWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -591,6 +604,11 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3031944D3083BD67004AF1F8 /* MeridianCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 30B3C71730821EA40018910C /* XCLocalSwiftPackageReference "MeridianCore" */;
+			productName = MeridianCore;
+		};
 		30B3C71830821EA40018910C /* MeridianCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MeridianCore;
