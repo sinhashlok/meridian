@@ -233,7 +233,7 @@ struct PlannerGrid: View {
                     .scaleEffect(isScrubbing ? 1.25 : 1)
                     .dragShadow()
                     .offset(x: start - knobSize / 2, y: height - knobSize / 2 + Self.cardPadding / 2)
-                    .animation(Motion.press, value: isScrubbing)
+                    .movingAnimation(Motion.press, value: isScrubbing)
                 // Drawn last so "now" stays visible when the selection sits on it.
                 if day.axis.contains(now) {
                     Rectangle().fill(Color.accent).frame(width: 2, height: height).offset(x: x(now) - 1)
@@ -325,7 +325,8 @@ private struct PlannerRowView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(row.zone.name), \(time), \(kind.spokenName)")
+        // Name, home, time and kind at the selected time, then work hours (decision CC).
+        .accessibilityLabel(row.zone.spokenRow(at: selection, isHome: isHome))
     }
 
     private func label(time: String, kind: HourKind) -> some View {
@@ -410,14 +411,6 @@ extension HourKind {
         switch self {
         case .work: "work"
         case .stretch: "stretch"
-        case .sleep: "asleep"
-        }
-    }
-
-    var spokenName: String {
-        switch self {
-        case .work: "work hours"
-        case .stretch: "stretch hours"
         case .sleep: "asleep"
         }
     }
