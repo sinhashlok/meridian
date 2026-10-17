@@ -12,5 +12,9 @@ import SwiftUI
                 .preferredColorScheme(.dark)
         }
         .modelContainer(AppModel.container)
+        // Refills alarms and job reminders while the app isn't open (M7 step 9).
+        .backgroundTask(.appRefresh(BackgroundRefresh.identifier)) {
+            await BackgroundRefresh.run()
+        }
     }
 }
