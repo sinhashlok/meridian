@@ -25,9 +25,12 @@ struct RootView: View {
                 appState.tab = host
             }
         }
-        // Timers: re-check alarms on launch and on every return to the app (decision AR).
+        // Re-check alarms on launch and on every return to the app (decision AR): AlarmKit's
+        // update stream isn't trusted while suspended.
         .onChange(of: scenePhase, initial: true) { _, phase in
-            if phase == .active { TimerAlarms.shared.sync(in: context) }
+            guard phase == .active else { return }
+            TimerAlarms.shared.sync(in: context)
+            SessionAlarms.shared.sync()
         }
     }
 }

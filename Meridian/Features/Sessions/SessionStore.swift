@@ -52,6 +52,7 @@ final class SessionRecord {
 
     static func start(at now: Date) {
         session = .start(lengths, at: now)
+        SessionAlarms.shared.sync()
     }
 
     /// Applies a Core change (pause, +5 min, skip, resume) if a session is running.
@@ -59,6 +60,7 @@ final class SessionRecord {
         guard var current = session else { return }
         change(&current)
         session = current
+        SessionAlarms.shared.sync()
     }
 
     /// Stop, or dismiss a finished session: log its focus so far, then clear it.
@@ -69,6 +71,7 @@ final class SessionRecord {
         }
         try? context.save()
         session = nil
+        SessionAlarms.shared.sync()
     }
 
     /// `-MeridianSession demo|paused|done|idle`, relative to the (frozen) clock: the
@@ -83,7 +86,8 @@ final class SessionRecord {
             session = paused
         case "done": session = .start(.standard, at: now.addingTimeInterval(-120 * 60))
         case "idle": session = nil
-        default: break
+        default: return
         }
+        SessionAlarms.shared.sync()
     }
 }

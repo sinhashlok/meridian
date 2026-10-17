@@ -1,7 +1,6 @@
 import MeridianCore
 import SwiftData
 import SwiftUI
-import UIKit  // UIApplication.openSettingsURLString
 
 /// Timer › Timers (spec §4.4, board TimerUntil): "2 running" and the New timer button,
 /// then one card per timer, done first, then soonest first (decision AJ).
@@ -56,24 +55,12 @@ struct TimersView: View {
         }
     }
 
-    /// Decision AI: say plainly when timers can't ring through Silent, with a way to fix it.
+    /// Decision AI: say plainly when timers can't ring through Silent.
     @ViewBuilder
     private var permissionNote: some View {
         let alarms = TimerAlarms.shared
         if alarms.alarmsDenied {
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                NoteLine(systemImage: "bell.slash", text: alarms.notificationsDenied
-                    ? "Alarms and notifications are off for Meridian, so timers won't alert."
-                    : "Alarms are off for Meridian, so timers only notify and stay quiet in Silent mode.")
-                Link("Open Settings", destination: URL(string: UIApplication.openSettingsURLString)!)
-                    .meridianFont(.headline)
-                    .foregroundStyle(.accentText)
-                    .frame(minHeight: Spacing.minTapTarget)
-                    .padding(.leading, Spacing.xxl)
-            }
-            .padding(.vertical, Spacing.xs)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.bgElevated, in: .rect(cornerRadius: Radius.row, style: .continuous))
+            AlarmPermissionNote(subject: "timers", notificationsDenied: alarms.notificationsDenied)
         }
     }
 

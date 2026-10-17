@@ -1,14 +1,7 @@
-import AlarmKit
 import Foundation
 import MeridianCore
 import Observation
 import SwiftData
-import SwiftUI  // Color.accent for the alarm tint
-import UserNotifications
-
-/// AlarmKit requires a metadata type even when there is nothing to attach.
-/// `nonisolated` keeps it off the MainActor so it can be `Sendable`, as AlarmKit requires.
-nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
 
 /// Makes the system alarms match the saved timers (decisions AH, AI, AR).
 ///
@@ -56,32 +49,26 @@ nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
         let entries = rows.compactMap { row in row.timer.map { TimerAlarmPlan.Entry(timer: $0, alarmID: row.alarmID) } }
         let needsAlert = entries.contains { $0.timer.status(at: now) == .running }
 
-        let manager = AlarmManager.shared
-        if manager.authorizationState == .notDetermined, needsAlert {
-            // Asked on the first Start, not at launch (spec §2).
-            _ = try? await manager.requestAuthorization()
-        }
-        alarmsDenied = manager.authorizationState == .denied
+        // Asked on the first Start, not at launch (spec §2).
+        alarmsDenied = await AlarmService.alarmsDenied(askingIf: needsAlert)
 
         if alarmsDenied {
             await reconcileNotifications(rows: rows, entries: entries, now: now, needsAlert: needsAlert)
         } else {
             await reconcileAlarms(rows: rows, entries: entries, now: now)
-            await removeTimerNotifications()
+            await AlarmService.removeNotifications(prefix: Self.prefix)
         }
         try? context.save()
         await TimerActivityController.update(entries.map(\.timer), now: now)
     }
 
     private func reconcileAlarms(rows: [SavedTimer], entries: [TimerAlarmPlan.Entry], now: Date) async {
-        let manager = AlarmManager.shared
-        guard manager.authorizationState == .authorized else { return }
-        let systemIDs = Set((try? manager.alarms)?.map(\.id) ?? [])
-        var known = knownIDs.intersection(systemIDs)
+        guard AlarmService.alarmsAuthorized else { return }
+        var known = knownIDs.intersection(AlarmService.liveAlarmIDs)
         let plan = TimerAlarmPlan.reconcile(entries, scheduled: known, now: now)
 
         for id in plan.cancel {
-            try? manager.cancel(id: id)
+            AlarmService.cancelAlarm(id: id)
             known.remove(id)
         }
         for row in rows where row.timer.map({ plan.clear.contains($0.id) }) ?? false {
@@ -89,20 +76,12 @@ nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
         }
         for row in rows {
             guard let timer = row.timer, plan.schedule.contains(timer.id), let end = timer.endDate else { continue }
-            let id = Alarm.ID()
+            let id = UUID()
             row.alarmID = id
             known.insert(id)
-            let configuration = AlarmManager.AlarmConfiguration.alarm(
-                schedule: .fixed(end),
-                attributes: AlarmAttributes<TimerAlarmMetadata>(presentation: AlarmPresentation(alert: alert(for: timer)),
-                                                               tintColor: .accent))
-            // Awaited inside the serial sync, so the next sync already sees this alarm.
-            do {
-                _ = try await manager.schedule(id: id, configuration: configuration)
-            } catch {
-                // Leave alarmID set; the next sync sees it missing and tries again.
-                print("Timer alarm not scheduled: \(error)")
-            }
+            // Awaited inside the serial sync, so the next sync already sees this alarm. If it
+            // fails, alarmID stays set; the next sync sees it missing and tries again.
+            await AlarmService.scheduleAlarm(id: id, at: end, title: title(for: timer))
         }
         knownIDs = known
     }
@@ -110,58 +89,26 @@ nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
     /// Decision AI: Alarms denied, so a notification at the end instead (quiet in Silent).
     private func reconcileNotifications(rows: [SavedTimer], entries: [TimerAlarmPlan.Entry], now: Date,
                                         needsAlert: Bool) async {
-        let center = UNUserNotificationCenter.current()
-        var settings = await center.notificationSettings()
-        if settings.authorizationStatus == .notDetermined, needsAlert {
-            _ = try? await center.requestAuthorization(options: [.alert, .sound])
-            settings = await center.notificationSettings()
-        }
-        notificationsDenied = settings.authorizationStatus == .denied
-
-        let pending = Set(await center.pendingNotificationRequests().compactMap { Self.uuid(from: $0.identifier) })
+        notificationsDenied = await AlarmService.notificationsDenied(askingIf: needsAlert)
+        let pending = await AlarmService.pendingNotificationIDs(prefix: Self.prefix)
         let plan = TimerAlarmPlan.reconcile(entries, scheduled: pending, now: now)
-        center.removePendingNotificationRequests(withIdentifiers: plan.cancel.map(Self.identifier))
+        await AlarmService.removeNotifications(prefix: Self.prefix, ids: plan.cancel)
         for row in rows {
             guard let timer = row.timer else { continue }
             if plan.clear.contains(timer.id) { row.alarmID = nil }
             guard plan.schedule.contains(timer.id), let end = timer.endDate, end > now else { continue }
             let id = UUID()
             row.alarmID = id
-            let content = UNMutableNotificationContent()
-            content.title = title(for: timer)
-            content.body = timer.isDuration ? "Timer done" : "Until time reached"
-            content.sound = .default
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: end.timeIntervalSince(now), repeats: false)
-            try? await center.add(UNNotificationRequest(identifier: Self.identifier(id), content: content, trigger: trigger))
+            await AlarmService.scheduleNotification(id: id, prefix: Self.prefix, at: end, title: title(for: timer),
+                                                    body: timer.isDuration ? "Timer done" : "Until time reached",
+                                                    now: now)
         }
-    }
-
-    /// With Alarms allowed again, drop any fallback notifications so nothing alerts twice.
-    private func removeTimerNotifications() async {
-        let center = UNUserNotificationCenter.current()
-        let ids = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix("timer-") }
-        if !ids.isEmpty { center.removePendingNotificationRequests(withIdentifiers: ids) }
     }
 
     private func title(for timer: CountdownTimer) -> String {
         TimerText.card(timer, now: .now, display: .device, displayIsPhone: true).title
     }
 
-    /// From iOS 26.1 the system draws the Stop button itself and `stopButton` is deprecated.
-    private func alert(for timer: CountdownTimer) -> AlarmPresentation.Alert {
-        let title = LocalizedStringResource(stringLiteral: title(for: timer))
-        if #available(iOS 26.1, *) {
-            return AlarmPresentation.Alert(title: title)
-        } else {
-            return AlarmPresentation.Alert(
-                title: title,
-                stopButton: AlarmButton(text: "Stop", textColor: .accent, systemImageName: "stop.circle"))
-        }
-    }
-
-    private static func identifier(_ id: UUID) -> String { "timer-" + id.uuidString }
-
-    private static func uuid(from identifier: String) -> UUID? {
-        identifier.hasPrefix("timer-") ? UUID(uuidString: String(identifier.dropFirst(6))) : nil
-    }
+    /// Fallback notifications are `timer-<uuid>`.
+    private static let prefix = "timer"
 }

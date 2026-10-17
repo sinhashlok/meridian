@@ -60,6 +60,9 @@ struct SessionsView: View {
         ForEach(text.notes, id: \.self) { note in
             NoteLine(systemImage: "clock.arrow.circlepath", text: note)
         }
+        if status != .done, SessionAlarms.shared.alarmsDenied {
+            AlarmPermissionNote(subject: "phase changes", notificationsDenied: SessionAlarms.shared.notificationsDenied)
+        }
 
         meetingCard(now: now)
 
