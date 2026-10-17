@@ -166,6 +166,10 @@ Rules:
   `Shared/LiveActivityIntents.swift` with a widget stub. `AppState.tab` and
   `plannerJump` (meeting line → Planner). Debug: `-MeridianSession demo|paused|done|idle`;
   `-MeridianBottom 1` also works on Sessions.
+- Live Activity layout: content views are in `Shared/LiveActivityViews.swift`; check them
+  with `scripts/shoot.sh la liveActivity` (debug screen at real sizes, red outline past
+  iOS's ~160pt Lock Screen height). The timer-driven ring shows as a spinner there; the
+  real ring only appears on a device.
 - Views get "now" from `AppState.now(timelineDate)`, never `Date.now` directly.
   Debug launch arguments for screenshots (ignored in Release): `-MeridianNow <ISO>`,
   `-MeridianZones "Asia/Kolkata=Mumbai,Europe/London=London"` (first is home),
