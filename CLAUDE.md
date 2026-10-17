@@ -197,10 +197,10 @@ Rules:
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
 2. M4 checks on the iPhone: Paste (needs a real clipboard), copy buttons and haptics,
    the cron key row above the keyboard, saving/editing/deleting fiscal calendars.
-3. Parked (owner's call, 16 Oct): the Planner feels laggy on an iPhone 16 in Debug; not
-   yet tried without the debugger or in Release. Core work per scrub frame measured at
-   ~0.1 ms, so if it's real the suspect is the whole Planner body rebuilding on every drag
-   (selection state lives in `PlannerView`). Fix: redraw only grid + bubble while dragging.
+3. Planner lag (parked 16 Oct): fix landed 17 Oct. While scrubbing, the time now lives
+   in `PlannerGrid` (`dragged`), so only the grid redraws per frame and the Planner gets
+   the time on release; bars are an equatable `PlannerTrack` that SwiftUI skips. Core
+   work per frame measured at ~5 µs (release). Check the scrub feel on the iPhone.
 4. Still open for M7 (from M0.5): do `.relative` alarms follow a device zone change, and
    what is AlarmKit's real alarm limit?
 

@@ -16,11 +16,10 @@ struct PlannerView: View {
     @State private var snaps = 0
     @State private var cache = PlannerCache()
 
-    private var plannerZones: [PlannerZone] { zones.compactMap(\.plannerZone) }
-
     var body: some View {
         TimelineView(.everyMinute) { timeline in
             let now = appState.now(timeline.date)
+            let plannerZones = zones.compactMap(\.plannerZone)    // once per frame, not per use
             let isUTC = appState.isUTCMode
             let homeSaved = zones.first(where: \.isHome)
             let reference = isUTC ? Zone.utc : (homeSaved?.zone ?? .utc)
@@ -61,10 +60,8 @@ struct PlannerView: View {
                         }
 
                         PlannerGrid(day: result.day, reference: reference, referenceName: referenceName,
-                                    home: homeSaved?.plannerZone, now: now, selection: selectedBinding,
-                                    minutes: meetingMinutes,
-                                    counts: OverlapEngine.window(starting: selected, minutes: meetingMinutes,
-                                                                 zones: plannerZones).countsText,
+                                    home: homeSaved?.plannerZone, zones: plannerZones, now: now,
+                                    selection: selectedBinding, minutes: meetingMinutes,
                                     bracket: bestOnDay, isScrubbing: $isScrubbing)
                             .padding(.top, Spacing.xs)
 

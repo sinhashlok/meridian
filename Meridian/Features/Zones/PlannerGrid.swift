@@ -7,15 +7,19 @@ import SwiftUI
 /// and overlays (repeated-hour shading, fault lines, best-window bracket, the selected
 /// meeting as a band with a handle, the accent now-line).
 /// A horizontal drag that starts on a track scrubs; dragging away vertically fine-scrubs.
+///
+/// While dragging, the time lives in `dragged` here, so only this grid redraws per frame;
+/// `selection` (the Planner's) changes once, on release. The bars are an equatable view,
+/// so SwiftUI skips them while scrubbing.
 struct PlannerGrid: View {
     let day: PlannerDay
     let reference: Zone
     let referenceName: String
     let home: PlannerZone?
+    let zones: [PlannerZone]
     let now: Date
     @Binding var selection: Date
     let minutes: Int
-    let counts: String
     let bracket: DateInterval?
     @Binding var isScrubbing: Bool
 
@@ -26,6 +30,11 @@ struct PlannerGrid: View {
     @State private var dragAxis: Axis?
     @State private var lastX: CGFloat = 0
     @State private var scrubFraction: Double = 0
+    /// The scrubbed time while a drag is in progress.
+    @State private var dragged: Date?
+
+    /// What the grid shows: the drag in progress, else the Planner's selection.
+    private var shown: Date { dragged ?? selection }
 
     static let trackHeight: CGFloat = 32
     private static let cardPadding = Spacing.s
@@ -53,7 +62,7 @@ struct PlannerGrid: View {
             .padding(.bottom, knobSize / 2)
             .background(.bgSurface, in: .rect(cornerRadius: Radius.card, style: .continuous))
         }
-        .sensoryFeedback(Haptic.selection, trigger: Scrubber.wallTime(of: selection, in: reference).hour)
+        .sensoryFeedback(Haptic.selection, trigger: Scrubber.wallTime(of: shown, in: reference).hour)
     }
 
     // MARK: Bubble
@@ -64,9 +73,10 @@ struct PlannerGrid: View {
     private var bubble: some View {
         let full = width + 2 * Self.cardPadding
         // The pointer stays under the selection line, inside the bubble's rounded corners.
-        let pointerX = min(max(Self.cardPadding + x(selection), Radius.chip + 6), full - Radius.chip - 6)
+        let pointerX = min(max(Self.cardPadding + x(shown), Radius.chip + 6), full - Radius.chip - 6)
+        let counts = OverlapEngine.window(starting: shown, minutes: minutes, zones: zones).countsText
         return VStack(alignment: .leading, spacing: 2) {
-            Text(Scrubber.bubbleText(selection, reference: reference, withUTC: isScrubbing))
+            Text(Scrubber.bubbleText(shown, reference: reference, withUTC: isScrubbing))
                 .meridianFont(.monoCaption).bold()
                 .foregroundStyle(.textPrimary)
             // At least two lines tall, so the grid below doesn't jump while scrubbing;
@@ -167,7 +177,7 @@ struct PlannerGrid: View {
         VStack(spacing: Spacing.s) {
             ForEach(day.rows, id: \.zone) { row in
                 PlannerRowView(row: row, axis: day.axis, caption: day.caption(for: row.zone, now: now),
-                               selection: selection, isScrubbing: isScrubbing, isHome: row.zone == home,
+                               selection: shown, isScrubbing: isScrubbing, isHome: row.zone == home,
                                markers: day.transitions.filter { $0.zoneName == row.zone.name }.map(\.transition),
                                fault: faults.first { $0.zoneName == row.zone.name },
                                isStacked: isStacked, labelWidth: labelWidth, trackX: trackX, trackWidth: trackWidth)
@@ -211,7 +221,7 @@ struct PlannerGrid: View {
                     .offset(x: start)
                 }
                 // The selected meeting: a band as long as the meeting, a leading line, a handle.
-                let start = x(selection), end = x(min(meeting.end, day.axis.end))
+                let start = x(shown), end = x(min(meeting.end, day.axis.end))
                 Rectangle()
                     .fill(Color.textPrimary.opacity(0.14))
                     .frame(width: max(end - start, 2), height: height)
@@ -235,7 +245,7 @@ struct PlannerGrid: View {
         .accessibilityHidden(true)
     }
 
-    private var meeting: DateInterval { DateInterval(start: selection, duration: TimeInterval(minutes * 60)) }
+    private var meeting: DateInterval { DateInterval(start: shown, duration: TimeInterval(minutes * 60)) }
 
     // MARK: Scrubbing
 
@@ -258,9 +268,11 @@ struct PlannerGrid: View {
                 scrubFraction += Double((value.location.x - lastX) * speed / trackWidth)
                 scrubFraction = min(max(scrubFraction, 0), 1)
                 lastX = value.location.x
-                selection = Scrubber.instant(atFraction: scrubFraction, in: day.axis)
+                dragged = Scrubber.instant(atFraction: scrubFraction, in: day.axis)
             }
             .onEnded { _ in
+                if let dragged { selection = dragged }
+                dragged = nil
                 dragAxis = nil
                 isScrubbing = false
             }
@@ -359,10 +371,24 @@ private struct PlannerRowView: View {
     }
 
     private var track: some View {
+        PlannerTrack(segments: row.segments, markers: markers, axis: axis, width: trackWidth)
+            .equatable()
+    }
+}
+
+/// One row's bars (height first: work 26, stretch 16, sleep 4) and its clock-change
+/// markers. Equatable: its inputs don't change while scrubbing, so SwiftUI skips it.
+private struct PlannerTrack: View, Equatable {
+    let segments: [Segment]
+    let markers: [MeridianCore.Transition]
+    let axis: DateInterval
+    let width: CGFloat
+
+    var body: some View {
         ZStack(alignment: .leading) {
-            ForEach(row.segments, id: \.interval) { segment in
-                let start = CGFloat(Scrubber.fraction(of: segment.interval.start, in: axis)) * trackWidth
-                let end = CGFloat(Scrubber.fraction(of: segment.interval.end, in: axis)) * trackWidth
+            ForEach(segments, id: \.interval) { segment in
+                let start = CGFloat(Scrubber.fraction(of: segment.interval.start, in: axis)) * width
+                let end = CGFloat(Scrubber.fraction(of: segment.interval.end, in: axis)) * width
                 RoundedRectangle(cornerRadius: Radius.bar, style: .continuous)
                     .fill(segment.kind.color)
                     .frame(width: max(end - start - 1, 1), height: segment.kind.barHeight)
@@ -371,10 +397,10 @@ private struct PlannerRowView: View {
             // Skipped/repeated-hour marker where this zone's clocks change.
             ForEach(markers, id: \.instant) { marker in
                 dashedLine(height: PlannerGrid.trackHeight, color: .textPrimary, width: 2)
-                    .offset(x: CGFloat(Scrubber.fraction(of: marker.instant, in: axis)) * trackWidth - 1)
+                    .offset(x: CGFloat(Scrubber.fraction(of: marker.instant, in: axis)) * width - 1)
             }
         }
-        .frame(width: trackWidth, height: PlannerGrid.trackHeight, alignment: .leading)
+        .frame(width: width, height: PlannerGrid.trackHeight, alignment: .leading)
     }
 }
 
