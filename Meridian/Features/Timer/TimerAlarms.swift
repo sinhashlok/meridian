@@ -30,7 +30,7 @@ nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
 
     /// Alarm ids we scheduled for timers. AlarmKit's list doesn't say what an alarm is
     /// for, and M7's wake-up alarms will share it, so reconcile only touches these.
-    @ObservationIgnored private var knownIDs: Set<UUID> {
+    private var knownIDs: Set<UUID> {
         get { Set((UserDefaults.standard.stringArray(forKey: "timer.alarmIDs") ?? []).compactMap(UUID.init)) }
         set { UserDefaults.standard.set(newValue.map(\.uuidString), forKey: "timer.alarmIDs") }
     }

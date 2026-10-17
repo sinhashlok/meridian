@@ -166,6 +166,14 @@ Rules:
 - Gotchas: SwiftUI has its own `Transition`, so write `MeridianCore.Transition` in the
   app. Xcode 27 enforces member import visibility: import the module that defines a
   method (e.g. SwiftUI for `Array.move(fromOffsets:)`, SwiftData for `.modelContainer`).
+  `@ScaledMetric` follows the text size of the view's *surroundings*: a
+  `.dynamicTypeSize(...)` cap inside the same body doesn't limit it (wrap it, as
+  `RoundIconButton` does). Check every changed screen at AX5 (`xcrun simctl ui booted
+  content_size accessibility-extra-extra-extra-large`).
+- Shared views (17 Oct cleanup): `App/SegmentedScreen.swift` (every segmented tab:
+  header, picker, selection haptic; segments conform to `ScreenSegment`); DesignSystem
+  `NoteLine` (also the DSTNote), `CopyButton`, `RoundIconButton`, `.buttonStyle(.pill)`.
+  Use these instead of re-drawing them.
 - Design boards: `docs/design/boards/` (40 PNGs; read its README first: spec wins, fonts
   are substitutes, tab bar/segmented/sheets are system-drawn). M3 screens now match
   their six boards (16 Oct 2026, decisions M–U). Core texts for them: `PlannerText.swift`
