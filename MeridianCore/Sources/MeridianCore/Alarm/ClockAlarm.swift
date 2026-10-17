@@ -53,6 +53,30 @@ public struct ClockAlarm: Codable, Hashable, Sendable, Identifiable {
         return copy
     }
 
+    /// The copy the edit sheet starts from: a Keep UTC alarm shows its zone's time now,
+    /// so saving it unchanged gives back the same UTC time (decision BE).
+    public func forEditing(now: Date, device: Zone) -> ClockAlarm {
+        guard case .keepUTC(let utc) = policy else { return self }
+        var copy = self
+        copy.time = utc.shifted(by: ZoneClock.state(zone(device: device), at: now).offsetSeconds)
+        return copy
+    }
+
+    /// The copy to store from the edit sheet: Keep UTC works out the UTC time from the
+    /// wheel's time now; Local alarms and zones without clock changes keep the zone time.
+    public func saving(keepsUTC: Bool, now: Date, device: Zone) -> ClockAlarm {
+        var copy = self
+        copy.policy = keepsUTC && offersUTCChoice(now: now, device: device)
+            ? .keepUTC(Self.utcTime(of: time, in: zone(device: device), at: now)) : .keepZone
+        return copy
+    }
+
+    /// "When clocks change" is offered only for zoned alarms whose zone changes clocks in
+    /// the next year (spec §4.2: hidden for UTC and Asia/Kolkata).
+    public func offersUTCChoice(now: Date, device: Zone) -> Bool {
+        !isLocal && !ZoneClock.transitions(in: zone(device: device), from: now, to: now + 366 * 24 * 3600).isEmpty
+    }
+
     /// A one-off whose ring has passed.
     public func isSpent(at now: Date) -> Bool {
         repeatDays.isEmpty && (onceAt.map { $0 <= now } ?? false)

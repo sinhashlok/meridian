@@ -95,8 +95,7 @@ public enum AlarmText {
     public static func policyChoices(_ alarm: ClockAlarm, now: Date,
                                      device: Zone) -> (keepZone: PolicyChoice, keepUTC: PolicyChoice)? {
         let zone = alarm.zone(device: device)
-        guard !alarm.isLocal, !ZoneClock.transitions(in: zone, from: now, to: now + noteWindow).isEmpty
-        else { return nil }
+        guard alarm.offersUTCChoice(now: now, device: device) else { return nil }
         let city = ZoneCatalog.displayName(for: zone)
         let utc: ClockTime = if case .keepUTC(let stored) = alarm.policy { stored }
                              else { ClockAlarm.utcTime(of: alarm.time, in: zone, at: now) }

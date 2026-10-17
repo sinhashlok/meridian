@@ -94,4 +94,23 @@ struct AlarmTests {
         let decoded = try JSONDecoder().decode(ClockAlarm.self, from: JSONEncoder().encode(alarm))
         #expect(decoded == alarm)
     }
+
+    @Test("Editing a Keep UTC alarm after the change shows 08:00 and saves 13:00 UTC again (no drift)")
+    func editKeepUTC() {
+        let november = Self.utc("2026-11-02T12:00:00Z")
+        let alarm = Self.alarm(9, 0, zone: Self.ny, policy: .keepUTC(ClockTime(13, 0)))
+        let editing = alarm.forEditing(now: november, device: Self.ist)
+        #expect(editing.time == ClockTime(8, 0))
+        #expect(editing.saving(keepsUTC: true, now: november, device: Self.ist).policy == .keepUTC(ClockTime(13, 0)))
+        let switched = editing.saving(keepsUTC: false, now: november, device: Self.ist)
+        #expect(switched.policy == .keepZone && switched.time == ClockTime(8, 0))
+    }
+
+    @Test("Keep UTC only where the choice is shown: Local and UTC alarms save Keep <zone>")
+    func savingWithoutChoice() {
+        #expect(Self.alarm(7, 0, zone: nil).saving(keepsUTC: true, now: Self.boardNow, device: Self.ist).policy
+                == .keepZone)
+        #expect(Self.alarm(2, 0, zone: .utc).saving(keepsUTC: true, now: Self.boardNow, device: Self.ist).policy
+                == .keepZone)
+    }
 }
