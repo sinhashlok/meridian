@@ -53,23 +53,7 @@ enum JobStore {
         guard let mode = DebugLaunch.jobs, ["demo", "none"].contains(mode) else { return }
         for row in saved { context.delete(row) }
         guard mode == "demo" else { return }
-        let jobs = [
-            Job(title: "Marketing dashboard refresh", category: .dashboard, schedule: .everyHours(4),
-                lastReviewed: CivilDate(2026, 10, 1)),
-            Job(title: "Netsuite pipeline run",
-                notes: "Loads NetSuite GL, AR and AP into the lakehouse each night, then rebuilds the sales views.",
-                category: .pipeline, mirrors: "Airflow DAG netsuite_nightly",
-                schedule: .daily(times: [ClockTime(2, 0)]), remindsMe: true, lastReviewed: CivilDate(2026, 7, 12),
-                children: [Job.Child(name: "Bronze load", offsetMinutes: 0),
-                           Job.Child(name: "Silver transform", offsetMinutes: 20),
-                           Job.Child(name: "Gold views", offsetMinutes: 45),
-                           Job.Child(name: "Sales dashboard refresh", offsetMinutes: 90)]),
-            Job(title: "Month-end close extract", category: .extract,
-                schedule: .monthly(day: .day(1), time: ClockTime(1, 0)), zoneID: "America/New_York",
-                remindsMe: true, lastReviewed: CivilDate(2026, 9, 1)),
-            Job(title: "Legacy CRM sync", category: .other, schedule: .weekly(days: [7], time: ClockTime(3, 0)),
-                isPaused: true, lastReviewed: CivilDate(2026, 9, 1)),
-        ]
+        let jobs = DemoData.jobs
         for (index, job) in jobs.enumerated() {
             context.insert(SavedJob(job: job, order: index))
         }

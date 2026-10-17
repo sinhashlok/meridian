@@ -12,6 +12,12 @@ import WidgetKit
     /// bytes: JSONEncoder doesn't keep key order, so equal snapshots can encode differently.
     private static var written: WidgetSnapshot?
 
+    /// What the widgets get from the saved rows, in Clocks/Planner and creation order.
+    static func snapshot(zones: [SavedZone], jobs: [SavedJob], isUTCMode: Bool) -> WidgetSnapshot {
+        WidgetSnapshot(zones: zones.map(\.snapshotData), jobs: JobStore.jobs(from: jobs).map(\.job),
+                       isUTCMode: isUTCMode)
+    }
+
     static func write(_ snapshot: WidgetSnapshot) {
         guard let url = SharedDefaults.snapshotURL else { return }  // no App Group entitlement
         if written == nil, let data = try? Data(contentsOf: url) { written = WidgetSnapshot.decoded(from: data) }
@@ -36,8 +42,7 @@ struct WidgetSyncer: View {
     @Query(sort: \SavedJob.order) private var jobs: [SavedJob]
 
     private var snapshot: WidgetSnapshot {
-        WidgetSnapshot(zones: zones.map(\.snapshotData), jobs: JobStore.jobs(from: jobs).map(\.job),
-                       isUTCMode: appState.isUTCMode)
+        WidgetSync.snapshot(zones: zones, jobs: jobs, isUTCMode: appState.isUTCMode)
     }
 
     var body: some View {

@@ -405,23 +405,6 @@ private struct PlannerTrack: View, Equatable {
 }
 
 extension HourKind {
-    /// Height first, colour second (CLAUDE.md UI rules).
-    var barHeight: CGFloat {
-        switch self {
-        case .work: 26
-        case .stretch: 16
-        case .sleep: 4
-        }
-    }
-
-    var color: Color {
-        switch self {
-        case .work: .accent
-        case .stretch: .tintStretch
-        case .sleep: .tintSleep
-        }
-    }
-
     /// Row caption while scrubbing (board PlannerScrub).
     var shortName: String {
         switch self {

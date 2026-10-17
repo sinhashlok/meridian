@@ -1,4 +1,5 @@
 import Foundation
+import MeridianCore
 
 /// Settings and the widget snapshot, kept in the App Group so the widget extension can
 /// read what the app writes (spec §6, §7; decisions BR, BX). In both targets.
@@ -23,5 +24,11 @@ enum SharedDefaults {
     static var snapshotURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroup)?
             .appending(path: "widget-snapshot.json")
+    }
+
+    /// What the app last wrote; `nil` before its first write (or without the App Group).
+    static func readSnapshot() -> WidgetSnapshot? {
+        guard let url = snapshotURL, let data = try? Data(contentsOf: url) else { return nil }
+        return WidgetSnapshot.decoded(from: data)
     }
 }

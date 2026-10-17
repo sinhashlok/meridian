@@ -25,6 +25,7 @@ struct RootView: View {
         }
         #if DEBUG
         .fullScreenCover(isPresented: .constant(DebugLaunch.screen == "liveActivity")) { LiveActivityPreview() }
+        .fullScreenCover(isPresented: .constant(DebugLaunch.screen == "widgets")) { WidgetGallery() }
         #endif
         .onOpenURL(perform: open)
         .task {

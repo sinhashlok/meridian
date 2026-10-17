@@ -83,6 +83,24 @@ enum FontToken {
     /// SF Mono 13 (.footnote). Lap list, cron runs, UTC pill.
     case monoCaption
 
+    // Widgets (boards WidgetFull, JobsWidget*): smaller than the app, sized from the boards.
+    /// SF Mono 34 Semibold (.largeTitle). Clock widget UTC, large Jobs widget's next run.
+    case widgetHero
+    /// SF Mono 22 Semibold (.title2). Small Jobs widget's next run.
+    case widgetTime
+    /// SF Pro 15 Semibold (.subheadline). Small Jobs widget title, accessory titles.
+    case widgetTitle
+    /// SF Pro 13 Semibold (.footnote). Planner names, job rows, best window.
+    case widgetRowTitle
+    /// SF Mono 13 Semibold (.footnote). Job row times.
+    case widgetMono
+    /// SF Pro 12 Regular (.caption). Schedule lines, counts, zone labels.
+    case widgetDetail
+    /// SF Mono 12 (.caption). Planner widget times, child rows.
+    case widgetDetailMono
+    /// SF Pro 11 Semibold (.caption2). `NEXT JOBS`, `UTC` headers.
+    case widgetHeader
+
     /// The font for every token except `.timeHero`, whose 64pt size is not a
     /// text-style default and needs `@ScaledMetric` (see `MeridianFont`).
     /// The system uses SF Pro Display automatically at 20pt and above.
@@ -98,6 +116,14 @@ enum FontToken {
         case .monoBody: .system(.body, design: .monospaced)
         case .monoTime: .system(.title, design: .monospaced, weight: .medium)
         case .monoCaption: .system(.footnote, design: .monospaced)
+        case .widgetHero: .system(.largeTitle, design: .monospaced, weight: .semibold)
+        case .widgetTime: .system(.title2, design: .monospaced, weight: .semibold)
+        case .widgetTitle: .system(.subheadline, weight: .semibold)
+        case .widgetRowTitle: .system(.footnote, weight: .semibold)
+        case .widgetMono: .system(.footnote, design: .monospaced, weight: .semibold)
+        case .widgetDetail: .system(.caption).monospacedDigit()
+        case .widgetDetailMono: .system(.caption, design: .monospaced)
+        case .widgetHeader: .system(.caption2, weight: .semibold)
         }
     }
 }
