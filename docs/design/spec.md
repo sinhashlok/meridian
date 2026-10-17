@@ -40,7 +40,8 @@ Each tab remembers its last segment. First launch: Zones › Planner with the de
 zone added as home and suggestion chips (London · New York · San Francisco ·
 Singapore · UTC). Permissions are requested only when first needed.
 
-**Settings sheet:** 24-hour time (Follow system) · Week start (Follow locale; used by
+**Settings sheet:** ~~24-hour time (Follow system)~~ (dropped: the app is always 24-hour,
+decision BQ) · Week start (Follow locale; used by
 Planner and weekly schedules only — ISO weeks always start Monday, fiscal profiles
 set their own) · Default working hours (09:00–18:00) · Default work days (Mon–Fri) ·
 Default fiscal profile · Warn before clocks change (off; in-app banner only) ·

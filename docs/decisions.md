@@ -349,3 +349,73 @@ a relative-alarm-across-zone-change test, to run on the iPhone; results go in
 
 Owner-review standards applied: child rows in one aligned grid (siblings wrap the same
 way), values never break mid-word at AX5.
+
+## 17 Oct 2026 · M8 Settings, widgets, accessibility
+
+Plan: `docs/notes/m8-plan.md`. Changes made while building are noted inline.
+
+**BQ. Always 24-hour.** The spec's "24-hour time" Settings row is dropped (spec §2 note).
+
+**BR. Widgets read a JSON snapshot** (`WidgetSnapshot`: zones, jobs, UTC mode) that the
+app writes to the App Group container (`group.com.shloksinha.meridian`, both targets,
+Debug and Release). Widgets compute every time with Core. The SwiftData store stays in
+the app's container (moving it would mean migrating data already on the phone).
+
+**BS. Timelines**: an entry now and one per whole minute for 2 hours, then `.atEnd`
+(`WidgetText.timelineDates`). The app rewrites the snapshot 0.5 s after the last change
+to zones, jobs or UTC mode, and on going to the background, then reloads widgets.
+*Built:* `WidgetSyncer` watches `@Query` rows instead of `ModelContext.didSave`, which
+wasn't posted for autosaves (the stores rely on autosave). Equal snapshots are compared
+as values and not rewritten (JSONEncoder's key order varies). Countdowns use the Jobs
+wording (decision BL), not `Text(timerInterval:)`.
+
+**BT. Small clock widget** (no board): `UTC` header, UTC time large, UTC date, then home
+city, its time and `IST (UTC+5:30)`. *Built:* the DST tag is the Clocks badge text
+(`DST in 10d`, within 14 days) rather than `DST 25 Oct`.
+
+**BU. Medium Planner widget** (board WidgetFull): home and the next 2 zones by order, the
+home day with bars at 0.7 of the Planner's 26/16/4pt, the now-line, and the best window
+from now on (a later day if today has none). Fewer than 2 zones: "Add a zone in
+Meridian…". *Built:* names stay on one line, shrinking to 0.8 first (three rows with a
+wrapped name don't fit); a zone changing clocks today shows a plain `DST` tag.
+
+**BV. Tinted and clear**: only work bars and countdowns under 24 h are
+`.widgetAccentable()`; stretch and sleep become opacity; no filled badges; backgrounds use
+`containerBackground`. The now-line is orange in full colour and white (not accentable)
+when tinted.
+
+**BW. Jobs widgets** small/medium/large and **Lock Screen accessories** "Next job"
+(inline/circular/rectangular) and "UTC" (inline/circular). *Built:* rows that don't fit are
+dropped whole (`ViewThatFits`), never cut mid-line. The medium widget therefore shows 2 of
+the board's 3 jobs: the schedule lines wrap to two lines, and the board only fits 3 by
+overlapping them. The small widget drops title lines, then the schedule line.
+
+**BX. UTC mode reaches widgets** through the snapshot (and App Group UserDefaults): Jobs
+widget times and header switch to `UTC`.
+
+**BY. Week start**: Follow locale · Monday · Sunday · Saturday. Orders weekday chips and day
+lists; ISO weeks and fiscal profiles ignore it.
+
+**BZ. Default working hours and work days** apply to new zones only, including the
+first-launch seed.
+
+**CA. Default fiscal profile** = the active profile (shared with Tools › Dates); None when
+there are no profiles.
+
+**CB. Permissions rows** show live status (✓ Allowed / Off / Allow), re-read on `.active`;
+Allow asks. Open iOS Settings stays. About: Version and Time zone data (`2026c`).
+
+**CC. Accessibility**: a UI test target runs `performAccessibilityAudit()` on every tab,
+segment and main sheet; a test checks a Planner row's spoken label. Planner rows read
+`PlannerZone.spokenRow` (name, home, time, kind, work hours). Each widget is one VoiceOver
+element. Reduce Motion: moving animations become instant (`movingAnimation`,
+`Motion.moving`), rolling digits crossfade (`numericTransition`); fades and SF Symbol
+effects are unchanged.
+
+**CD. Deep links**: `meridian://planner`, `meridian://clocks`, `meridian://jobs` (widgets)
+join `timer` and `sessions` in `RootView.open`. Debug `-MeridianOpenURL` follows one 2 s
+after launch, because `simctl openurl` stops at a confirmation alert.
+
+**CE. Widget text size** (new): Dynamic Type is capped at xxLarge on Home Screen widgets
+and xLarge on Lock Screen accessories. A widget can't grow, and above those sizes even one
+row doesn't fit. Checked in the debug gallery at default size and AX5.
