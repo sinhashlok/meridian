@@ -23,6 +23,8 @@ public struct ClockAlarm: Codable, Hashable, Sendable, Identifiable {
     /// `nil` = snooze off.
     public var snoozeMinutes: Int?
     public var isOn: Bool
+    /// One-off alarms: the instant it was armed for (decision BF). Set by `armed`.
+    public private(set) var onceAt: Date?
 
     /// How far ahead zoned alarms are scheduled as fixed instants (decision BD): elapsed
     /// time, not "14 days" on any calendar.
@@ -41,6 +43,32 @@ public struct ClockAlarm: Codable, Hashable, Sendable, Identifiable {
     }
 
     public var isLocal: Bool { zoneID == nil }
+
+    /// A copy ready to schedule: a one-off that is on gets its ring instant fixed, so it
+    /// never slides to the next day (decision BF). Call on every save and switch-on.
+    public func armed(now: Date, device: Zone) -> ClockAlarm {
+        var copy = self
+        copy.onceAt = nil
+        if isOn, repeatDays.isEmpty { copy.onceAt = copy.nextRing(after: now, device: device) }
+        return copy
+    }
+
+    /// A one-off whose ring has passed.
+    public func isSpent(at now: Date) -> Bool {
+        repeatDays.isEmpty && (onceAt.map { $0 <= now } ?? false)
+    }
+
+    /// Changes whenever what AlarmKit was given would change (time, zone, days, title,
+    /// snooze, armed instant), so the old system alarms are replaced.
+    public var fingerprint: String {
+        let policyText = switch policy {
+        case .keepZone: "zone"
+        case .keepUTC(let utc): "utc \(utc.text)"
+        }
+        return [time.text, zoneID ?? "local", policyText, repeatDays.sorted().map(String.init).joined(separator: ","),
+                label, snoozeMinutes.map(String.init) ?? "-",
+                onceAt.map { "\($0.timeIntervalSinceReferenceDate)" } ?? "-"].joined(separator: "|")
+    }
 
     /// The UTC time of day that `time` in `zone` is on `instant`'s date there (BE):
     /// 09:00 New York on 16 Oct → 13:00, on 2 Nov → 14:00.
@@ -63,6 +91,7 @@ public struct ClockAlarm: Codable, Hashable, Sendable, Identifiable {
     /// rings once, at its first occurrence (spec §5.2).
     public func rings(after now: Date, within: TimeInterval, device: Zone) -> [Date] {
         let end = now.addingTimeInterval(within)
+        if repeatDays.isEmpty, let onceAt { return onceAt > now && onceAt < end ? [onceAt] : [] }
         let zone = zone(device: device)
         let repeatDays = repeatDays
         // One alarm time per day, so this many runs always covers the window.
