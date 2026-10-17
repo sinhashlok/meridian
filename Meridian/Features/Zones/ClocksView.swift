@@ -87,6 +87,7 @@ struct ClocksView: View {
 /// Singapore · UTC, minus any already added. Wraps instead of scrolling sideways.
 struct ZoneSuggestions: View {
     let zones: [SavedZone]
+    @Environment(AppState.self) private var appState
     @Environment(\.modelContext) private var context
 
     var body: some View {
@@ -94,7 +95,7 @@ struct ZoneSuggestions: View {
         FlowLayout(spacing: Spacing.xs) {
             ForEach(remaining, id: \.self) { entry in
                 Button {
-                    ZoneStore.add(entry.zone, named: entry.city, to: zones, in: context)
+                    ZoneStore.add(entry.zone, named: entry.city, to: zones, in: context, defaults: appState.zoneDefaults)
                 } label: {
                     HStack(spacing: Spacing.xxs) {
                         Image(systemName: "plus")

@@ -51,11 +51,12 @@ enum TimerStore {
     /// `-MeridianTimers demo`: the TimerUntil board's two timers, relative to `now`
     /// (06:42 left of 10 min; Until 02:00 UTC). `live`: the same on the real clock, for
     /// the Live Activity. `short`: one 20-second timer on the real clock, to check
-    /// ringing. Each replaces any saved timers.
+    /// ringing. `none`: no timers. Each replaces any saved timers.
     static func applyDebugLaunch(_ saved: [SavedTimer], now frozenNow: Date, in context: ModelContext) {
-        guard let mode = DebugLaunch.timers, ["demo", "live", "short"].contains(mode) else { return }
+        guard let mode = DebugLaunch.timers, ["demo", "live", "short", "none"].contains(mode) else { return }
         let now = mode == "demo" ? frozenNow : .now
         for row in saved { context.delete(row) }
+        if mode == "none" { return }
         if mode == "short" {
             context.insert(SavedTimer(timer: .duration(seconds: 20, name: "Smoke test", now: .now), order: 0))
             return

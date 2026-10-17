@@ -226,7 +226,7 @@ Rules:
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
 - No app test target yet. Add one (Xcode clicks) when the first UI logic needs tests.
 
-### Next up (as of 17 Oct 2026)
+### Next up (as of 17 Oct 2026, M8 started)
 
 All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 `docs/notes/alarmkit.md` › M7 iPhone checks:
@@ -235,7 +235,26 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 2. After 2–3 days without opening the app: zoned alarms and job reminders still fire.
 3. Settings › Debug · AlarmKit from a Debug build: real alarm limit; `.relative` alarm
    across a device zone change.
-4. M8 (widgets, Lock Screen accessories, Settings complete, accessibility): plan first.
+4. **M8 in progress** (plan approved 17 Oct, decisions BQ–CD: `docs/notes/m8-plan.md`;
+   not yet copied into `docs/decisions.md`).
+   - Done: step 1 `SettingsValues.swift` (WeekStart, Weekdays summary/spoken, hours range,
+     `ZoneClock.dataVersion`), step 2 `Widget/WidgetSnapshot.swift`, step 3
+     `Widget/WidgetText.swift` + `PlannerZone.spokenRow`. 318 Core tests green.
+   - Step 4 (Settings) code committed as WIP, builds, **not yet checked against board
+     Settings**: `Shared/SharedDefaults.swift` (App Group suite), `AppState` settings
+     persisted with `didSet` (debug `-MeridianUTC`/`-MeridianWarn` via `DebugLaunch.flag`,
+     `-MeridianScreen settings`), `SettingsSheet` rebuilt, `ZoneStore` takes `ZoneDefaults`,
+     `WeekdayPicker(first:)`, `AlarmService.Permission`, `-MeridianTimers none`.
+     Next: reboot the Simulator (a stuck AlarmKit alert from old demo timers; they're
+     cleared now), then `EXTRA="-MeridianFiscal india -MeridianNotif off" scripts/shoot.sh
+     settings settings` (+ `-MeridianBottom 1`; check it scrolls the Form), compare with
+     the board, check AX5, then commit step 4 properly.
+   - Owner's Xcode clicks still to do (step 0): App Groups `group.com.shloksinha.meridian`
+     on Meridian and MeridianWidgetsExtension; add MeridianCore to the widget target's
+     Frameworks. Check them in `project.pbxproj` before step 5.
+   - Then steps 5–8: snapshot writer + deep links, widgets + debug gallery, UI test target
+     with accessibility audits, docs. Noticed: Planner banner says "Weekend in all 1
+     cities" with one zone (M3 wording bug, fix separately).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 

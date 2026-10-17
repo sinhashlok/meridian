@@ -8,6 +8,7 @@ struct ZoneEditSheet: View {
     @Bindable var zone: SavedZone
     let zones: [SavedZone]
 
+    @Environment(AppState.self) private var appState
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
@@ -42,7 +43,7 @@ struct ZoneEditSheet: View {
                 .listRowBackground(Color.bgSurface)
 
                 Section("Work days") {
-                    WeekdayPicker(days: $zone.workDays)
+                    WeekdayPicker(days: $zone.workDays, first: appState.firstWeekday)
                 }
                 .listRowBackground(Color.bgSurface)
 

@@ -30,6 +30,11 @@ final class SavedZone {
         self.workDays = workDays
     }
 
+    convenience init(ianaID: String, name: String, isHome: Bool, order: Int, defaults: ZoneDefaults) {
+        self.init(ianaID: ianaID, name: name, isHome: isHome, order: order, workStart: defaults.workStart,
+                  workEnd: defaults.workEnd, workDays: defaults.workDays)
+    }
+
     /// `nil` only if the stored id stopped being a valid zone (e.g. a removed alias).
     var zone: Zone? { Zone(ianaID) }
 

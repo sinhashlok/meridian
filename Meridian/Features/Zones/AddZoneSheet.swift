@@ -51,7 +51,7 @@ struct AddZoneSheet: View {
     private func row(name: String, detail: String, zone: Zone) -> some View {
         let isAdded = ZoneStore.contains(zone, named: name, in: zones)
         return Button {
-            ZoneStore.add(zone, named: name, to: zones, in: context)
+            ZoneStore.add(zone, named: name, to: zones, in: context, defaults: appState.zoneDefaults)
             dismiss()
         } label: {
             HStack(spacing: Spacing.s) {

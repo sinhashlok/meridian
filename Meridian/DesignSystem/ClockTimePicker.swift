@@ -15,10 +15,12 @@ struct ClockTimePicker: View {
     }
 }
 
-/// Seven day toggles, Monday first. On = accent fill with `onAccent` label (an active
+/// Seven day toggles, starting on `first` (Settings › Week start). On = accent fill with `onAccent` label (an active
 /// state, §3.2); off = control outline. Wraps at large text sizes.
 struct WeekdayPicker: View {
     @Binding var days: [Int]
+    /// ISO weekday shown first (`AppState.firstWeekday`).
+    var first = 1
 
     private static let letters = ["M", "T", "W", "T", "F", "S", "S"]
     private static let names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -26,12 +28,12 @@ struct WeekdayPicker: View {
     var body: some View {
         ViewThatFits(in: .horizontal) {
             HStack(spacing: 0) {
-                ForEach(1...7, id: \.self) { day in
+                ForEach(Weekdays.ordered(from: first), id: \.self) { day in
                     toggle(day).frame(maxWidth: .infinity)
                 }
             }
             FlowLayout(spacing: Spacing.xs) {
-                ForEach(1...7, id: \.self, content: toggle)
+                ForEach(Weekdays.ordered(from: first), id: \.self, content: toggle)
             }
         }
         .padding(.vertical, Spacing.xxs)

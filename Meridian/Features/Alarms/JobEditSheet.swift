@@ -261,7 +261,8 @@ struct JobEditSheet: View {
                 draft.dailyTimes.append(ClockTime(((draft.dailyTimes.last?.hour ?? 1) + 1) % 24, 0))
             }
         case .weekly:
-            WeekdayPicker(days: Binding(get: { draft.weeklyDays.sorted() }, set: { draft.weeklyDays = Set($0) }))
+            WeekdayPicker(days: Binding(get: { draft.weeklyDays.sorted() }, set: { draft.weeklyDays = Set($0) }),
+                          first: appState.firstWeekday)
             ClockTimePicker(title: "At", time: $draft.weeklyTime)
         case .monthly:
             Picker("Day", selection: $draft.monthDay) {

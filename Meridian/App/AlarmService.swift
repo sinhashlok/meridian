@@ -20,6 +20,17 @@ import UserNotifications
 
     static var alarmsAuthorized: Bool { AlarmManager.shared.authorizationState == .authorized }
 
+    /// Settings › Permissions (decision CB).
+    enum Permission { case allowed, off, notAsked }
+
+    static var alarmsPermission: Permission {
+        switch AlarmManager.shared.authorizationState {
+        case .authorized: .allowed
+        case .denied: .off
+        default: .notAsked
+        }
+    }
+
     /// What AlarmKit has scheduled right now (the update stream isn't trusted while
     /// suspended, M0.5 test 9, so callers compare against this).
     static var liveAlarmIDs: Set<UUID> {
@@ -106,6 +117,14 @@ import UserNotifications
             _ = try? await center.requestAuthorization(options: [.alert, .sound])
         }
         return await center.notificationSettings().authorizationStatus == .denied
+    }
+
+    static func notificationsPermission() async -> Permission {
+        switch await UNUserNotificationCenter.current().notificationSettings().authorizationStatus {
+        case .authorized, .provisional, .ephemeral: .allowed
+        case .denied: .off
+        default: .notAsked
+        }
     }
 
     /// Pending fallback notifications whose identifier is `<prefix>-<uuid>`.

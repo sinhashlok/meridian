@@ -46,13 +46,13 @@ enum DebugLaunch {
         #endif
     }
 
-    /// `-MeridianWarn 1`: show the Clocks warn-before-clocks-change banner (a Settings
-    /// toggle from M8).
-    static var warnsBeforeClockChanges: Bool {
+    /// A `0`/`1` launch argument, or `nil` when it wasn't passed (so the saved setting
+    /// stays): `-MeridianUTC 1`, `-MeridianWarn 1` (the Clocks warn-before-clocks-change banner).
+    static func flag(_ key: String) -> Bool? {
         #if DEBUG
-        UserDefaults.standard.bool(forKey: "MeridianWarn")
+        UserDefaults.standard.object(forKey: key) == nil ? nil : UserDefaults.standard.bool(forKey: key)
         #else
-        false
+        nil
         #endif
     }
 

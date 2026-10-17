@@ -77,7 +77,8 @@ struct AlarmEditSheet: View {
                     Section {
                         LabeledContent("Repeat", value: AlarmText.repeatText(draft.repeatDays))
                         WeekdayPicker(days: Binding(get: { draft.repeatDays.sorted() },
-                                                    set: { draft.repeatDays = Set($0) }))
+                                                    set: { draft.repeatDays = Set($0) }),
+                                      first: appState.firstWeekday)
                         LabeledContent("Label") {
                             TextField("Alarm", text: $draft.label)
                                 .multilineTextAlignment(.trailing)

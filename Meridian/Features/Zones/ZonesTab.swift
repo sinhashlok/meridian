@@ -43,7 +43,7 @@ struct ZonesTab: View {
                 context.insert(SavedZone(ianaID: entry.zone.id, name: entry.name, isHome: index == 0, order: index))
             }
         } else if !isSeeded {
-            if zones.isEmpty { ZoneStore.seed(into: context) }
+            if zones.isEmpty { ZoneStore.seed(into: context, defaults: appState.zoneDefaults) }
             isSeeded = true
         }
         switch DebugLaunch.screen {
