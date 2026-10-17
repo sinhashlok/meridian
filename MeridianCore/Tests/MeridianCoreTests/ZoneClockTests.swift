@@ -129,7 +129,8 @@ struct ZoneClockTests {
     @Test("Until 02:00 UTC from 15:39:18Z: 10:20:42 remaining, 07:30 IST Friday")
     func untilTimer() {
         let start = Self.utc("2026-10-15T15:39:18Z")
-        let target = ZoneClock.nextOccurrence(hour: 2, minute: 0, in: .utc, after: start)
+        // The Until timer's own resolver (TimerTests covers its gap/overlap cases).
+        let target = UntilTarget.next(hour: 2, minute: 0, in: .utc, occurrence: .first, after: start).instant
         #expect(target.timeIntervalSince(start) == 10 * 3600 + 20 * 60 + 42)
         #expect(ZoneClock.wallTime(target, in: Self.ist) == "07:30")
         #expect(ZoneClock.local(target, in: Self.ist).date.isoWeekday == 5)    // Friday

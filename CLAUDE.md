@@ -112,7 +112,7 @@ Rules:
   Xcode generate a `.accent` symbol that clashes with the token.
 - M1 done: `MeridianCore` has `EpochParser`, `ZoneClock` and `PeriodEngine` (54 tests,
   every EpochParser/ZoneClock/gap-overlap/conversion/PeriodEngine fixture row). Also
-  `ClockFormat.utcTime` and the placeholder `CoreInfo` + smoke test.
+  `ClockFormat.utcTime`.
   - `EpochParser`: `EpochValue` = `Int64` seconds + `Int32` nanoseconds (exact);
     unit by significant digits with ambiguous bands (decision C); `parseISO8601`
     throws `.missingZone` for zone-less input (M4 wires Interpret-as).
@@ -147,7 +147,7 @@ Rules:
   `-MeridianScreen fiscalEditor|fiscalProfiles`.
 - M5 done (17 Oct 2026, decisions AH–AS): Timer › Timers and Stopwatch. Core `CountdownTimer`
   + `TimerText` (duration/Until, card wording), `Stopwatch` + `StopwatchText` (laps, CSV),
-  `TimerAlarmPlan` (reconcile + Live Activity content); 217 Core tests. App: `SavedTimer`
+  `TimerAlarmPlan` (reconcile + Live Activity content); 216 Core tests. App: `SavedTimer`
   + `TimerStore`, `TimersView`/`TimerCard`/`NewTimerSheet`, `StopwatchView`, `TimerAlarms`
   (AlarmKit `.fixed` alarm per running timer, notification fallback, sync on change /
   launch / `.active`, only ids in `timer.alarmIDs`), `TimerActivityController`.

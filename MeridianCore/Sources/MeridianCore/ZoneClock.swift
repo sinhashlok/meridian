@@ -173,16 +173,6 @@ public enum ZoneClock {
         return Resolution(instant: first, kind: isExact ? .exact : .skipped)
     }
 
-    /// The next time the wall clock in `zone` reads `hour:minute` after `instant`
-    /// (first occurrence if repeated, next valid time if skipped). For Until timers.
-    public static func nextOccurrence(hour: Int, minute: Int, in zone: Zone, after instant: Date) -> Date {
-        guard let date = zone.calendar.nextDate(after: instant, matching: DateComponents(hour: hour, minute: minute),
-                                                matchingPolicy: .nextTime, repeatedTimePolicy: .first,
-                                                direction: .forward)
-        else { preconditionFailure("no \(hour):\(minute) after \(instant) in \(zone.id)") }
-        return date
-    }
-
     // MARK: Private
 
     /// Local noon on `date`: inside the day and never in a DST gap.
