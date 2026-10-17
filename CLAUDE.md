@@ -166,6 +166,21 @@ Rules:
   `Shared/LiveActivityIntents.swift` with a widget stub. `AppState.tab` and
   `plannerJump` (meeting line → Planner). Debug: `-MeridianSession demo|paused|done|idle`;
   `-MeridianBottom 1` also works on Sessions.
+- M7 in progress (17 Oct 2026, decisions BD–BP): steps 1–8 done, step 9 (background
+  refresh) waits for the Background Modes capability. Core `ClockAlarm` (+ `onceAt`,
+  `forEditing`/`saving` for Keep UTC), `ClockAlarmPlan`, `AlarmText`, `ClockMove` (DST badge
+  rule), `Job`, `JobText`, `ReminderPlan`; 295 Core tests. App: `SavedAlarm`/`AlarmStore`,
+  `ClockAlarms` (Local = `.relative`, zoned = `.fixed` 14 days; own ids `alarm.alarmIDs`),
+  `AlarmsView`/`AlarmRow`/`AlarmEditSheet`, `SavedJob`/`JobStore`, `JobReminders` (48 h, max 48,
+  ids `job-<id>-<epoch>`), `JobsView`/`JobRow`/`JobDetailView`/`JobEditSheet`. Shared:
+  `ZonePickerSheet`, `ActionHeader`, `RunTable` (Tools › Cron uses it too), widget
+  `AlarmLiveActivity` (snooze countdown), `Shared/MeridianAlarmMetadata.swift`. DEBUG
+  Settings › "Debug · AlarmKit" runs the limit and relative-alarm tests. Debug:
+  `-MeridianAlarms demo|none`, `-MeridianJobs demo|none`, `-MeridianNotif off`,
+  `-MeridianScreen alarmEdit|newAlarm|jobDetail|jobEdit|jobEditCron|newJob` (use
+  `-alarms.segment jobs` for Jobs; boards' times: alarms `2026-10-16T10:15:07Z`, jobs
+  `2026-10-15T15:32:07Z`). A system permission alert left unanswered stays up across
+  relaunches and reinstalls in the Simulator: shut the Simulator down and boot it again.
 - Live Activity layout: content views are in `Shared/LiveActivityViews.swift`; check them
   with `scripts/shoot.sh la liveActivity` (debug screen at real sizes, red outline past
   iOS's ~160pt Lock Screen height). The timer-driven ring shows as a spinner there; the
@@ -207,26 +222,28 @@ Rules:
 
 ### Next up (as of 17 Oct 2026)
 
-0. M5 + M6 checks on the iPhone: timers and session phase changes ring when locked, on
+0. M7 step 9: owner adds Background Modes › Background fetch (Xcode clicks in the M7
+   hand-off); Claude adds `BGTaskSchedulerPermittedIdentifiers`
+   (`com.shloksinha.meridian.refresh`) to `Config/Meridian-Info.plist`, a `BGAppRefreshTask`
+   that runs `ClockAlarms` and `JobReminders` syncs, then step 10 (docs, PLAN.md, push).
+1. M7 iPhone checks: run Settings › Debug · AlarmKit (limit test; relative alarm across a
+   zone change) and record results in `docs/notes/alarmkit.md`; zoned and Local alarms
+   ring locked / Silent / Focus / force-quit; Snooze counts down and rings again; a one-off
+   alarm turns off after ringing; Keep UTC vs Keep zone around a DST change; job reminders
+   arrive at lead time; Turn on notifications flow; DST badge opens Upcoming clock changes.
+2. M5 + M6 checks on the iPhone: timers and session phase changes ring when locked, on
    Silent, in Focus and after force-quit; a session keeps advancing with the app killed;
-   timer pause / +1 min / resume / restart ring once at the new time; Live Activity
-   layout was fixed and accepted from the owner's iPhone screenshots (17 Oct); still to
-   check: Island minimal/expanded on device and that every Live Activity button
-   (session Pause / Resume / Skip / +5 min / Stop, timer Pause / Resume / +1 min / Cancel)
-   updates the app; tapping an activity opens its tab; the meeting line opens the Planner
-   on its window; haptics on start, lap and session done; Copy CSV; denied-Alarms note.
-   Then M7 Alarms + Jobs (plan first; reuse `AlarmService` and `AlarmDiff`).
-1. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
+   timer pause / +1 min / resume / restart ring once at the new time; Island
+   minimal/expanded on device; every Live Activity button (session Pause / Resume / Skip /
+   +5 min / Stop, timer Pause / Resume / +1 min / Cancel) updates the app; tapping an
+   activity opens its tab; the meeting line opens the Planner on its window; haptics on
+   start, lap and session done; Copy CSV; denied-Alarms note.
+3. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
    new handle/hint, best window snap haptic and ✓ state, Copy/Share, meeting length menu,
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
-2. M4 checks on the iPhone: Paste (needs a real clipboard), copy buttons and haptics,
+4. M4 checks on the iPhone: Paste (needs a real clipboard), copy buttons and haptics,
    the cron key row above the keyboard, saving/editing/deleting fiscal calendars.
-3. Planner lag (parked 16 Oct): fix landed 17 Oct. While scrubbing, the time now lives
-   in `PlannerGrid` (`dragged`), so only the grid redraws per frame and the Planner gets
-   the time on release; bars are an equatable `PlannerTrack` that SwiftUI skips. Core
-   work per frame measured at ~5 µs (release). Check the scrub feel on the iPhone.
-4. Still open for M7 (from M0.5): do `.relative` alarms follow a device zone change, and
-   what is AlarmKit's real alarm limit?
+5. Planner lag fix (17 Oct): check the scrub feel on the iPhone.
 
 ## How we work
 

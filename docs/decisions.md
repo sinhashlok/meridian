@@ -283,3 +283,69 @@ AlarmKit reports. Dates match exactly, so store them as seconds since 2001
 (`timeIntervalSinceReferenceDate`): seconds since 1970 don't round-trip, which made
 every sync cancel and reschedule all alarms (caught in the AlarmKit log).
 `AlarmService` (app) holds the AlarmKit and notification calls timers and sessions share.
+
+## 17 Oct 2026 · M7 Alarms and Jobs
+
+**BD. How alarms ring.** Local alarms (no zone: the phone's wall clock wherever it is)
+are one AlarmKit `.relative` alarm, weekly or once, so they keep ringing if Meridian is
+never opened. Zoned alarms (UTC or any IANA zone) are `.fixed` instants for the next
+14 days (`ClockAlarm.window`), refilled on every change, launch, `.active` and (step 9)
+background refresh. Core's `ClockAlarmPlan` decides per alarm, diffing with `AlarmDiff`;
+a fingerprint of the settings replaces everything when an alarm changes. Rings that are
+past but still listed (alerting or snoozed) are left alone. `ClockAlarms` only touches
+ids it scheduled (`alarm.alarmIDs`).
+
+**BE. Keep UTC time** stores the UTC time worked out at Save and never recomputes it.
+Repeat days are read in the alarm's zone. Opening a Keep UTC alarm shows its zone's time
+now (`forEditing`), so an unchanged Save gives back the same UTC time. "When clocks
+change" shows only for zoned alarms whose zone changes clocks within a year
+(`offersUTCChoice`). DSTNote names what moves: phone time (Keep <zone>), zone time
+and/or phone time (Keep UTC), with the label as `(EST, UTC−5)` like the board.
+
+**BF. One-off alarms** are armed for one instant (`onceAt`) on every save and switch-on,
+and turn off once that has passed and AlarmKit no longer lists them.
+
+**BG. Snooze** on by default, 9 min (Off, 5, 9, 10, 15): AlarmKit's secondary button with
+`.countdown`; the widget draws the countdown (`AlarmLiveActivity`), and
+`MeridianAlarmMetadata` moved to `Shared/`. Needs an iPhone check.
+
+**BH. Sound is "Default" only.** AlarmKit plays the system sound or a bundled file; iOS
+ringtones (the board's "Radar") aren't available to apps.
+
+**BI. Zone picker** (`ZonePickerSheet`): Local (alarms only), UTC, saved zones, last 5
+picked, search. Jobs default to UTC. Tools keep their menu (decision X).
+
+**BJ. DST badge on alarm and job rows**, `DST 1 Nov`, when the item's zone and the phone's
+differ and a change within 30 days moves it (`ClockMove`; the boards show it 16–17 days
+ahead). Not for Local alarms, off alarms or paused jobs. Tap opens Upcoming clock changes,
+which now also lists alarm and job zones.
+
+**BK. Job reminders**: notifications for runs in the next 48 h, soonest first, at most 48
+(16 of iOS's 64 left for timer and session fallbacks), ids `job-<id>-<run epoch>`.
+Lead: at the run, 5, 10, 15, 30, 60 min (default 10). Debug demo launches never show
+the system prompt (it covers screenshots and SpringBoard keeps it across relaunches).
+
+**BL. Jobs wording follows the boards.** "4 jobs · times in IST"; Next line in the shown
+zone ("today", weekday within a week, else date); countdown rounded up and orange under
+24 h, whole days after; schedule lines reworded (`Weekly · Sun 03:00 UTC`,
+`Every 4 hours · from 00:00 UTC`). Review after 90 days. Board JobDetail's "96 days ago"
+is 95 (12 Jul → 15 Oct). Jobs use the M2 DST warnings, not JobEditCron's sentence.
+
+**BM. Children**: offset = elapsed time from the parent's start, `+H:MM`, edited in 5-min
+steps; expected at = next run + offset. The edit form is always in edit mode, so rows
+show visible delete and ≡ drag handles (never swipe-only).
+
+**BN. Alarms list** sorted by next ring, off alarms last; "Next: 18:30 IST today" follows
+the UTC pill. Delete is in the edit sheet (visible button); no swipe-to-delete. With
+Alarms denied there is no notification fallback for wake-up alarms: a banner says they
+won't ring, with Open Settings.
+
+**BO. Storage**: `SavedAlarm` (ClockAlarm JSON + scheduled ids) and `SavedJob` (Job JSON),
+changed only through `AlarmStore` / `JobStore`.
+
+**BP. AlarmKit capacity**: DEBUG Settings section "Debug · AlarmKit" with a limit test and
+a relative-alarm-across-zone-change test, to run on the iPhone; results go in
+`docs/notes/alarmkit.md`. If the limit is low, shrink `ClockAlarm.window`.
+
+Owner-review standards applied: child rows in one aligned grid (siblings wrap the same
+way), values never break mid-word at AX5.
