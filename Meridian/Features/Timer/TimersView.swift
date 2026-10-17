@@ -1,6 +1,7 @@
 import MeridianCore
 import SwiftData
 import SwiftUI
+import UIKit  // UIApplication.openSettingsURLString
 
 /// Timer › Timers (spec §4.4, board TimerUntil): "2 running" and the New timer button,
 /// then one card per timer, done first, then soonest first (decision AJ).
@@ -23,6 +24,7 @@ struct TimersView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.s) {
                     header(TimerText.header(pairs.map(\.timer), now: now))
+                    if !pairs.isEmpty { permissionNote }
                     if sorted.isEmpty {
                         PlaceholderBox(text: "No timers. Start a countdown, or one that ends at a time in any zone.")
                     }
@@ -43,12 +45,35 @@ struct TimersView: View {
             NewTimerSheet { timer in
                 TimerStore.add(timer, to: saved, in: context)
                 starts += 1
+                TimerAlarms.shared.sync(in: context)
             }
         }
         .sensoryFeedback(Haptic.timerStart, trigger: starts)
         .onAppear {
             TimerStore.applyDebugLaunch(saved, now: appState.now(), in: context)
+            if DebugLaunch.timers != nil { TimerAlarms.shared.sync(in: context) }
             if DebugLaunch.screen == "newTimer" || DebugLaunch.screen == "newTimerUntil" { isAdding = true }
+        }
+    }
+
+    /// Decision AI: say plainly when timers can't ring through Silent, with a way to fix it.
+    @ViewBuilder
+    private var permissionNote: some View {
+        let alarms = TimerAlarms.shared
+        if alarms.alarmsDenied {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
+                NoteLine(systemImage: "bell.slash", text: alarms.notificationsDenied
+                    ? "Alarms and notifications are off for Meridian, so timers won't alert."
+                    : "Alarms are off for Meridian, so timers only notify and stay quiet in Silent mode.")
+                Link("Open Settings", destination: URL(string: UIApplication.openSettingsURLString)!)
+                    .meridianFont(.headline)
+                    .foregroundStyle(.accentText)
+                    .frame(minHeight: Spacing.minTapTarget)
+                    .padding(.leading, Spacing.xxl)
+            }
+            .padding(.vertical, Spacing.xs)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.bgElevated, in: .rect(cornerRadius: Radius.row, style: .continuous))
         }
     }
 
@@ -99,5 +124,6 @@ struct TimersView: View {
             case .remove: TimerStore.delete(row, in: context)
             }
         }
+        TimerAlarms.shared.sync(in: context)
     }
 }

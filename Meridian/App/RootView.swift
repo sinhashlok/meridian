@@ -4,6 +4,8 @@ import SwiftUI
 /// The 5-tab shell from spec §2. First launch opens Zones.
 struct RootView: View {
     @Environment(AppState.self) private var appState
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.modelContext) private var context
     /// First launch opens Zones (spec §2); debug builds can pick another with `-MeridianTab`.
     @State private var tab = DebugLaunch.tab ?? "zones"
 
@@ -19,6 +21,10 @@ struct RootView: View {
         }
         .sheet(isPresented: $appState.isSettingsPresented) {
             SettingsSheet()
+        }
+        // Timers: re-check alarms on launch and on every return to the app (decision AR).
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { TimerAlarms.shared.sync(in: context) }
         }
     }
 }

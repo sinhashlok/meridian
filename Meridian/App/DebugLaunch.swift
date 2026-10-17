@@ -71,7 +71,7 @@ enum DebugLaunch {
     /// `-MeridianFiscal india|retail|none`: replaces the saved fiscal profiles on launch.
     static var fiscal: String? { string("MeridianFiscal") }
 
-    /// `-MeridianTimers demo`: replaces saved timers with the TimerUntil board's two.
+    /// `-MeridianTimers demo|short`: replaces saved timers (board TimerUntil, or one 20 s timer).
     static var timers: String? { string("MeridianTimers") }
 
     /// `-MeridianStopwatch demo`: a running stopwatch with laps (Timer › Stopwatch).
