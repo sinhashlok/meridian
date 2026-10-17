@@ -44,8 +44,10 @@ import SwiftData
         let wanted = ReminderPlan.wanted(jobs, now: now, device: .device)
 
         // Asked when the first reminder is turned on, not at launch (spec §2). Debug demo
-        // launches don't ask, so the system prompt never covers a screenshot.
-        let denied = await AlarmService.notificationsDenied(askingIf: !wanted.isEmpty && DebugLaunch.jobs == nil)
+        // launches (and `-MeridianNotif off`) don't ask, so the system prompt never covers a
+        // screenshot.
+        let asks = !wanted.isEmpty && DebugLaunch.jobs == nil && !DebugLaunch.notificationsOff
+        let denied = await AlarmService.notificationsDenied(askingIf: asks)
         notificationsDenied = denied || DebugLaunch.notificationsOff
         guard !denied else { return }
 
