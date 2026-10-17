@@ -11,6 +11,6 @@ import SwiftUI
                 .tint(.accent)
                 .preferredColorScheme(.dark)
         }
-        .modelContainer(for: [SavedZone.self, SavedFiscalProfile.self])
+        .modelContainer(for: [SavedZone.self, SavedFiscalProfile.self, SavedTimer.self])
     }
 }

@@ -26,7 +26,7 @@ struct RootView: View {
 #Preview {
     RootView()
         .environment(AppState())
-        .modelContainer(for: [SavedZone.self, SavedFiscalProfile.self], inMemory: true)
+        .modelContainer(for: [SavedZone.self, SavedFiscalProfile.self, SavedTimer.self], inMemory: true)
         .tint(.accent)
         .preferredColorScheme(.dark)
 }

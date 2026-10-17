@@ -71,6 +71,12 @@ enum DebugLaunch {
     /// `-MeridianFiscal india|retail|none`: replaces the saved fiscal profiles on launch.
     static var fiscal: String? { string("MeridianFiscal") }
 
+    /// `-MeridianTimers demo`: replaces saved timers with the TimerUntil board's two.
+    static var timers: String? { string("MeridianTimers") }
+
+    /// `-MeridianStopwatch demo`: a running stopwatch with laps (Timer › Stopwatch).
+    static var stopwatch: String? { string("MeridianStopwatch") }
+
     private static func string(_ key: String) -> String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: key)

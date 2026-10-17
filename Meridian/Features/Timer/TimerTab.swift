@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 enum TimerSegment: String, CaseIterable, Identifiable {
@@ -25,11 +26,12 @@ struct TimerTab: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal, Spacing.screenMargin)
 
-                ContentUnavailableView(
-                    segment.title,
-                    systemImage: segment == .timers ? "timer" : "stopwatch",
-                    description: Text("Coming in M5")
-                )
+                switch segment {
+                case .timers:
+                    TimersView()
+                case .stopwatch:
+                    ContentUnavailableView("Stopwatch", systemImage: "stopwatch", description: Text("Coming in M5"))
+                }
             }
             .frame(maxHeight: .infinity, alignment: .top)
             .meridianScreen(title: "Timer")
@@ -40,5 +42,6 @@ struct TimerTab: View {
 #Preview {
     TimerTab()
         .environment(AppState())
+        .modelContainer(for: [SavedTimer.self, SavedZone.self], inMemory: true)
         .preferredColorScheme(.dark)
 }
