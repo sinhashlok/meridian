@@ -228,26 +228,16 @@ Rules:
 
 ### Next up (as of 17 Oct 2026)
 
-0. M7 iPhone checks: run Settings › Debug · AlarmKit (limit test; relative alarm across a
-   zone change) and record results in `docs/notes/alarmkit.md`; zoned and Local alarms
-   ring locked / Silent / Focus / force-quit; Snooze counts down and rings again; a one-off
-   alarm turns off after ringing; Keep UTC vs Keep zone around a DST change; job reminders
-   arrive at lead time; Turn on notifications flow; DST badge opens Upcoming clock changes;
-   after a few days without opening the app, zoned alarms and reminders are still there
-   (background refresh). Then M8 (widgets, Settings, accessibility): plan first.
-1. M5 + M6 checks on the iPhone: timers and session phase changes ring when locked, on
-   Silent, in Focus and after force-quit; a session keeps advancing with the app killed;
-   timer pause / +1 min / resume / restart ring once at the new time; Island
-   minimal/expanded on device; every Live Activity button (session Pause / Resume / Skip /
-   +5 min / Stop, timer Pause / Resume / +1 min / Cancel) updates the app; tapping an
-   activity opens its tab; the meeting line opens the Planner on its window; haptics on
-   start, lap and session done; Copy CSV; denied-Alarms note.
-2. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
-   new handle/hint, best window snap haptic and ✓ state, Copy/Share, meeting length menu,
-   zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
-3. M4 checks on the iPhone: Paste (needs a real clipboard), copy buttons and haptics,
-   the cron key row above the keyboard, saving/editing/deleting fiscal calendars.
-4. Planner lag fix (17 Oct): check the scrub feel on the iPhone.
+All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
+`docs/notes/alarmkit.md` › M7 iPhone checks:
+
+1. On 26 Oct: Keep London vs Keep UTC alarms across Europe's 25 Oct DST change.
+2. After 2–3 days without opening the app: zoned alarms and job reminders still fire.
+3. Settings › Debug · AlarmKit from a Debug build: real alarm limit; `.relative` alarm
+   across a device zone change.
+4. M8 (widgets, Lock Screen accessories, Settings complete, accessibility): plan first.
+
+Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
 ## How we work
 

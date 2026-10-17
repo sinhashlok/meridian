@@ -103,3 +103,27 @@ Afterwards: turn Set Automatically back on (test 10) and turn Alarms back on (te
   sheet can mention it in one line if testers miss alarms.
 - **Still open before M7:** whether `.relative` alarms follow a device time zone change,
   and the real `maximumLimitReached` count. A second spike button can answer both.
+
+## M7 iPhone checks (17 Oct 2026)
+
+Release build on the iPhone 16 (iOS 27.0.1), after the UTC pill hang fix (`71915a7`).
+The owner reported everything that could be tested on the day as working:
+
+- Local and zoned ("Keep <zone> time") alarms rang locked, on Silent, in Focus and after
+  force-quit. Snooze counted down and rang again; a one-off alarm turned off after
+  ringing; the DST badge opened Upcoming clock changes.
+- Job reminders arrived at their lead time (5 min and at run time); Pause job stopped
+  them; the notifications-off note and its link to iOS Settings worked.
+- Timers, Stopwatch and Sessions (M5, M6): rang locked / Silent / force-quit, pause /
+  +1 min / resume rang once at the new time, a session kept advancing after force-quit,
+  every Live Activity button updated the app, the meeting line opened the Planner.
+
+Still to check (they need a later date or a Debug build):
+
+- **Keep UTC vs Keep zone across a DST change.** Europe changes on 25 Oct 2026: on
+  26 Oct, a daily 09:00 "Keep London time" alarm should still ring at 09:00 London
+  (an hour later in IST), and a "Keep UTC time" alarm at the same UTC time as before.
+- **Background refresh.** After 2–3 days without opening the app, zoned alarms and job
+  reminders still fire.
+- **Settings › Debug · AlarmKit** (Debug build only): the real `maximumLimitReached`
+  count, and whether a `.relative` alarm follows a device zone change.

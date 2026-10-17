@@ -50,11 +50,11 @@ what to check on the phone.
 | M0.5 | **AlarmKit spike** (throwaway branch): schedule an alarm 2 min out, lock phone, Silent on, Focus on | You saw it ring through; notes written in `docs/notes/alarmkit.md` | Done 16 Oct 2026; notes in `docs/notes/alarmkit.md` |
 | M1 | Core: `ZoneClock`, `EpochParser`, `PeriodEngine` (ISO + fiscal) | All matching fixtures pass in `swift test` | Done 16 Oct 2026 (`3ac49da`) |
 | M2 | Core: `CronParser` (Unix + Quartz), `ScheduleEngine` (presets + cron + gap/overlap), `OverlapEngine` | All remaining fixtures pass | Done 16 Oct 2026 (`648be8f`) |
-| M3 | Zones UI: Clocks, Planner, DayPager, scrubber, BestWindowChip, Copy/Share | Planner board recreated; scrub feels right on the phone | Built 16 Oct 2026 (`cbb5113`); board comparison and iPhone checks pending |
-| M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work |  |
-| M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone | Built 17 Oct 2026; iPhone checks pending |
-| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown | Built 17 Oct 2026; iPhone checks pending |
-| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 | Built 17 Oct 2026; reminders ≤ 48 proven in Core; iPhone checks pending |
+| M3 | Zones UI: Clocks, Planner, DayPager, scrubber, BestWindowChip, Copy/Share | Planner board recreated; scrub feels right on the phone | Done 17 Oct 2026: boards matched, iPhone checks passed |
+| M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work | Done 17 Oct 2026 (`4f13777`); iPhone checks passed |
+| M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone | Done 17 Oct 2026; iPhone checks passed |
+| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown | Done 17 Oct 2026; iPhone checks passed |
+| M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 | Done 17 Oct 2026; iPhone checks passed. Still to check: DST crossing (26 Oct), background refresh over days, Debug · AlarmKit |
 | M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows |  |
 | M9 | App icon, name, TestFlight | Build installed via TestFlight |  |
 
