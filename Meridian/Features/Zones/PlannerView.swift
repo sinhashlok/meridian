@@ -71,7 +71,8 @@ struct PlannerView: View {
                         let notes = [result.day.referenceChange(reference: reference, referenceName: referenceName)?.note,
                                      result.day.faultLineNote(reference: reference, referenceName: referenceName)]
                         ForEach(notes.compactMap(\.self), id: \.self) { note in
-                            DSTNote(text: note)
+                            NoteLine(systemImage: "clock.arrow.circlepath", text: note)
+                                .padding(.top, Spacing.xs)
                         }
 
                         if isScrubbing {
@@ -111,25 +112,6 @@ struct PlannerView: View {
         let wall = Scrubber.wallTime(of: current, in: reference)
         day = newDay
         selection = Scrubber.instant(keeping: wall, on: newDay, in: reference)
-    }
-}
-
-/// DSTNote (spec §5.1): clock-arrow symbol and text.secondary prose under the grid.
-struct DSTNote: View {
-    let text: String
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
-            Image(systemName: "clock.arrow.circlepath")
-                .foregroundStyle(.textSecondary)
-                .accessibilityHidden(true)
-            Text(text)
-                .foregroundStyle(.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .meridianFont(.body)
-        .padding(.horizontal, Spacing.xs)
-        .padding(.top, Spacing.xs)
     }
 }
 

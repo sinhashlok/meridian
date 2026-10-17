@@ -1,6 +1,5 @@
 import MeridianCore
 import SwiftUI
-import UIKit  // UIPasteboard
 
 /// BestWindowChip (spec §4.1) as a card: `BEST COMPROMISE`, the range in UTC (decision N),
 /// counts, and the weekend-skip note. Outlined with a checkmark while it is the selection.
@@ -87,8 +86,6 @@ struct MeetingCard: View {
     let onNow: (() -> Void)?
 
     @Environment(\.dynamicTypeSize) private var typeSize
-    @State private var copies = 0
-    @State private var showsCopied = false
 
     var body: some View {
         let tags = MeetingText.tags(start: selection, minutes: minutes, zones: zones)
@@ -220,20 +217,8 @@ struct MeetingCard: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xs))
             : AnyLayout(HStackLayout(spacing: Spacing.xs))
         return layout {
-            Button {
-                UIPasteboard.general.string = text
-                copies += 1
-                showsCopied = true
-                Task {
-                    try? await Task.sleep(for: .seconds(2))
-                    showsCopied = false
-                }
-            } label: {
-                // Success = checkmark glyph swap (spec §3.1).
-                Label(showsCopied ? "Copied" : "Copy", systemImage: showsCopied ? "checkmark" : "doc.on.doc")
-                    .contentTransition(.symbolEffect(.replace))
-            }
-            .buttonStyle(.bordered)
+            CopyButton(text: text)
+                .buttonStyle(.bordered)
             ShareLink(item: text) {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
@@ -246,7 +231,6 @@ struct MeetingCard: View {
         }
         .controlSize(.large)
         .tint(.textPrimary)          // secondary controls stay neutral (§3.2)
-        .sensoryFeedback(Haptic.success, trigger: copies)
     }
 }
 

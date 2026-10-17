@@ -3,9 +3,9 @@ import SwiftData
 import SwiftUI
 import UIKit  // UIPasteboard
 
-/// The rounded input box every tool starts with: a large mono field, a clear button and
-/// optional trailing content (Dates' kind label and Today). Outlined in `statusDanger`
-/// when the input has a problem.
+/// The rounded input box every tool starts with: a large mono field, an optional caption
+/// under it (Dates' `Date · today`), a clear button and optional trailing content (Dates'
+/// Today). Outlined in `statusDanger` when the input has a problem.
 struct ToolInputBox<Trailing: View>: View {
     let placeholder: String
     @Binding var text: String
@@ -13,6 +13,8 @@ struct ToolInputBox<Trailing: View>: View {
     var keyboard: UIKeyboardType = .numbersAndPunctuation
     /// Dates hides it: its Today button already resets the input.
     var showsClear = true
+    /// Under the field, not beside it, so the value keeps the width (mono values never truncate).
+    var caption: String?
     @ViewBuilder var trailing: () -> Trailing
 
     @Environment(\.dynamicTypeSize) private var typeSize
@@ -25,12 +27,19 @@ struct ToolInputBox<Trailing: View>: View {
         layout {
             HStack(spacing: Spacing.s) {
                 // Wraps long epochs; a single-line field (Dates) scrolls instead.
-                TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
-                    .meridianFont(.monoTime)
-                    .foregroundStyle(.textPrimary)
-                    .keyboardType(keyboard)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+                VStack(alignment: .leading, spacing: 2) {
+                    TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
+                        .meridianFont(.monoTime)
+                        .foregroundStyle(.textPrimary)
+                        .keyboardType(keyboard)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    if let caption, !caption.isEmpty {
+                        Text(caption)
+                            .meridianFont(.caption)
+                            .foregroundStyle(.textSecondary)
+                    }
+                }
                 if showsClear, !text.isEmpty {
                     Button("Clear", systemImage: "xmark.circle.fill") { text = "" }
                         .labelStyle(.iconOnly)
@@ -111,10 +120,6 @@ struct CopyRow: View {
                 UIPasteboard.general.string = copyText
                 copies += 1
                 showsCopied = true
-                Task {
-                    try? await Task.sleep(for: .seconds(2))
-                    showsCopied = false
-                }
             } label: {
                 Image(systemName: showsCopied ? "checkmark" : "doc.on.doc")
                     .contentTransition(.symbolEffect(.replace))
@@ -132,6 +137,11 @@ struct CopyRow: View {
         .background(showsCopied ? Color.bgElevated : .clear)
         .animation(Motion.stateChange, value: showsCopied)
         .sensoryFeedback(Haptic.success, trigger: copies)
+        // Restarts on every copy, so a second tap keeps "Copied" up for the full 2 seconds.
+        .task(id: copies) {
+            guard copies > 0, (try? await Task.sleep(for: .seconds(2))) != nil else { return }
+            showsCopied = false
+        }
         .accessibilityElement(children: .combine)
     }
 
@@ -175,15 +185,8 @@ struct ProblemBlock: View {
                 if onFix != nil || onClear != nil {
                     HStack(spacing: Spacing.s) {
                         if let fixLabel, let onFix {
-                            Button(action: onFix) {
-                                fixLabel
-                                    .meridianFont(.headline)
-                                    .foregroundStyle(.textPrimary)
-                                    .padding(.horizontal, Spacing.m)
-                                    .frame(minHeight: Spacing.minTapTarget)
-                                    .background(.bgElevated, in: .capsule)
-                            }
-                            .buttonStyle(.plain)
+                            Button(action: onFix) { fixLabel }
+                                .buttonStyle(.pill)
                         }
                         if let onClear {
                             Button("Clear", action: onClear)
@@ -215,30 +218,6 @@ struct PlaceholderBox: View {
                 RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                     .strokeBorder(Color.separatorLine, style: StrokeStyle(lineWidth: 1, dash: [5, 4]))
             }
-    }
-}
-
-/// An info line: symbol, optional bold lead, then the text in `textSecondary`.
-struct NoteLine: View {
-    var systemImage = "info.circle"
-    var lead: String?
-    let text: String
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
-            Image(systemName: systemImage)
-                .foregroundStyle(.textSecondary)
-                .accessibilityHidden(true)
-            if let lead {
-                Text("\(Text(lead).bold().foregroundStyle(.textPrimary)) \(text)")
-                    .foregroundStyle(.textSecondary)
-            } else {
-                Text(text).foregroundStyle(.textSecondary)
-            }
-        }
-        .meridianFont(.body)
-        .fixedSize(horizontal: false, vertical: true)
-        .padding(.horizontal, Spacing.xs)
     }
 }
 

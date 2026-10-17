@@ -11,7 +11,6 @@ struct DatesView: View {
     @State private var sheet: Sheet?
 
     @Environment(AppState.self) private var appState
-    @Environment(\.dynamicTypeSize) private var typeSize
     @Query(sort: \SavedFiscalProfile.order) private var saved: [SavedFiscalProfile]
 
     enum Sheet: Identifiable {
@@ -87,20 +86,9 @@ struct DatesView: View {
         }
         return ToolInputBox(placeholder: today.isoText,
                             text: Binding(get: { text }, set: { input = $0 == today.isoText ? "" : $0 }),
-                            isInvalid: isProblem, showsClear: false) {
-            if !label.isEmpty {
-                Text(label)
-                    .meridianFont(.caption)
-                    .foregroundStyle(.textSecondary)
-                    .fixedSize(horizontal: !typeSize.isAccessibilitySize, vertical: false)
-            }
+                            isInvalid: isProblem, showsClear: false, caption: label) {
             Button("Today") { input = "" }
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-                .padding(.horizontal, Spacing.m)
-                .frame(minHeight: Spacing.minTapTarget)
-                .background(.bgElevated, in: .capsule)
-                .buttonStyle(.plain)
+                .buttonStyle(.pill)
                 .fixedSize()
         }
     }

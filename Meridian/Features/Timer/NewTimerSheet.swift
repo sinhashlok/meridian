@@ -136,8 +136,7 @@ struct NewTimerSheet: View {
                     .meridianFont(.sub)
                     .foregroundStyle(.textPrimary)
                 if let note = preview.note {
-                    NoteLine(systemImage: "clock.arrow.circlepath", text: note)
-                        .padding(.horizontal, -Spacing.xs)
+                    NoteLine(systemImage: "clock.arrow.circlepath", text: note, inset: 0)
                 }
             }
             .padding(.top, Spacing.xs)

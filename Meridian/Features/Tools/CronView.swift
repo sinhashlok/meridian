@@ -1,7 +1,6 @@
 import MeridianCore
 import SwiftData
 import SwiftUI
-import UIKit  // UIPasteboard
 
 /// Tools › Cron (spec §4.6; boards Cron and CronError): dialect, expression with field
 /// names, plain-English description, Evaluate-in zone and the next 5 runs in UTC and on
@@ -166,6 +165,10 @@ struct CronView: View {
                 Spacer()
                 CopyButton(text: CronText.copyText(expression: input.trimmingCharacters(in: .whitespaces),
                                                    description: expression.description, runs: runs, device: .device))
+                    .meridianFont(.headline)
+                    .foregroundStyle(.textPrimary)
+                    .frame(minHeight: Spacing.minTapTarget)
+                    .buttonStyle(.plain)
             }
             runTable(runs, now: now)
         }
@@ -232,32 +235,5 @@ struct CronView: View {
         }
         ProblemBlock(title: error.message, detail: CronText.hint(for: error, dialect: dialect) ?? "")
         PlaceholderBox(text: "The description and next runs appear once the expression is valid.")
-    }
-}
-
-/// `Copy` with the checkmark swap, for a whole block of text.
-struct CopyButton: View {
-    let text: String
-    @State private var copies = 0
-    @State private var showsCopied = false
-
-    var body: some View {
-        Button {
-            UIPasteboard.general.string = text
-            copies += 1
-            showsCopied = true
-            Task {
-                try? await Task.sleep(for: .seconds(2))
-                showsCopied = false
-            }
-        } label: {
-            Label(showsCopied ? "Copied" : "Copy", systemImage: showsCopied ? "checkmark" : "doc.on.doc")
-                .contentTransition(.symbolEffect(.replace))
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-                .frame(minHeight: Spacing.minTapTarget)
-        }
-        .buttonStyle(.plain)
-        .sensoryFeedback(Haptic.success, trigger: copies)
     }
 }

@@ -1,6 +1,5 @@
 import MeridianCore
 import SwiftUI
-import UIKit  // UIPasteboard
 
 /// Timer › Stopwatch (spec §4.4, decision AP): centiseconds, Lap/Reset and Start/Stop,
 /// laps newest first with fastest/slowest marked from 3 laps, Copy CSV. The Core
@@ -13,8 +12,6 @@ struct StopwatchView: View {
 
     @State private var laps = 0
     @State private var starts = 0
-    @State private var copies = 0
-    @State private var copied = false
 
     private var watch: Stopwatch {
         (try? JSONDecoder().decode(Stopwatch.self, from: stored)) ?? Stopwatch()
@@ -46,7 +43,6 @@ struct StopwatchView: View {
         }
         .sensoryFeedback(Haptic.lap, trigger: laps)
         .sensoryFeedback(Haptic.timerStart, trigger: starts)
-        .sensoryFeedback(Haptic.success, trigger: copies)
         .onAppear(perform: applyDebugLaunch)
     }
 
@@ -121,25 +117,10 @@ struct StopwatchView: View {
         }
     }
 
-    /// Copy CSV (spec §4.4): glyph swaps to a checkmark on success (spec §3.1).
+    /// Copy CSV (spec §4.4).
     private func copyButton(_ completed: [Lap]) -> some View {
-        Button {
-            UIPasteboard.general.string = StopwatchText.csv(completed)
-            copies += 1
-            copied = true
-            Task {
-                try? await Task.sleep(for: .seconds(1.5))
-                copied = false
-            }
-        } label: {
-            Label(copied ? "Copied" : "Copy CSV", systemImage: copied ? "checkmark" : "doc.on.doc")
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-                .padding(.horizontal, Spacing.m)
-                .frame(minHeight: Spacing.minTapTarget)
-                .background(.bgElevated, in: .capsule)
-        }
-        .buttonStyle(.plain)
+        CopyButton(text: StopwatchText.csv(completed), title: "Copy CSV")
+            .buttonStyle(.pill)
     }
 
     // MARK: State

@@ -70,22 +70,3 @@ struct DayPager: View {
         .disabled(isToday)
     }
 }
-
-/// A neutral 44pt circle with a symbol (DayPager chevrons).
-struct RoundIconButton: View {
-    let systemImage: String
-    let label: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: systemImage)
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-                .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
-                .background(.bgSurface, in: .circle)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
-    }
-}

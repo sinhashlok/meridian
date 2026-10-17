@@ -55,8 +55,7 @@ struct TimerCard: View {
                 }
             }
             ForEach(text.notes, id: \.self) { note in
-                NoteLine(systemImage: "clock.arrow.circlepath", text: note)
-                    .padding(.horizontal, -Spacing.xs)
+                NoteLine(systemImage: "clock.arrow.circlepath", text: note, inset: 0)
             }
         }
         .padding(Spacing.m)
@@ -134,31 +133,30 @@ struct TimerCard: View {
             if timer.isDuration {
                 switch status {
                 case .running, .paused:
-                    Button { perform(.addMinute) } label: {
-                        Text("+1 min")
-                            .meridianFont(.headline)
-                            .fixedSize()    // natural width, so ViewThatFits stacks instead of squeezing
-                            .padding(.horizontal, Spacing.m)
-                            .frame(minHeight: Spacing.minTapTarget)
-                            .background(.bgElevated, in: .capsule)
-                    }
-                    .accessibilityLabel("Add 1 minute")
-                    .accessibilityShowsLargeContentViewer()
+                    Button("+1 min") { perform(.addMinute) }
+                        .buttonStyle(.pill)
+                        .fixedSize()    // natural width, so ViewThatFits stacks instead of squeezing
+                        .accessibilityLabel("Add 1 minute")
+                        .accessibilityShowsLargeContentViewer()
                     if status == .running {
-                        CircleButton(systemImage: "pause.fill", label: "Pause") { perform(.pause) }
+                        circle("pause.fill", "Pause") { perform(.pause) }
                     } else {
-                        CircleButton(systemImage: "play.fill", label: "Resume") { perform(.resume) }
+                        circle("play.fill", "Resume") { perform(.resume) }
                     }
                 case .finished:
-                    CircleButton(systemImage: "arrow.clockwise", label: "Restart") { perform(.restart) }
+                    circle("arrow.clockwise", "Restart") { perform(.restart) }
                 }
             }
-            CircleButton(systemImage: "xmark", label: status == .finished ? "Dismiss" : "Cancel") { perform(.remove) }
+            circle("xmark", status == .finished ? "Dismiss" : "Cancel") { perform(.remove) }
         }
-        .foregroundStyle(.textPrimary)
-        .buttonStyle(.plain)
         // Icon controls stop growing at AX1 so the row still fits; long-press shows them large.
         .dynamicTypeSize(...DynamicTypeSize.accessibility1)
+    }
+
+    /// 48pt on `bgElevated` (board TimerUntil).
+    private func circle(_ systemImage: String, _ label: String, action: @escaping () -> Void) -> some View {
+        RoundIconButton(systemImage: systemImage, label: label, fill: .bgElevated, size: Spacing.minTapTarget + 4,
+                        action: action)
     }
 
     /// VoiceOver: "6 minutes 42 seconds left".
@@ -166,29 +164,6 @@ struct TimerCard: View {
         let seconds = timer.remainingSeconds(at: now)
         let parts = DateComponentsFormatter.localizedString(from: DateComponents(second: seconds), unitsStyle: .full)
         return seconds == 0 ? "Done" : "\(parts ?? "") left"
-    }
-}
-
-/// A 44pt round button on `bgElevated` (board TimerUntil).
-private struct CircleButton: View {
-    let systemImage: String
-    let label: String
-    let action: () -> Void
-
-    /// 48pt at the default size, growing with the glyph.
-    @ScaledMetric(relativeTo: .body) private var size = Spacing.minTapTarget + 4
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(.body, weight: .semibold))
-                .frame(width: size, height: size)
-                .background(.bgElevated, in: .circle)
-        }
-        .accessibilityLabel(label)
-        .accessibilityShowsLargeContentViewer {
-            Label(label, systemImage: systemImage)
-        }
     }
 }
 
