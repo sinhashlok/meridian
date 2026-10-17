@@ -63,7 +63,7 @@ public enum TimerText {
             case .running:
                 let end = timer.endDate!
                 line = "Ends " + timeOnDay(end, in: display, now: now)
-                notes += clockChangeNotes(in: display, from: now, to: end)
+                notes += ZoneClock.clockChangeNotes(in: display, from: now, to: end)
             case .finished:
                 line = "Done · ended " + timeOnDay(timer.endDate!, in: display, now: now)
             }
@@ -88,7 +88,7 @@ public enum TimerText {
                 line = "Passed " + EpochText.relative(epoch(end), now: now)
             } else if ruleNote == nil || !sameZone(zone, display) {
                 // A §5.2 note already says this zone changes clocks; don't say it twice.
-                notes += clockChangeNotes(in: display, from: now, to: end)
+                notes += ZoneClock.clockChangeNotes(in: display, from: now, to: end)
             }
             return TimerCardText(title: timer.name.isEmpty ? untilTime : timer.name, tag: "Until",
                                  remaining: remaining, status: line, untilTime: untilTime, localLine: localLine,
@@ -136,7 +136,7 @@ public enum TimerText {
     // MARK: Private
 
     /// `21:16 IST`, or `Fri 07:30 IST` when that isn't today in `zone`.
-    private static func timeOnDay(_ instant: Date, in zone: Zone, now: Date) -> String {
+    static func timeOnDay(_ instant: Date, in zone: Zone, now: Date) -> String {
         let time = ZoneClock.timeWithAbbreviation(instant, in: zone)
         return isOtherDay(instant, in: zone, now: now)
             ? ZoneClock.local(instant, in: zone).date.weekdayText + " " + time : time
@@ -148,13 +148,6 @@ public enum TimerText {
 
     private static func sameZone(_ a: Zone, _ b: Zone) -> Bool {
         a == b || (a.isUTC && b.isUTC)
-    }
-
-    /// §5.3: `Clocks go back 1 hour at 02:00 BST before this ends.`
-    private static func clockChangeNotes(in zone: Zone, from now: Date, to end: Date) -> [String] {
-        ZoneClock.transitions(in: zone, from: now, to: end).map { change in
-            "Clocks go \(change.directionText) at \(change.wallTimes.from) \(change.before.shortName) before this ends."
-        }
     }
 
     /// §5.2 note when the rule decided the target.

@@ -88,6 +88,14 @@ extension ZoneClock {
 
     // MARK: Shared wording
 
+    /// §5.3, for anything that ends later (timers, sessions): one note per clock change in
+    /// `zone` before `end`. `Clocks go back 1 hour at 02:00 BST before this ends.`
+    static func clockChangeNotes(in zone: Zone, from now: Date, to end: Date) -> [String] {
+        transitions(in: zone, from: now, to: end).map { change in
+            "Clocks go \(change.directionText) at \(change.wallTimes.from) \(change.before.shortName) before this ends."
+        }
+    }
+
     /// `5h 30m`, `1h`, `30m` with no sign.
     static func amountText(_ seconds: Int) -> String {
         String(durationText(seconds: abs(seconds)).dropFirst())
