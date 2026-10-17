@@ -201,6 +201,10 @@ Rules:
   `.dynamicTypeSize(...)` cap inside the same body doesn't limit it (wrap it, as
   `RoundIconButton` does). Check every changed screen at AX5 (`xcrun simctl ui booted
   content_size accessibility-extra-extra-extra-large`).
+  Never put a `TimelineView` in a toolbar item: on iOS 27 it keeps the navigation bar
+  re-laying out nonstop (main thread 100% busy, ~0.74 s freeze every second). `UTCPill`
+  ticks with a `.task` loop instead. To find hangs: `xcrun xctrace record --template
+  'Time Profiler' --instrument Hangs` on a Release build (the phone must be on a cable).
 - Shared views (17 Oct cleanup): `App/SegmentedScreen.swift` (every segmented tab:
   header, picker, selection haptic; segments conform to `ScreenSegment`); DesignSystem
   `NoteLine` (also the DSTNote), `CopyButton`, `RoundIconButton`, `.buttonStyle(.pill)`.

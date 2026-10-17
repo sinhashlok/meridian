@@ -5,18 +5,16 @@ import SwiftUI
 /// (spec §4.1); in UTC mode it gets an accent outline.
 struct UTCPill: View {
     @Environment(AppState.self) private var appState
-
-    /// Ticks land on whole seconds because the schedule starts on a whole second.
-    private static let everySecond = PeriodicTimelineSchedule(
-        from: Date(timeIntervalSinceReferenceDate: 0), by: 1
-    )
+    /// Set on each whole second by `tick()`. Not a `TimelineView`: inside a toolbar item one
+    /// kept the navigation bar re-laying out nonstop (iOS 27), freezing the app ~0.74 s a second.
+    @State private var tickDate = Date.now
 
     var body: some View {
         Button {
             appState.isUTCMode.toggle()
         } label: {
-            TimelineView(Self.everySecond) { context in
-                let time = ClockFormat.utcTime(appState.now(context.date))
+            Group {
+                let time = ClockFormat.utcTime(appState.now(tickDate))
                 Text("UTC \(time)")
                     .meridianFont(.monoCaption)
                     .foregroundStyle(.textPrimary)
@@ -39,6 +37,16 @@ struct UTCPill: View {
         .sensoryFeedback(Haptic.utcFlip, trigger: appState.isUTCMode)
         .accessibilityAddTraits(appState.isUTCMode ? .isSelected : [])
         .accessibilityHint(appState.isUTCMode ? "Shows times in their own zones" : "Shows all times in UTC")
+        .task { await tick() }
+    }
+
+    /// Updates `tickDate` just after each whole second until the pill goes away.
+    private func tick() async {
+        while !Task.isCancelled {
+            let intoSecond = Date.now.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1)
+            try? await Task.sleep(for: .seconds(1 - intoSecond))
+            tickDate = .now
+        }
     }
 }
 
