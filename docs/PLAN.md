@@ -53,7 +53,7 @@ what to check on the phone.
 | M3 | Zones UI: Clocks, Planner, DayPager, scrubber, BestWindowChip, Copy/Share | Planner board recreated; scrub feels right on the phone | Built 16 Oct 2026 (`cbb5113`); board comparison and iPhone checks pending |
 | M4 | Tools UI: Epoch, Cron, Dates, fiscal profile sheet | Boards recreated; copy buttons work |  |
 | M5 | Timer: duration + until, Stopwatch with laps/CSV, widget extension + Live Activity | Timers survive locking the phone | Built 17 Oct 2026; iPhone checks pending |
-| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown |  |
+| M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown | Built 17 Oct 2026; iPhone checks pending |
 | M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 |  |
 | M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows |  |
 | M9 | App icon, name, TestFlight | Build installed via TestFlight |  |

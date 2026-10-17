@@ -156,6 +156,16 @@ Rules:
   Debug: `-MeridianTimers demo|live|short`, `-MeridianStopwatch demo`,
   `-MeridianScreen newTimer|newTimerUntil`, `-timer.segment stopwatch`. Simulator
   screenshots don't show Island content; check it on the phone or in the Xcode preview.
+- M6 done (17 Oct 2026, decisions AT–BC): Sessions. Core `PomodoroSession` (phases with
+  instants; pause/+5/skip), `SessionText`, `MeetingLine`, `SessionActivityContent`,
+  `AlarmDiff`; 242 Core tests. App: `SessionsView` (+ `PomodoroRing`, `MeetingLineCard`),
+  `SessionStore` (UserDefaults JSON) + `SessionRecord` history, `SessionAlarms`,
+  `SessionActivityController`; shared `AlarmService`, `AppModel.container`,
+  `LiveActivityActions` (intents' real work). Widget: `SessionLiveActivity`,
+  `LiveActivityParts` (countdown, progress, `LiveButton`), intents in
+  `Shared/LiveActivityIntents.swift` with a widget stub. `AppState.tab` and
+  `plannerJump` (meeting line → Planner). Debug: `-MeridianSession demo|paused|done|idle`;
+  `-MeridianBottom 1` also works on Sessions.
 - Views get "now" from `AppState.now(timelineDate)`, never `Date.now` directly.
   Debug launch arguments for screenshots (ignored in Release): `-MeridianNow <ISO>`,
   `-MeridianZones "Asia/Kolkata=Mumbai,Europe/London=London"` (first is home),
@@ -193,13 +203,14 @@ Rules:
 
 ### Next up (as of 17 Oct 2026)
 
-0. M5 checks on the iPhone: a timer rings when locked, on Silent, in Focus and after
-   force-quit; pause / +1 min / resume / restart reschedule (one ring, at the new time);
-   Until timer rings at the right time; Live Activity on the Lock Screen and Island
-   (compact, minimal, expanded) and tapping it opens Timer; haptics on start and lap;
-   Copy CSV pastes into Notes; deny Alarms in Settings and check the fallback line and
-   notification. Then M6 Sessions (plan first): adds App Intents, then retrofit
-   Pause / +1 min / Stop onto the timer Live Activity (decision AQ).
+0. M5 + M6 checks on the iPhone: timers and session phase changes ring when locked, on
+   Silent, in Focus and after force-quit; a session keeps advancing with the app killed;
+   timer pause / +1 min / resume / restart ring once at the new time; Live Activities
+   on the Lock Screen and Island (compact, minimal, expanded); every Live Activity button
+   (session Pause / Resume / Skip / +5 min / Stop, timer Pause / Resume / +1 min / Cancel)
+   updates the app; tapping an activity opens its tab; the meeting line opens the Planner
+   on its window; haptics on start, lap and session done; Copy CSV; denied-Alarms note.
+   Then M7 Alarms + Jobs (plan first; reuse `AlarmService` and `AlarmDiff`).
 1. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
    new handle/hint, best window snap haptic and ✓ state, Copy/Share, meeting length menu,
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.

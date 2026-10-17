@@ -234,3 +234,52 @@ what an alarm is for and M7's alarms will share it. One sync runs at a time.
 is compiled into both targets (`TimerActivityAttributes`); `Tokens.swift` is also a
 member of the widget target. The content state carries Core-formatted strings, so the
 widget doesn't link `MeridianCore` until M8.
+
+## 17 Oct 2026 · M6 Sessions
+
+**AT. A session is a list of phases with real instants**, planned at Start. Pause
+records `pausedAt`; resume moves every later boundary by the pause; +5 min lengthens
+the current phase and moves the rest; Skip ends it now and pulls the rest earlier.
+"Where am I" is computed from `now`, so the session advances with the app killed.
+Each phase keeps its paused seconds, so history never counts a pause as focus.
+
+**AU. A session ends after the last focus** (4 focus + 3 breaks, no long break):
+"Session done · 1 h 40 min focused", success haptic, then New session.
+
+**AV. Phase ends ring with AlarmKit**, one `.fixed` alarm per boundary still ahead,
+all scheduled up front ("Break · 5 min", "Focus 2 of 4", "Session done"); none while
+paused. Denied Alarms falls back to notifications with the timers' note (AI).
+
+**AW. Lengths are editable when idle**: Focus 15/25/45/50, Break 5/10/15, Cycles 1–6
+(25/5/4 by default), remembered. Not editable mid-session.
+
+**AX. Screen per board Sessions**, with "Ends 21:28 IST" (zone added, like Timer's AL).
+Ring = remaining fraction; focus accent, break `textSecondary`, paused `textTertiary`.
+Cycle dots: done `textSecondary`, current accent, upcoming `tintSleep`. Idle: Start
+(the one orange button) above the meeting line. At accessibility sizes the ring's
+caption and the Pause button move to their own rows.
+
+**AY. Meeting line**: the best window from now (`bestWindow(notBefore: now)`), Planner
+counts wording, "in N min" rounded **up** (board: 20 min 42 s → 21 min), "now",
+"No shared window today" + "Next: Mon 16:00 UTC · …"; hidden under 2 zones. Tap →
+Zones › Planner on that window (`AppState.plannerJump`).
+
+**AZ. Session Live Activity** per boards LiveActivity and Island. Relevance: session
+100, timers 50, so a running session owns the Dynamic Island. Same no-push limit as
+timers: after a phase ends in the background it shows 0:00 until the app runs.
+
+**BA. Live Activity buttons are `LiveActivityIntent`s** in `Shared/` (one session intent,
+one timer intent, each with an action parameter; hidden from Shortcuts). iOS runs them
+in the app; `LiveActivityActions` (app) applies the change and waits for alarms and the
+activity; the widget target has a no-op stand-in. Session: Pause + Skip on the Lock
+Screen, Pause / +5 min / Stop expanded. Timer: Pause + +1 min, plus Cancel expanded.
+
+**BB. Storage**: the active session and lengths are JSON in `UserDefaults`
+(`SessionStore`), shared with intents; finished focus is `SessionRecord` rows. One
+`ModelContainer` (`AppModel.container`) for the scene and intents.
+
+**BC. `AlarmDiff` (Core)** reconciles wanted fire dates with stored ids and what
+AlarmKit reports. Dates match exactly, so store them as seconds since 2001
+(`timeIntervalSinceReferenceDate`): seconds since 1970 don't round-trip, which made
+every sync cancel and reschedule all alarms (caught in the AlarmKit log).
+`AlarmService` (app) holds the AlarmKit and notification calls timers and sessions share.
