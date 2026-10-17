@@ -30,7 +30,7 @@ struct TimerTab: View {
                 case .timers:
                     TimersView()
                 case .stopwatch:
-                    ContentUnavailableView("Stopwatch", systemImage: "stopwatch", description: Text("Coming in M5"))
+                    StopwatchView()
                 }
             }
             .frame(maxHeight: .infinity, alignment: .top)
