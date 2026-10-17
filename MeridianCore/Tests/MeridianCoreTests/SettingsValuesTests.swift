@@ -55,3 +55,30 @@ struct SettingsValuesTests {
         #expect(ZoneClock.dataVersion.wholeMatch(of: /\d{4}[a-z]/) != nil)
     }
 }
+
+/// Decision CC: VoiceOver reads each Planner row as one sentence (board Planner times:
+/// 16:00Z = 21:30 IST, 17:00 BST, 09:00 PDT; Sat 17 Oct 10:00 IST = 04:30Z).
+@Suite("Planner row for VoiceOver")
+struct PlannerSpokenRowTests {
+    static let start = JobTextTests.utc("2026-10-15T16:00:00Z")
+
+    @Test("Spoken weekday summary")
+    func spokenDays() {
+        #expect(Weekdays.spokenSummary([1, 2, 3, 4, 5]) == "Monday to Friday")
+        #expect(Weekdays.spokenSummary([1, 2, 3, 4, 6]) == "Monday to Thursday, Saturday")
+        #expect(Weekdays.spokenSummary([]) == "no work days")
+    }
+
+    @Test("Rows")
+    func rows() {
+        let mumbai = PlannerZone(zone: Zone("Asia/Kolkata")!, name: "Mumbai")
+        let sf = PlannerZone(zone: Zone("America/Los_Angeles")!, name: "SF", workStart: ClockTime(8, 30),
+                             workEnd: ClockTime(17, 0), workDays: [1, 2, 3, 4])
+        #expect(mumbai.spokenRow(at: Self.start, isHome: true)
+                == "Mumbai, home, 21:30 IST, stretch hours. Work hours 09:00 to 18:00, Monday to Friday.")
+        #expect(sf.spokenRow(at: Self.start, isHome: false)
+                == "SF, 09:00 PDT, work hours. Work hours 08:30 to 17:00, Monday to Thursday.")
+        #expect(mumbai.spokenRow(at: JobTextTests.utc("2026-10-17T04:30:00Z"), isHome: false)
+                == "Mumbai, 10:00 IST, weekend, stretch hours. Work hours 09:00 to 18:00, Monday to Friday.")
+    }
+}
