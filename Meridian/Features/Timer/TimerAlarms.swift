@@ -30,13 +30,17 @@ import SwiftData
 
     private init() {}
 
-    /// Queues a reconcile of every saved timer against the system's alarms.
-    func sync(in context: ModelContext) {
+    /// Queues a reconcile of every saved timer against the system's alarms; await the
+    /// task to know the alarms and activity are done.
+    @discardableResult
+    func sync(in context: ModelContext) -> Task<Void, Never> {
         let previous = running
-        running = Task {
+        let task = Task {
             await previous?.value
             await reconcile(in: context)
         }
+        running = task
+        return task
     }
 
     // MARK: Private

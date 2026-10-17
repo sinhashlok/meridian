@@ -3,6 +3,8 @@ import Foundation
 /// What the timer Live Activity shows (decision AQ): the soonest timer and "+N more".
 /// The app copies it into the ActivityKit content state; the widget only lays it out.
 public struct TimerActivityContent: Equatable, Sendable {
+    /// The shown timer, so Lock Screen buttons act on it.
+    public let timerID: UUID
     public let title: String
     /// `Ends 21:16 IST`, `Until 02:00 UTC` or `Paused`.
     public let caption: String
@@ -16,8 +18,9 @@ public struct TimerActivityContent: Equatable, Sendable {
     /// `+2 more`; `nil` when this is the only timer.
     public let more: String?
 
-    public init(title: String, caption: String, endDate: Date?, progressStart: Date?, pausedRemaining: String?,
-                pausedFraction: Double?, more: String?) {
+    public init(timerID: UUID, title: String, caption: String, endDate: Date?, progressStart: Date?,
+                pausedRemaining: String?, pausedFraction: Double?, more: String?) {
+        self.timerID = timerID
         self.title = title
         self.caption = caption
         self.endDate = endDate
@@ -73,14 +76,16 @@ public enum TimerAlarmPlan {
         let more = live.count > 1 ? "+\(live.count - 1) more" : nil
 
         if soonest.status(at: now) == .paused {
-            return TimerActivityContent(title: card.title, caption: "Paused", endDate: nil, progressStart: nil,
+            return TimerActivityContent(timerID: soonest.id, title: card.title, caption: "Paused", endDate: nil,
+                                        progressStart: nil,
                                         pausedRemaining: card.remaining, pausedFraction: soonest.progress(at: now),
                                         more: more)
         }
         let end = soonest.endDate!
         let caption = card.untilTime.map { "Until " + $0 } ?? card.status ?? ""    // "Ends Fri 00:30 IST"
         let start = soonest.totalSeconds.map { end.addingTimeInterval(-TimeInterval($0)) }
-        return TimerActivityContent(title: card.title, caption: caption, endDate: end, progressStart: start,
+        return TimerActivityContent(timerID: soonest.id, title: card.title, caption: caption, endDate: end,
+                                    progressStart: start,
                                     pausedRemaining: nil, pausedFraction: nil, more: more)
     }
 }

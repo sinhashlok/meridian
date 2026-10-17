@@ -30,13 +30,25 @@ struct TimerLiveActivity: Widget {
                         .foregroundStyle(.textPrimary)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(alignment: .leading, spacing: Spacing.xxs) {
-                        Text(state.title)
-                            .meridianFont(.headline)
-                            .foregroundStyle(.textPrimary)
-                        Text([state.caption, state.more].compactMap(\.self).joined(separator: " · "))
-                            .meridianFont(.sub)
-                            .foregroundStyle(.textSecondary)
+                    VStack(alignment: .leading, spacing: Spacing.s) {
+                        VStack(alignment: .leading, spacing: Spacing.xxs) {
+                            Text(state.title)
+                                .meridianFont(.headline)
+                                .foregroundStyle(.textPrimary)
+                            Text([state.caption, state.more].compactMap(\.self).joined(separator: " · "))
+                                .meridianFont(.sub)
+                                .foregroundStyle(.textSecondary)
+                        }
+                        // Pause / +1 min / Cancel (decision BA; Until timers: Cancel only).
+                        HStack(spacing: Spacing.xs) {
+                            if state.isDuration {
+                                pauseButton(state)
+                                LiveButton(title: "+1 min", systemImage: "plus",
+                                           intent: TimerActionIntent(.addMinute, timerID: state.timerID))
+                            }
+                            LiveButton(title: "Cancel", systemImage: "xmark",
+                                       intent: TimerActionIntent(.cancel, timerID: state.timerID))
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -83,9 +95,18 @@ private struct LockScreenView: View {
             }
             .meridianFont(.sub)
 
-            LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
-                .font(.system(size: 48, weight: .light).monospacedDigit())
-                .foregroundStyle(.textPrimary)
+            HStack(alignment: .center, spacing: Spacing.s) {
+                LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
+                    .font(.system(size: 48, weight: .light).monospacedDigit())
+                    .foregroundStyle(.textPrimary)
+                Spacer(minLength: 0)
+                // Pause and +1 min for duration timers (decision BA); Until has neither.
+                if state.isDuration {
+                    pauseButton(state, iconOnly: true)
+                    LiveButton(title: "Add 1 minute", systemImage: "goforward.plus",
+                               intent: TimerActionIntent(.addMinute, timerID: state.timerID), iconOnly: true)
+                }
+            }
 
             LiveProgress(shape: .bar, start: state.progressStart, end: state.endDate,
                          pausedFraction: state.pausedFraction, tint: state.endDate == nil ? .textTertiary : .accent)
@@ -96,12 +117,24 @@ private struct LockScreenView: View {
 
 // MARK: - Parts
 
+extension TimerActivityAttributes.ContentState {
+    /// Duration timers have a bar (running) or a paused fraction; Until timers have neither.
+    var isDuration: Bool { progressStart != nil || pausedFraction != nil }
+}
+
+/// Pause while running, Resume while paused.
+private func pauseButton(_ state: TimerActivityAttributes.ContentState, iconOnly: Bool = false) -> some View {
+    let isPaused = state.endDate == nil
+    return LiveButton(title: isPaused ? "Resume" : "Pause", systemImage: isPaused ? "play.fill" : "pause.fill",
+                      intent: TimerActionIntent(isPaused ? .resume : .pause, timerID: state.timerID), iconOnly: iconOnly)
+}
+
 /// Ring for the Island: drains with the timer; a timer glyph for Until timers.
 private struct Ring: View {
     let state: TimerActivityAttributes.ContentState
 
     var body: some View {
-        if state.progressStart != nil || state.pausedFraction != nil {
+        if state.isDuration {
             LiveProgress(shape: .ring, start: state.progressStart, end: state.endDate,
                          pausedFraction: state.pausedFraction, tint: state.endDate == nil ? .textTertiary : .accent)
         } else {
@@ -118,12 +151,12 @@ private struct Ring: View {
 extension TimerActivityAttributes.ContentState {
     /// Board TimerUntil's Standup prep, 06:42 left.
     fileprivate static var standup: Self {
-        Self(title: "Standup prep", caption: "Ends 21:16 IST", endDate: .now.addingTimeInterval(402),
+        Self(timerID: UUID(), title: "Standup prep", caption: "Ends 21:16 IST", endDate: .now.addingTimeInterval(402),
              progressStart: .now.addingTimeInterval(-198), pausedRemaining: nil, pausedFraction: nil, more: "+1 more")
     }
 
     fileprivate static var paused: Self {
-        Self(title: "Standup prep", caption: "Paused", endDate: nil, progressStart: nil,
+        Self(timerID: UUID(), title: "Standup prep", caption: "Paused", endDate: nil, progressStart: nil,
              pausedRemaining: "06:42", pausedFraction: 0.67, more: nil)
     }
 }

@@ -34,12 +34,16 @@ import Observation
 
     private init() {}
 
-    func sync() {
+    /// Queues a reconcile; await the task to know the alarms and activity are done.
+    @discardableResult
+    func sync() -> Task<Void, Never> {
         let previous = running
-        running = Task {
+        let task = Task {
             await previous?.value
             await reconcile()
         }
+        running = task
+        return task
     }
 
     private func reconcile() async {

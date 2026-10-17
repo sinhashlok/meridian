@@ -16,7 +16,7 @@ import MeridianCore
             return
         }
         let state = TimerActivityAttributes.ContentState(
-            title: content.title, caption: content.caption, endDate: content.endDate,
+            timerID: content.timerID, title: content.title, caption: content.caption, endDate: content.endDate,
             progressStart: content.progressStart, pausedRemaining: content.pausedRemaining,
             pausedFraction: content.pausedFraction, more: content.more)
         // Marked stale once the shown timer ends, so the system knows it's out of date.

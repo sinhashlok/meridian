@@ -38,8 +38,16 @@ struct SessionLiveActivity: Widget {
                         .foregroundStyle(.textPrimary)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    MeetingLines(state: state)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .leading, spacing: Spacing.s) {
+                        MeetingLines(state: state)
+                        // Board Island: Pause / +5 min / Stop (decision BA).
+                        HStack(spacing: Spacing.xs) {
+                            sessionPauseButton(state)
+                            LiveButton(title: "+5 min", systemImage: "plus", intent: SessionActionIntent(.addFive))
+                            LiveButton(title: "Stop", systemImage: "stop.fill", intent: SessionActionIntent(.stop))
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             } compactLeading: {
                 SessionRing(state: state).frame(width: 20, height: 20)
@@ -80,9 +88,16 @@ private struct SessionLockScreenView: View {
             }
             .meridianFont(.sub)
 
-            LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
-                .font(.system(size: 48, weight: .light).monospacedDigit())
-                .foregroundStyle(.textPrimary)
+            // Board LiveActivity: Pause and Skip beside the countdown (decision BA).
+            HStack(alignment: .center, spacing: Spacing.s) {
+                LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
+                    .font(.system(size: 48, weight: .light).monospacedDigit())
+                    .foregroundStyle(.textPrimary)
+                Spacer(minLength: 0)
+                sessionPauseButton(state, iconOnly: true)
+                LiveButton(title: "Skip to next phase", systemImage: "forward.end.fill",
+                           intent: SessionActionIntent(.skip), iconOnly: true)
+            }
 
             LiveProgress(shape: .bar, start: state.phaseStart, end: state.endDate, pausedFraction: state.pausedFraction,
                          tint: sessionTint(state))
@@ -122,6 +137,13 @@ private struct MeetingLines: View {
             }
         }
     }
+}
+
+/// Pause while running, Resume while paused.
+private func sessionPauseButton(_ state: SessionActivityAttributes.ContentState, iconOnly: Bool = false) -> some View {
+    let isPaused = state.endDate == nil
+    return LiveButton(title: isPaused ? "Resume" : "Pause", systemImage: isPaused ? "play.fill" : "pause.fill",
+                      intent: SessionActionIntent(isPaused ? .resume : .pause), iconOnly: iconOnly)
 }
 
 /// Focus accent, break `textSecondary`, paused `textTertiary` (as in the app).

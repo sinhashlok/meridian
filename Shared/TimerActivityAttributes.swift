@@ -10,6 +10,8 @@ import Foundation
 /// off the main thread, so it must be plain `Sendable` data.
 nonisolated struct TimerActivityAttributes: ActivityAttributes {
     nonisolated struct ContentState: Codable, Hashable, Sendable {
+        /// The shown timer, for the Pause / +1 min / Cancel buttons.
+        var timerID: UUID
         /// Soonest timer's name.
         var title: String
         /// `Ends 21:16 IST`, `Until 02:00 UTC` or `Paused`.

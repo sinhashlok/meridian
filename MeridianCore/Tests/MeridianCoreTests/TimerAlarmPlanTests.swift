@@ -54,7 +54,7 @@ struct TimerAlarmPlanTests {
     func activityBoard() {
         let content = TimerAlarmPlan.activity([Self.deploy(), Self.standup()], now: Self.now, display: Self.ist)
         #expect(content == TimerActivityContent(
-            title: "Standup prep", caption: "Ends 21:16 IST",
+            timerID: Self.id(1), title: "Standup prep", caption: "Ends 21:16 IST",
             endDate: try! EpochParser.parseISO8601("2026-10-15T15:46:00Z").date,
             progressStart: try! EpochParser.parseISO8601("2026-10-15T15:36:00Z").date,
             pausedRemaining: nil, pausedFraction: nil, more: "+1 more"))

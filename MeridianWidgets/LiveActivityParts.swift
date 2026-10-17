@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 
 // Pieces both Live Activities draw. Live Activities can't run our clock code, so running
@@ -46,5 +47,34 @@ struct LiveProgress: View {
         case .bar: view.tint(tint)
         case .ring: view.progressViewStyle(.circular).tint(tint)
         }
+    }
+}
+
+/// A Live Activity button that runs an intent in the app (decision BA): a 44pt circle
+/// with a symbol, or a capsule with a label. Neutral `bgElevated`, like the app's pills.
+struct LiveButton<Intent: AppIntent>: View {
+    let title: String
+    let systemImage: String
+    let intent: Intent
+    var iconOnly = false
+
+    var body: some View {
+        Button(intent: intent) {
+            if iconOnly {
+                Image(systemName: systemImage)
+                    .font(.system(.body, weight: .semibold))
+                    .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
+                    .background(.bgElevated, in: .circle)
+            } else {
+                Label(title, systemImage: systemImage)
+                    .meridianFont(.headline)
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity, minHeight: Spacing.minTapTarget)
+                    .background(.bgElevated, in: .capsule)
+            }
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(.textPrimary)
+        .accessibilityLabel(title)
     }
 }
