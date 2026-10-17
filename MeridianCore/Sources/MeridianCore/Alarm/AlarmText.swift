@@ -71,6 +71,13 @@ public enum AlarmText {
         }
     }
 
+    /// What AlarmKit shows when it rings: `NY market open prep · 09:00 New York`, `Wake`.
+    public static func alertTitle(_ alarm: ClockAlarm) -> String {
+        let label = alarm.label.isEmpty ? "Alarm" : alarm.label
+        guard let zoneID = alarm.zoneID, let zone = Zone(zoneID) else { return label }
+        return "\(label) · \(alarm.time.text) \(ZoneCatalog.displayName(for: zone))"
+    }
+
     /// Under the edit sheet's zone row: `18:30 IST on this phone today · EDT (UTC−4)`.
     /// `nil` for Local alarms and the phone's own zone.
     public static func localEquivalent(_ alarm: ClockAlarm, now: Date, device: Zone) -> String? {

@@ -80,6 +80,9 @@ enum DebugLaunch {
     /// `-MeridianSession demo|paused|done|idle`: replaces the active session.
     static var session: String? { string("MeridianSession") }
 
+    /// `-MeridianAlarms demo|none`: replaces saved alarms (see `AlarmStore.applyDebugLaunch`).
+    static var alarms: String? { string("MeridianAlarms") }
+
     private static func string(_ key: String) -> String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: key)

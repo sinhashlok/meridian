@@ -3,11 +3,7 @@ import Foundation
 import SwiftUI  // Color.accent for the alarm tint
 import UserNotifications
 
-/// AlarmKit requires a metadata type even when there is nothing to attach.
-/// `nonisolated` keeps it off the MainActor so it can be `Sendable`, as AlarmKit requires.
-nonisolated struct MeridianAlarmMetadata: AlarmMetadata {}
-
-/// The AlarmKit and notification calls every feature shares (timers, sessions, M7
+/// The AlarmKit and notification calls every feature shares (timers, sessions,
 /// alarms). Each feature decides *what* should ring and keeps its own ids; this only talks
 /// to the system. Permissions are asked when something first needs to ring (spec §2).
 @MainActor enum AlarmService {
@@ -33,13 +29,35 @@ nonisolated struct MeridianAlarmMetadata: AlarmMetadata {}
     /// A one-off alarm at an absolute instant (`.fixed` keeps its instant across zone
     /// changes, M0.5 test 10). `false` if AlarmKit refused it.
     @discardableResult
-    static func scheduleAlarm(id: UUID, at date: Date, title: String) async -> Bool {
-        let configuration = AlarmManager.AlarmConfiguration.alarm(
-            schedule: .fixed(date),
-            attributes: AlarmAttributes<MeridianAlarmMetadata>(presentation: AlarmPresentation(alert: alert(title)),
-                                                               tintColor: .accent))
+    static func scheduleAlarm(id: UUID, at date: Date, title: String, snoozeMinutes: Int? = nil) async -> Bool {
+        await schedule(id: id, .fixed(date), title: title, snoozeMinutes: snoozeMinutes)
+    }
+
+    /// A wall-clock alarm on the phone's own clock (Local alarms, decision BD): repeats on
+    /// ISO `weekdays` (Monday = 1), or rings once when empty.
+    @discardableResult
+    static func scheduleRelativeAlarm(id: UUID, hour: Int, minute: Int, weekdays: Set<Int>, title: String,
+                                      snoozeMinutes: Int?) async -> Bool {
+        let repeats: Alarm.Schedule.Relative.Recurrence =
+            weekdays.isEmpty ? .never : .weekly(weekdays.sorted().map { isoWeekdays[$0 - 1] })
+        let relative = Alarm.Schedule.Relative(time: .init(hour: hour, minute: minute), repeats: repeats)
+        return await schedule(id: id, .relative(relative), title: title, snoozeMinutes: snoozeMinutes)
+    }
+
+    /// Throws AlarmKit's error, for the DEBUG limit test (decision BP).
+    static func trySchedule(id: UUID, _ schedule: Alarm.Schedule, title: String) async throws {
+        _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration(schedule, title: title,
+                                                                                         snoozeMinutes: nil))
+    }
+
+    static func cancelAlarm(id: UUID) {
+        try? AlarmManager.shared.cancel(id: id)
+    }
+
+    private static func schedule(id: UUID, _ schedule: Alarm.Schedule, title: String, snoozeMinutes: Int?) async -> Bool {
         do {
-            _ = try await AlarmManager.shared.schedule(id: id, configuration: configuration)
+            _ = try await AlarmManager.shared.schedule(
+                id: id, configuration: configuration(schedule, title: title, snoozeMinutes: snoozeMinutes))
             return true
         } catch {
             print("Alarm not scheduled (\(title)): \(error)")
@@ -47,20 +65,37 @@ nonisolated struct MeridianAlarmMetadata: AlarmMetadata {}
         }
     }
 
-    static func cancelAlarm(id: UUID) {
-        try? AlarmManager.shared.cancel(id: id)
+    /// With snooze (decision BG), the alert gets a Snooze button that counts down
+    /// `snoozeMinutes` and rings again; the widget draws that countdown.
+    private static func configuration(_ schedule: Alarm.Schedule, title: String,
+                                      snoozeMinutes: Int?) -> AlarmManager.AlarmConfiguration<MeridianAlarmMetadata> {
+        let resource = LocalizedStringResource(stringLiteral: title)
+        let presentation = snoozeMinutes == nil
+            ? AlarmPresentation(alert: alert(resource, snooze: false))
+            : AlarmPresentation(alert: alert(resource, snooze: true),
+                                countdown: AlarmPresentation.Countdown(title: "Snoozed · \(title)"))
+        let attributes = AlarmAttributes<MeridianAlarmMetadata>(presentation: presentation, tintColor: .accent)
+        return AlarmManager.AlarmConfiguration(
+            countdownDuration: snoozeMinutes.map { Alarm.CountdownDuration(preAlert: nil, postAlert: TimeInterval($0 * 60)) },
+            schedule: schedule, attributes: attributes)
     }
 
     /// From iOS 26.1 the system draws the Stop button itself and `stopButton` is deprecated.
-    private static func alert(_ title: String) -> AlarmPresentation.Alert {
-        let resource = LocalizedStringResource(stringLiteral: title)
+    private static func alert(_ title: LocalizedStringResource, snooze: Bool) -> AlarmPresentation.Alert {
+        let snoozeButton = snooze ? AlarmButton(text: "Snooze", textColor: .textPrimary, systemImageName: "zzz") : nil
+        let behavior: AlarmPresentation.Alert.SecondaryButtonBehavior? = snooze ? .countdown : nil
         if #available(iOS 26.1, *) {
-            return AlarmPresentation.Alert(title: resource)
+            return AlarmPresentation.Alert(title: title, secondaryButton: snoozeButton, secondaryButtonBehavior: behavior)
         } else {
             return AlarmPresentation.Alert(
-                title: resource, stopButton: AlarmButton(text: "Stop", textColor: .accent, systemImageName: "stop.circle"))
+                title: title, stopButton: AlarmButton(text: "Stop", textColor: .accent, systemImageName: "stop.circle"),
+                secondaryButton: snoozeButton, secondaryButtonBehavior: behavior)
         }
     }
+
+    /// `Locale.Weekday` for ISO weekdays 1…7.
+    private static let isoWeekdays: [Locale.Weekday] = [.monday, .tuesday, .wednesday, .thursday, .friday,
+                                                         .saturday, .sunday]
 
     // MARK: Notification fallback (decision AI)
 

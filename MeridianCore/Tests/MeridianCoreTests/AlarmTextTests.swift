@@ -131,4 +131,11 @@ struct AlarmTextTests {
         #expect(AlarmText.row(Self.alarm(9, 0, zone: Self.ny, isOn: false), now: Self.now, device: Self.ist)
             .dstBadge == nil)
     }
+
+    @Test("Alert title: the label, plus the zone time for zoned alarms")
+    func alertTitle() {
+        #expect(Self.board.map(AlarmText.alertTitle) == ["NY market open prep · 09:00 New York",
+                                                         "Nightly pipeline check · 02:00 UTC", "Wake", "Gym"])
+        #expect(AlarmText.alertTitle(Self.alarm(7, 0, zone: nil)) == "Alarm")
+    }
 }

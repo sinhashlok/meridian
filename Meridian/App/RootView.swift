@@ -34,6 +34,7 @@ struct RootView: View {
             guard phase == .active else { return }
             TimerAlarms.shared.sync(in: context)
             SessionAlarms.shared.sync()
+            ClockAlarms.shared.sync(in: context)
         }
     }
 }

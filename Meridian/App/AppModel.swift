@@ -6,7 +6,7 @@ import SwiftData
 /// write through two different stacks.
 enum AppModel {
     static let types: [any PersistentModel.Type] = [SavedZone.self, SavedFiscalProfile.self, SavedTimer.self,
-                                                    SessionRecord.self]
+                                                    SessionRecord.self, SavedAlarm.self]
 
     static let container: ModelContainer = {
         do {

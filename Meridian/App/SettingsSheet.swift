@@ -43,6 +43,11 @@ struct SettingsSheet: View {
                 }
                 .listRowBackground(Color.bgSurface)
 
+                #if DEBUG
+                AlarmKitProbeSection()
+                    .listRowBackground(Color.bgSurface)
+                #endif
+
                 Section("About") {
                     LabeledContent("Version", value: appVersion)
                 }
