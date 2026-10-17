@@ -70,6 +70,7 @@ nonisolated struct TimerAlarmMetadata: AlarmMetadata {}
             await removeTimerNotifications()
         }
         try? context.save()
+        await TimerActivityController.update(entries.map(\.timer), now: now)
     }
 
     private func reconcileAlarms(rows: [SavedTimer], entries: [TimerAlarmPlan.Entry], now: Date) async {

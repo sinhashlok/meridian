@@ -22,6 +22,10 @@ struct RootView: View {
         .sheet(isPresented: $appState.isSettingsPresented) {
             SettingsSheet()
         }
+        // The timer Live Activity links here (meridian://timer).
+        .onOpenURL { url in
+            if url.scheme == "meridian", url.host == "timer" { tab = "timer" }
+        }
         // Timers: re-check alarms on launch and on every return to the app (decision AR).
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { TimerAlarms.shared.sync(in: context) }
