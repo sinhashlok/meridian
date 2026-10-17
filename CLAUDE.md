@@ -172,8 +172,16 @@ Rules:
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
 - No app test target yet. Add one (Xcode clicks) when the first UI logic needs tests.
 
-### Next up (as of 16 Oct 2026)
+### Next up (as of 17 Oct 2026)
 
+0. M5 in progress (plan: decisions AH–AS, recorded in docs/decisions.md at step 8).
+   Done: Core `CountdownTimer`/`TimerText`, `Stopwatch`/`StopwatchText`, `TimerAlarmPlan`
+   (217 Core tests); Timers list/cards/sheet; AlarmKit ringing via `TimerAlarms` (sync on
+   change, launch, `.active`; only touches ids in `timer.alarmIDs`); Stopwatch UI.
+   Waiting on the owner's Xcode clicks for step 6 (widget extension `MeridianWidgets` with
+   Live Activity, Supports Live Activities = YES, `Shared/` folder in both targets,
+   `Tokens.swift` also in the widget target). `Shared/TimerActivityAttributes.swift`
+   is on disk. Then step 6 (Live Activity) and step 8 (docs, push).
 1. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
    new handle/hint, best window snap haptic and ✓ state, Copy/Share, meeting length menu,
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
