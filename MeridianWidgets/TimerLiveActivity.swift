@@ -25,7 +25,7 @@ struct TimerLiveActivity: Widget {
                         .padding(.leading, Spacing.xxs)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Countdown(state: state)
+                    LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
                         .font(.system(size: 40, weight: .light).monospacedDigit())
                         .foregroundStyle(.textPrimary)
                 }
@@ -44,7 +44,7 @@ struct TimerLiveActivity: Widget {
                 Ring(state: state).frame(width: 20, height: 20)
             } compactTrailing: {
                 // Orange: a Live Activity countdown (§3.2).
-                Countdown(state: state)
+                LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
                     .monospacedDigit()
                     .foregroundStyle(.accent)
                     .frame(maxWidth: 64)
@@ -83,11 +83,12 @@ private struct LockScreenView: View {
             }
             .meridianFont(.sub)
 
-            Countdown(state: state)
+            LiveCountdown(end: state.endDate, paused: state.pausedRemaining)
                 .font(.system(size: 48, weight: .light).monospacedDigit())
                 .foregroundStyle(.textPrimary)
 
-            Bar(state: state)
+            LiveProgress(shape: .bar, start: state.progressStart, end: state.endDate,
+                         pausedFraction: state.pausedFraction, tint: state.endDate == nil ? .textTertiary : .accent)
         }
         .padding(Spacing.m)
     }
@@ -95,48 +96,14 @@ private struct LockScreenView: View {
 
 // MARK: - Parts
 
-/// Time left: ticking while running, frozen while paused.
-private struct Countdown: View {
-    let state: TimerActivityAttributes.ContentState
-
-    var body: some View {
-        if let end = state.endDate {
-            // `max` keeps the range valid once the end has passed (shows 0:00).
-            Text(timerInterval: Date.now...max(end, .now), countsDown: true)
-        } else {
-            Text(state.pausedRemaining ?? "")
-        }
-    }
-}
-
-/// The draining bar for duration timers; none for Until timers (spec §4.4).
-private struct Bar: View {
-    let state: TimerActivityAttributes.ContentState
-
-    var body: some View {
-        if let start = state.progressStart, let end = state.endDate, start < end {
-            ProgressView(timerInterval: start...end, countsDown: true) { EmptyView() } currentValueLabel: { EmptyView() }
-                .tint(.accent)
-        } else if let fraction = state.pausedFraction {
-            ProgressView(value: fraction)
-                .tint(.textTertiary)
-        }
-    }
-}
-
 /// Ring for the Island: drains with the timer; a timer glyph for Until timers.
 private struct Ring: View {
     let state: TimerActivityAttributes.ContentState
 
     var body: some View {
-        if let start = state.progressStart, let end = state.endDate, start < end {
-            ProgressView(timerInterval: start...end, countsDown: true) { EmptyView() } currentValueLabel: { EmptyView() }
-                .progressViewStyle(.circular)
-                .tint(.accent)
-        } else if let fraction = state.pausedFraction {
-            ProgressView(value: fraction)
-                .progressViewStyle(.circular)
-                .tint(.textTertiary)
+        if state.progressStart != nil || state.pausedFraction != nil {
+            LiveProgress(shape: .ring, start: state.progressStart, end: state.endDate,
+                         pausedFraction: state.pausedFraction, tint: state.endDate == nil ? .textTertiary : .accent)
         } else {
             Image(systemName: "timer")
                 .resizable()

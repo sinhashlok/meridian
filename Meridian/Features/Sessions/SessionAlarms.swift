@@ -77,6 +77,7 @@ import Observation
             await AlarmService.removeNotifications(prefix: Self.prefix)
         }
         stored = map
+        await SessionActivityController.update(session, now: now)
     }
 
     /// Fallback notifications are `session-<uuid>`.

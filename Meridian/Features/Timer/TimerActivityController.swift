@@ -20,7 +20,8 @@ import MeridianCore
             progressStart: content.progressStart, pausedRemaining: content.pausedRemaining,
             pausedFraction: content.pausedFraction, more: content.more)
         // Marked stale once the shown timer ends, so the system knows it's out of date.
-        let activityContent = ActivityContent(state: state, staleDate: content.endDate)
+        // Below a session's score: a running session owns the Dynamic Island.
+        let activityContent = ActivityContent(state: state, staleDate: content.endDate, relevanceScore: 50)
 
         if let activity = current.first {
             await activity.update(activityContent)

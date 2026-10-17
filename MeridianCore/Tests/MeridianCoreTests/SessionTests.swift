@@ -197,3 +197,47 @@ struct SessionTests {
         }
     }
 }
+
+/// Decision AZ: what the session Live Activity shows.
+@Suite("Session Live Activity")
+struct SessionActivityTests {
+    static let ist = Zone("Asia/Kolkata")!
+    static func utc(_ iso: String) -> Date { try! EpochParser.parseISO8601(iso).date }
+    static let now = utc("2026-10-15T15:39:18Z")
+    static let meeting = MeetingLine(title: "Best compromise in 21 min", detail: "16:00 UTC · 3 of 3 awake · Mumbai in stretch",
+                                     start: utc("2026-10-15T16:00:00Z"), day: CivilDate(2026, 10, 15))
+
+    @Test("Board LiveActivity: Focus · 1 of 4, ends 21:28 IST, counts down to 15:58Z, with the meeting line")
+    func board() {
+        let session = PomodoroSession.start(.standard, at: Self.utc("2026-10-15T15:33:00Z"))
+        let content = SessionActivityContent.make(session, now: Self.now, display: Self.ist, meeting: Self.meeting)
+        #expect(content == SessionActivityContent(
+            phase: "Focus · 1 of 4", ends: "Ends 21:28 IST", isFocus: true,
+            endDate: Self.utc("2026-10-15T15:58:00Z"), phaseStart: Self.utc("2026-10-15T15:33:00Z"),
+            pausedRemaining: nil, pausedFraction: nil,
+            meetingTitle: "Best compromise in 21 min", meetingDetail: "16:00 UTC · 3 of 3 awake · Mumbai in stretch"))
+    }
+
+    @Test("Paused: frozen time and ring, no countdown")
+    func paused() {
+        var session = PomodoroSession.start(.standard, at: Self.utc("2026-10-15T15:33:00Z"))
+        session.pause(at: Self.now)
+        let content = SessionActivityContent.make(session, now: Self.now, display: Self.ist, meeting: nil)
+        #expect(content?.ends == "Paused")
+        #expect(content?.endDate == nil)
+        #expect(content?.pausedRemaining == "18:42")
+        #expect(content?.pausedFraction == 0.748)
+        #expect(content?.meetingTitle == nil)
+    }
+
+    @Test("A break counts down with the break's own start; done ends the activity")
+    func breakAndDone() {
+        let session = PomodoroSession.start(.standard, at: Self.utc("2026-10-15T15:33:00Z"))
+        let onBreak = SessionActivityContent.make(session, now: Self.utc("2026-10-15T16:00:00Z"), display: Self.ist,
+                                                  meeting: nil)
+        #expect(onBreak?.isFocus == false)
+        #expect(onBreak?.phaseStart == Self.utc("2026-10-15T15:58:00Z"))
+        #expect(SessionActivityContent.make(session, now: Self.utc("2026-10-15T17:28:00Z"), display: Self.ist,
+                                            meeting: nil) == nil)
+    }
+}
