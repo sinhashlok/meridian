@@ -5,7 +5,9 @@
 #   scripts/shoot.sh planner planner 2026-10-15T15:32:00Z
 #   UTC=1 scripts/shoot.sh plannerUTC planner
 #
-# <screen>: clocks | planner | plannerScrub | addZone | editZone | changes   (see Meridian/App/DebugLaunch.swift)
+# <screen>: clocks | planner | plannerScrub | addZone | editZone | changes | newTimer | newTimerUntil
+#           (see Meridian/App/DebugLaunch.swift); "none" for just the tab
+#   EXTRA="-MeridianTab timer -MeridianTimers demo" scripts/shoot.sh timers none 2026-10-15T15:39:18Z
 # [now]:    frozen clock, ISO 8601 (default 2026-10-15T15:32:00Z, the boards' Planner time)
 # [zones]:  "Asia/Kolkata=Mumbai,Europe/London=London,..."; the first is home
 # Env:      UTC=1 for UTC mode, WAIT=<seconds> before the shot, OUT=<dir> for the PNGs,

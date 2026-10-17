@@ -145,6 +145,17 @@ Rules:
   `-MeridianTool epoch|cron|dates`, `-MeridianInput` (Cron uses `_` for spaces),
   `-MeridianZone <IANA>`, `-MeridianFiscal india|retail|none`,
   `-MeridianScreen fiscalEditor|fiscalProfiles`.
+- M5 done (17 Oct 2026, decisions AH–AS): Timer › Timers and Stopwatch. Core `CountdownTimer`
+  + `TimerText` (duration/Until, card wording), `Stopwatch` + `StopwatchText` (laps, CSV),
+  `TimerAlarmPlan` (reconcile + Live Activity content); 217 Core tests. App: `SavedTimer`
+  + `TimerStore`, `TimersView`/`TimerCard`/`NewTimerSheet`, `StopwatchView`, `TimerAlarms`
+  (AlarmKit `.fixed` alarm per running timer, notification fallback, sync on change /
+  launch / `.active`, only ids in `timer.alarmIDs`), `TimerActivityController`.
+  Widget target `MeridianWidgetsExtension` (folder `MeridianWidgets/`, `TimerLiveActivity`);
+  `Shared/` and `Tokens.swift` are in both targets. `meridian://timer` opens Timer.
+  Debug: `-MeridianTimers demo|live|short`, `-MeridianStopwatch demo`,
+  `-MeridianScreen newTimer|newTimerUntil`, `-timer.segment stopwatch`. Simulator
+  screenshots don't show Island content; check it on the phone or in the Xcode preview.
 - Views get "now" from `AppState.now(timelineDate)`, never `Date.now` directly.
   Debug launch arguments for screenshots (ignored in Release): `-MeridianNow <ISO>`,
   `-MeridianZones "Asia/Kolkata=Mumbai,Europe/London=London"` (first is home),
@@ -174,21 +185,18 @@ Rules:
 
 ### Next up (as of 17 Oct 2026)
 
-0. M5 in progress (plan: decisions AH–AS, recorded in docs/decisions.md at step 8).
-   Done: Core `CountdownTimer`/`TimerText`, `Stopwatch`/`StopwatchText`, `TimerAlarmPlan`
-   (217 Core tests); Timers list/cards/sheet; AlarmKit ringing via `TimerAlarms` (sync on
-   change, launch, `.active`; only touches ids in `timer.alarmIDs`); Stopwatch UI.
-   Waiting on the owner's Xcode clicks for step 6 (widget extension `MeridianWidgets` with
-   Live Activity, Supports Live Activities = YES, `Shared/` folder in both targets,
-   `Tokens.swift` also in the widget target). `Shared/TimerActivityAttributes.swift`
-   is on disk. Then step 6 (Live Activity) and step 8 (docs, push).
+0. M5 checks on the iPhone: a timer rings when locked, on Silent, in Focus and after
+   force-quit; pause / +1 min / resume / restart reschedule (one ring, at the new time);
+   Until timer rings at the right time; Live Activity on the Lock Screen and Island
+   (compact, minimal, expanded) and tapping it opens Timer; haptics on start and lap;
+   Copy CSV pastes into Notes; deny Alarms in Settings and check the fallback line and
+   notification. Then M6 Sessions (plan first): adds App Intents, then retrofit
+   Pause / +1 min / Stop onto the timer Live Activity (decision AQ).
 1. M3 checks only the owner can do on the iPhone: scrub feel, hourly haptic and the
    new handle/hint, best window snap haptic and ✓ state, Copy/Share, meeting length menu,
    zone add/edit/reorder/delete, DST badge tap, VoiceOver ±30 min on the meeting time.
 2. M4 checks on the iPhone: Paste (needs a real clipboard), copy buttons and haptics,
    the cron key row above the keyboard, saving/editing/deleting fiscal calendars.
-   Then M5 Timer (duration + until, stopwatch, widget extension, Live Activity): plan
-   first; it needs a widget extension target (Xcode clicks).
 3. Parked (owner's call, 16 Oct): the Planner feels laggy on an iPhone 16 in Debug; not
    yet tried without the debugger or in Release. Core work per scrub frame measured at
    ~0.1 ms, so if it's real the suspect is the whole Planner body rebuilding on every drag

@@ -177,3 +177,60 @@ removing the active one activates the first), so the app still needs no test tar
 
 Owner-review standards from M3 (decision V) applied: values in aligned rows, no
 date-like strings, siblings wrap the same way.
+
+## 17 Oct 2026 · M5 Timer
+
+**AH. How timers ring.** Each running timer is one AlarmKit *alarm* with a `.fixed(end)`
+schedule, not AlarmKit's `.timer` countdown. Pause, +1 min and resume cancel it and
+schedule a new id. Why: spec §6 wants one Live Activity ("soonest large, +2 more"), not
+one per timer; +1 min isn't a system action; and FB23754550 reports countdown timers
+alerting silently on iOS 27.
+
+**AI. Alarms permission denied:** a local notification at the end instead, plus one line
+over the list ("Alarms are off for Meridian, so timers only notify and stay quiet in
+Silent mode.") with Open Settings. Permissions are asked on the first Start.
+
+**AJ. Finished timers stay as cards** until dismissed (Done + Restart/×; Until shows
+"Passed 10 min ago"). We can't reliably learn that Stop was tapped (M0.5 test 9). Order:
+done, then running by end, then paused by time left. Header counts each kind.
+
+**AK. Remaining time** is `MM:SS`, or `HH:MM:SS` from an hour, rounded *up* (10:00 at the
+start, 00:00 only at the end). The bar shows the remaining fraction (board: 67% at 6:42 of
+10:00). The Live Activity uses the system countdown, which prints `6:42`.
+
+**AL. Ends and Until lines.** "Ends 21:16 IST" in the shown zone (phone, or UTC with the
+pill), weekday only when not today. A note when the shown zone changes clocks before the
+end ("Clocks go back 1 hour at 02:00 BST before this ends."), unless a §5.2 note (AM)
+already covers that zone. Until: "Until 02:00 UTC" + "07:30 IST on this phone · Fri",
+hidden when the target zone is the shown zone.
+
+**AM. Until in a gap or repeated hour** follows §5.2: skipped → next valid time with
+"Your scheduler may differ."; repeated → First by default, First | Second shown in the
+sheet only when the time repeats. If the first has passed, "Until 01:30" is the second
+(the next time the clock reads 01:30).
+
+**AN. New-timer sheet:** Duration (h/m/s wheels, max 23:59:59) or Until (time, zone menu
+as decision X, UTC default, last used remembered). Empty name → "10 min" / "02:00 UTC".
+
+**AO. Storage:** timers are SwiftData `SavedTimer` rows (Core `CountdownTimer` as JSON +
+alarm id), changed only through `TimerStore`. The stopwatch is one JSON value in
+`UserDefaults`. Instants and millisecond totals only, never a running counter.
+
+**AP. Stopwatch:** `MM:SS.cc` (`H:MM:SS.cc` from an hour), centiseconds truncated, laps as
+whole-ms totals (nearest ms: `Date` is a `Double`). Fastest/slowest from 3 laps, earliest
+wins ties, none if all equal. CSV `lap,split_ms,total_ms,split,total`, completed laps only.
+
+**AQ. Live Activity is display-only in M5** (Lock Screen + Island compact/minimal/expanded;
+tap opens Timer via `meridian://timer`). Pause / +1 min / Stop buttons need App Intents and
+come with M6's Sessions intents. Known limit: with no push server, when the soonest timer
+ends in the background the activity shows 0:00 until the app is opened; the alarm rings.
+
+**AR. Reconcile** on every change, on launch and on `scenePhase == .active`: Core's
+`TimerAlarmPlan` compares stored timers with `AlarmManager.shared.alarms`. It only touches
+alarm ids it scheduled for timers (`timer.alarmIDs`), because AlarmKit's list doesn't say
+what an alarm is for and M7's alarms will share it. One sync runs at a time.
+
+**AS. Widget extension** `MeridianWidgetsExtension` (folder `MeridianWidgets/`). `Shared/`
+is compiled into both targets (`TimerActivityAttributes`); `Tokens.swift` is also a
+member of the widget target. The content state carries Core-formatted strings, so the
+widget doesn't link `MeridianCore` until M8.
