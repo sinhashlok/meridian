@@ -19,36 +19,44 @@ struct StopwatchView: View {
 
     var body: some View {
         let watch = watch
-        // Redraws every frame only while running; stopped, nothing changes.
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !watch.isRunning)) { timeline in
-            let now = appState.now(timeline.date)
-            ScrollView {
-                VStack(spacing: Spacing.sectionGap) {
-                    Text(StopwatchText.time(ms: watch.elapsedMs(at: now)))
+        let hasStarted = watch.isRunning || watch.accumulatedMs > 0
+        ScrollView {
+            VStack(spacing: Spacing.sectionGap) {
+                ticking(watch) { now in
+                    let elapsed = StopwatchText.time(ms: watch.elapsedMs(at: now))
+                    Text(elapsed)
                         .meridianFont(.timeHero)
                         .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, Spacing.xl)
-                        .accessibilityLabel("Elapsed \(StopwatchText.time(ms: watch.elapsedMs(at: now)))")
-
-                    buttons(watch)
-
-                    if watch.elapsedMs(at: now) > 0 {
-                        lapList(watch, now: now)
-                    }
+                        .accessibilityLabel("Elapsed \(elapsed)")
                 }
-                .padding(.horizontal, Spacing.screenMargin)
-                .padding(.bottom, Spacing.sectionGap)
+                .padding(.top, Spacing.xl)
+
+                buttons(watch, hasStarted: hasStarted)
+
+                if hasStarted {
+                    lapList(watch)
+                }
             }
+            .padding(.horizontal, Spacing.screenMargin)
+            .padding(.bottom, Spacing.sectionGap)
         }
         .sensoryFeedback(Haptic.lap, trigger: laps)
         .sensoryFeedback(Haptic.timerStart, trigger: starts)
         .onAppear(perform: applyDebugLaunch)
     }
 
+    /// Redraws `content` up to 30 times a second while running, never while stopped.
+    /// Only the hero time and the lap in progress use it; finished laps don't change.
+    private func ticking(_ watch: Stopwatch, @ViewBuilder content: @escaping (Date) -> some View) -> some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !watch.isRunning)) { timeline in
+            content(appState.now(timeline.date))
+        }
+    }
+
     // MARK: Buttons
 
-    private func buttons(_ watch: Stopwatch) -> some View {
+    private func buttons(_ watch: Stopwatch, hasStarted: Bool) -> some View {
         let layout = typeSize.isAccessibilitySize
             ? AnyLayout(VStackLayout(spacing: Spacing.s)) : AnyLayout(HStackLayout(spacing: Spacing.s))
         return layout {
@@ -60,10 +68,9 @@ struct StopwatchView: View {
                 pill("Stop", systemImage: "pause.fill", filled: false) { change { $0.stop(at: appState.now()) } }
             } else {
                 pill("Reset", systemImage: "arrow.counterclockwise", filled: false) { change { $0.reset() } }
-                    .disabled(watch.elapsedMs(at: appState.now()) == 0)
+                    .disabled(!hasStarted)
                 // The screen's one filled orange button (spec §3.2).
-                pill(watch.elapsedMs(at: appState.now()) == 0 ? "Start" : "Resume", systemImage: "play.fill",
-                     filled: true) {
+                pill(hasStarted ? "Resume" : "Start", systemImage: "play.fill", filled: true) {
                     change { $0.start(at: appState.now()) }
                     starts += 1
                 }
@@ -84,7 +91,7 @@ struct StopwatchView: View {
 
     // MARK: Laps
 
-    private func lapList(_ watch: Stopwatch, now: Date) -> some View {
+    private func lapList(_ watch: Stopwatch) -> some View {
         let completed = watch.laps
         let marks = StopwatchText.marks(completed)
         return VStack(alignment: .leading, spacing: Spacing.s) {
@@ -105,8 +112,10 @@ struct StopwatchView: View {
 
             VStack(spacing: 0) {
                 if !typeSize.isAccessibilitySize { LapColumnsHeader() }
-                LapRow(title: "Lap \(completed.count + 1)", split: watch.currentLapMs(at: now),
-                       total: watch.elapsedMs(at: now), mark: nil)
+                ticking(watch) { now in
+                    LapRow(title: "Lap \(completed.count + 1)", split: watch.currentLapMs(at: now),
+                           total: watch.elapsedMs(at: now), mark: nil)
+                }
                 ForEach(completed.reversed(), id: \.number) { lap in
                     Rectangle().fill(Color.separatorLine).frame(height: 1).padding(.leading, Spacing.m)
                     LapRow(title: "Lap \(lap.number)", split: lap.splitMs, total: lap.totalMs, mark: marks[lap.number])
