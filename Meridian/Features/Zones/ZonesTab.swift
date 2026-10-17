@@ -2,10 +2,8 @@ import MeridianCore
 import SwiftData
 import SwiftUI
 
-enum ZonesSegment: String, CaseIterable, Identifiable {
+enum ZonesSegment: String, ScreenSegment {
     case planner, clocks
-
-    var id: Self { self }
 
     var title: String {
         switch self {
@@ -24,24 +22,11 @@ struct ZonesTab: View {
     @Environment(\.modelContext) private var context
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: Spacing.m) {
-                Picker("View", selection: $segment) {
-                    ForEach(ZonesSegment.allCases) { Text($0.title).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, Spacing.screenMargin)
-                .sensoryFeedback(Haptic.selection, trigger: segment)
-
-                switch segment {
-                case .planner:
-                    PlannerView(zones: zones)
-                case .clocks:
-                    ClocksView(zones: zones)
-                }
+        SegmentedScreen(title: "Zones", segment: $segment) { segment in
+            switch segment {
+            case .planner: PlannerView(zones: zones)
+            case .clocks: ClocksView(zones: zones)
             }
-            .frame(maxHeight: .infinity, alignment: .top)
-            .meridianScreen(title: "Zones")
         }
         .task(prepareZones)
     }
