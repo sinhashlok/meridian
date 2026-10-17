@@ -2,17 +2,21 @@ import MeridianCore
 import SwiftUI
 
 /// Upcoming clock changes (spec §5.1, board ClockChanges), opened from a DSTBadge or the
-/// Clocks banner: each saved zone's next change, soonest first (decision S). Alarm and
-/// job zones join in M7.
+/// Clocks banner: each saved zone's next change, soonest first (decision S), plus the
+/// zones alarms and jobs use (decision BJ).
 struct UpcomingChangesSheet: View {
     let zones: [SavedZone]
+    /// Zones of alarms and jobs, shown after saved zones that aren't already there.
+    var alsoUsed: [(zone: Zone, name: String)] = []
 
     @Environment(AppState.self) private var appState
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         let now = appState.now()
-        let cards = ZoneClock.changeCards(for: zones.compactMap(\.named), now: now, device: Zone.device)
+        let saved = zones.compactMap(\.named)
+        let extra = alsoUsed.filter { used in !saved.contains { $0.zone == used.zone } }
+        let cards = ZoneClock.changeCards(for: saved + extra, now: now, device: Zone.device)
 
         NavigationStack {
             List {
@@ -28,7 +32,7 @@ struct UpcomingChangesSheet: View {
                             .meridianFont(.sub)
                             .foregroundStyle(.textSecondary)
                             .textCase(nil)
-                        Text("Your zones")
+                        Text(alsoUsed.isEmpty ? "Your zones" : "Your zones, alarms and jobs")
                     }
                 }
             }

@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 enum AlarmsSegment: String, ScreenSegment {
@@ -16,8 +17,11 @@ struct AlarmsTab: View {
 
     var body: some View {
         SegmentedScreen(title: "Alarms", segment: $segment) { segment in
-            ContentUnavailableView(segment.title, systemImage: segment == .alarms ? "alarm" : "calendar.badge.clock",
-                                   description: Text("Coming in M7"))
+            switch segment {
+            case .alarms: AlarmsView()
+            case .jobs:
+                ContentUnavailableView("Jobs", systemImage: "calendar.badge.clock", description: Text("Coming in M7"))
+            }
         }
     }
 }
@@ -25,5 +29,6 @@ struct AlarmsTab: View {
 #Preview {
     AlarmsTab()
         .environment(AppState())
+        .modelContainer(AppModel.preview)
         .preferredColorScheme(.dark)
 }

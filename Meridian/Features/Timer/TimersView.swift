@@ -22,7 +22,9 @@ struct TimersView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.s) {
-                    header(TimerText.header(pairs.map(\.timer), now: now))
+                    ActionHeader(TimerText.header(pairs.map(\.timer), now: now), buttonTitle: "New timer") {
+                        isAdding = true
+                    }
                     if !pairs.isEmpty { permissionNote }
                     if sorted.isEmpty {
                         PlaceholderBox(text: "No timers. Start a countdown, or one that ends at a time in any zone.")
@@ -62,41 +64,6 @@ struct TimersView: View {
         if alarms.alarmsDenied {
             AlarmPermissionNote(subject: "timers", notificationsDenied: alarms.notificationsDenied)
         }
-    }
-
-    /// Summary and button on one row; stacked at large text sizes.
-    private func header(_ summary: String?) -> some View {
-        let text = Text(summary ?? "")
-            .meridianFont(.sub)
-            .foregroundStyle(.textSecondary)
-        return ViewThatFits(in: .horizontal) {
-            HStack(spacing: Spacing.s) {
-                text.fixedSize()
-                Spacer(minLength: 0)
-                newTimerButton.fixedSize()
-            }
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                newTimerButton
-                text
-            }
-        }
-        .padding(.vertical, Spacing.xxs)
-    }
-
-    /// The screen's one filled orange button (spec §3.2).
-    private var newTimerButton: some View {
-        Button {
-            isAdding = true
-        } label: {
-            Label("New timer", systemImage: "plus")
-                .meridianFont(.headline)
-                .foregroundStyle(.onAccent)
-                .padding(.horizontal, Spacing.m)
-                .padding(.vertical, Spacing.xs)
-                .frame(minHeight: Spacing.minTapTarget)
-                .background(.accent, in: .capsule)
-        }
-        .buttonStyle(.plain)
     }
 
     private func perform(_ action: TimerAction, on row: SavedTimer, now: Date) {
