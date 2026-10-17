@@ -17,7 +17,7 @@ public struct ClockTime: Hashable, Comparable, Codable, Sendable {
     public var text: String { twoDigits(hour) + ":" + twoDigits(minute) }
 }
 
-public enum MonthDay: Hashable, Sendable {
+public enum MonthDay: Hashable, Codable, Sendable {
     /// 1–31; months without that day are skipped.
     case day(Int)
     case last
@@ -25,7 +25,7 @@ public enum MonthDay: Hashable, Sendable {
 
 /// A Job's schedule (spec §4.3 SchedulePicker, §7 data model). Always paired with an
 /// IANA zone; wall times are resolved there with the gap/overlap rule.
-public enum Schedule: Hashable, Sendable {
+public enum Schedule: Hashable, Codable, Sendable {
     /// On the wall clock, like cron `*/N` (decision F). N must divide 60.
     case everyMinutes(Int)
     /// At minute 0 of every Nth hour from midnight. N must divide 24.
@@ -106,11 +106,11 @@ public enum ScheduleEngine {
         case .everyMinutes(let n):
             return "Every \(n) min"
         case .everyHours(let n):
-            return "Every \(n) hour\(n == 1 ? "" : "s") · \(place)"
+            return "Every \(n) hour\(n == 1 ? "" : "s") · from 00:00 \(place)"
         case .daily(let times):
             return "Daily · " + Array(Set(times)).sorted().map(\.text).joined(separator: ", ") + " \(place)"
         case .weekly(let days, let time):
-            return "Weekly · \(weekdayList(days)) · \(time.text) \(place)"
+            return "Weekly · \(weekdayList(days)) \(time.text) \(place)"
         case .monthly(let monthDay, let time):
             let day = switch monthDay {
             case .day(let day): "day \(day)"

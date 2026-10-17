@@ -22,8 +22,6 @@ public struct PolicyChoice: Equatable, Sendable {
 
 /// Wording for Alarms (spec §4.2, boards AlarmsList and AlarmEdit).
 public enum AlarmText {
-    /// Rows show a DST badge for clock changes this close (decision BJ).
-    static let badgeWindow: TimeInterval = 30 * 24 * 3600
     /// The edit sheet's choice and note look this far ahead.
     static let noteWindow: TimeInterval = 366 * 24 * 3600
 
@@ -37,7 +35,7 @@ public enum AlarmText {
         if !alarm.isLocal, !zone.isSame(as: device), let ring {
             phoneLine = ZoneClock.timeWithAbbreviation(ring, in: device) + " on this phone"
         }
-        let badge = alarm.isOn ? change(for: alarm, now: now, within: badgeWindow, device: device) : nil
+        let badge = alarm.isOn ? change(for: alarm, now: now, within: ClockMove.badgeWindow, device: device) : nil
         return AlarmRowText(time: time, zoneTag: alarm.isLocal ? nil : ZoneCatalog.displayName(for: zone),
                             phoneLine: phoneLine, caption: caption(alarm),
                             dstBadge: badge.map { "DST " + $0.date.dayMonthText })
@@ -125,7 +123,7 @@ public enum AlarmText {
 
     // MARK: Private
 
-    private static let weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    static let weekdayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
     /// `EST, UTC−5` (board AlarmEdit's note, inside brackets); `UTC+4`; `UTC`.
     private static func commaLabel(_ zone: Zone, at instant: Date) -> String {
@@ -139,44 +137,12 @@ public enum AlarmText {
         return alarm.repeatDays.isEmpty ? label : "\(label) · \(repeatText(alarm.repeatDays))"
     }
 
-    /// A clock change in the alarm's zone or the phone's, with both offsets after it.
-    private struct Change {
-        let instant: Date
-        /// The date of the change in the zone that changed.
-        let date: CivilDate
-        let zoneAfter: Int
-        let phoneAfter: Int
-        let zoneMoves: Bool
-        let phoneMoves: Bool
-    }
-
-    /// The first clock change within `within` that moves this alarm: its phone time for
-    /// Keep <zone> time; its zone or phone time for Keep UTC time. Local alarms never move.
-    private static func change(for alarm: ClockAlarm, now: Date, within: TimeInterval, device: Zone) -> Change? {
+    /// The first clock change within `within` that moves this alarm (Local alarms never move).
+    private static func change(for alarm: ClockAlarm, now: Date, within: TimeInterval, device: Zone) -> ClockMove? {
         guard !alarm.isLocal else { return nil }
-        let zone = alarm.zone(device: device)
-        let end = now + within
-        let changing = zone.isSame(as: device) ? [zone] : [zone, device]
-        let candidates = changing
-            .flatMap { changed in ZoneClock.transitions(in: changed, from: now, to: end).map { (changed, $0) } }
-            .sorted { $0.1.instant < $1.1.instant }
-
-        for (changed, transition) in candidates {
-            let before = transition.instant.addingTimeInterval(-1)
-            func offset(_ zone: Zone, _ instant: Date) -> Int { ZoneClock.state(zone, at: instant).offsetSeconds }
-            let zoneBefore = offset(zone, before), zoneAfter = offset(zone, transition.instant)
-            let phoneBefore = offset(device, before), phoneAfter = offset(device, transition.instant)
-            let moves = switch alarm.policy {
-            case .keepZone: phoneAfter - zoneAfter != phoneBefore - zoneBefore
-            case .keepUTC: zoneAfter != zoneBefore || phoneAfter != phoneBefore
-            }
-            if moves {
-                return Change(instant: transition.instant, date: ZoneClock.local(transition.instant, in: changed).date,
-                              zoneAfter: zoneAfter, phoneAfter: phoneAfter,
-                              zoneMoves: zoneAfter != zoneBefore, phoneMoves: phoneAfter != phoneBefore)
-            }
-        }
-        return nil
+        let pinned: ClockMove.Pinned = if case .keepUTC = alarm.policy { .utcTime } else { .zoneTime }
+        return ClockMove.first(zone: alarm.zone(device: device), device: device, pinned: pinned, now: now,
+                               within: within)
     }
 }
 

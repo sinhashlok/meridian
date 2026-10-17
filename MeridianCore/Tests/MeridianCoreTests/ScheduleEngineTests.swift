@@ -124,13 +124,15 @@ struct ScheduleEngineTests {
     @Test("Schedule lines", arguments: [
         (Schedule.daily(times: [ClockTime(2, 0)]), Zone.utc, "Daily · 02:00 UTC"),
         (.daily(times: [ClockTime(14, 0), ClockTime(2, 0)]), .utc, "Daily · 02:00, 14:00 UTC"),
-        (.weekly(days: [1, 3], time: ClockTime(9, 0)), london, "Weekly · Mon, Wed · 09:00 London"),
-        (.weekly(days: [1, 2, 3, 4, 5], time: ClockTime(9, 0)), london, "Weekly · Mon–Fri · 09:00 London"),
+        (.weekly(days: [1, 3], time: ClockTime(9, 0)), london, "Weekly · Mon, Wed 09:00 London"),
+        (.weekly(days: [1, 2, 3, 4, 5], time: ClockTime(9, 0)), london, "Weekly · Mon–Fri 09:00 London"),
         (.monthly(day: .day(1), time: ClockTime(1, 0)), ny, "Monthly · day 1 · 01:00 New York"),
         (.monthly(day: .last, time: ClockTime(23, 30)), ny, "Monthly · last day · 23:30 New York"),
         (.everyMinutes(15), .utc, "Every 15 min"),
-        (.everyHours(2), ny, "Every 2 hours · New York"),
+        (.everyHours(2), ny, "Every 2 hours · from 00:00 New York"),
         (.cron(dialect: .unix, expression: "0 2 * * 1-5"), .utc, "Cron · 0 2 * * 1-5 · UTC"),
+        (.weekly(days: [7], time: ClockTime(3, 0)), .utc, "Weekly · Sun 03:00 UTC"),
+        (.everyHours(4), .utc, "Every 4 hours · from 00:00 UTC"),
     ])
     func scheduleLine(schedule: Schedule, zone: Zone, line: String) {
         #expect(ScheduleEngine.scheduleLine(schedule, in: zone) == line)

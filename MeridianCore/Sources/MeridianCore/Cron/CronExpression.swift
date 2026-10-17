@@ -1,6 +1,6 @@
 import Foundation
 
-public enum CronDialect: Sendable {
+public enum CronDialect: Codable, Sendable {
     /// `minute hour day-of-month month day-of-week`; Sunday is 0 or 7.
     case unix
     /// `second minute hour day-of-month month day-of-week [year]`; SUN=1 … SAT=7, and
