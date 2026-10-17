@@ -77,6 +77,9 @@ enum DebugLaunch {
     /// `-MeridianStopwatch demo`: a running stopwatch with laps (Timer › Stopwatch).
     static var stopwatch: String? { string("MeridianStopwatch") }
 
+    /// `-MeridianSession demo|paused|done|idle`: replaces the active session.
+    static var session: String? { string("MeridianSession") }
+
     private static func string(_ key: String) -> String? {
         #if DEBUG
         UserDefaults.standard.string(forKey: key)

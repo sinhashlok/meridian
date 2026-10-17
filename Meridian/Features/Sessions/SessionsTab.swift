@@ -1,15 +1,12 @@
+import SwiftData
 import SwiftUI
 
 /// Sessions has no segments (spec §2).
 struct SessionsTab: View {
     var body: some View {
         NavigationStack {
-            ContentUnavailableView(
-                "Sessions",
-                systemImage: "scope",
-                description: Text("Coming in M6")
-            )
-            .meridianScreen(title: "Sessions")
+            SessionsView()
+                .meridianScreen(title: "Sessions")
         }
     }
 }
@@ -17,5 +14,6 @@ struct SessionsTab: View {
 #Preview {
     SessionsTab()
         .environment(AppState())
+        .modelContainer(AppModel.preview)
         .preferredColorScheme(.dark)
 }

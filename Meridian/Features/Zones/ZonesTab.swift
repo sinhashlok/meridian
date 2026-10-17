@@ -20,6 +20,7 @@ struct ZonesTab: View {
     @AppStorage("zones.seeded") private var isSeeded = false
     @Query(sort: \SavedZone.order) private var zones: [SavedZone]
     @Environment(\.modelContext) private var context
+    @Environment(AppState.self) private var appState
 
     var body: some View {
         SegmentedScreen(title: "Zones", segment: $segment) { segment in
@@ -29,6 +30,10 @@ struct ZonesTab: View {
             }
         }
         .task(prepareZones)
+        // Sessions' meeting line asks for a Planner window.
+        .onChange(of: appState.plannerJump) { _, jump in
+            if jump != nil { segment = .planner }
+        }
     }
 
     private func prepareZones() {

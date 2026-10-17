@@ -6,13 +6,10 @@ struct RootView: View {
     @Environment(AppState.self) private var appState
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.modelContext) private var context
-    /// First launch opens Zones (spec §2); debug builds can pick another with `-MeridianTab`.
-    @State private var tab = DebugLaunch.tab ?? "zones"
-
     var body: some View {
         @Bindable var appState = appState
 
-        TabView(selection: $tab) {
+        TabView(selection: $appState.tab) {
             Tab("Zones", systemImage: "globe", value: "zones") { ZonesTab() }
             Tab("Alarms", systemImage: "alarm", value: "alarms") { AlarmsTab() }
             Tab("Timer", systemImage: "timer", value: "timer") { TimerTab() }
@@ -22,9 +19,11 @@ struct RootView: View {
         .sheet(isPresented: $appState.isSettingsPresented) {
             SettingsSheet()
         }
-        // The timer Live Activity links here (meridian://timer).
+        // The Live Activities link here (meridian://timer, meridian://sessions).
         .onOpenURL { url in
-            if url.scheme == "meridian", url.host == "timer" { tab = "timer" }
+            if url.scheme == "meridian", let host = url.host(), ["timer", "sessions"].contains(host) {
+                appState.tab = host
+            }
         }
         // Timers: re-check alarms on launch and on every return to the app (decision AR).
         .onChange(of: scenePhase, initial: true) { _, phase in
@@ -36,7 +35,7 @@ struct RootView: View {
 #Preview {
     RootView()
         .environment(AppState())
-        .modelContainer(for: [SavedZone.self, SavedFiscalProfile.self, SavedTimer.self], inMemory: true)
+        .modelContainer(AppModel.preview)
         .tint(.accent)
         .preferredColorScheme(.dark)
 }

@@ -101,6 +101,13 @@ struct PlannerView: View {
             .sensoryFeedback(Haptic.snap, trigger: snaps)
         }
         .sheet(isPresented: $isAdding) { AddZoneSheet(zones: zones) }
+        // A window picked elsewhere (Sessions' meeting line): show its day and select it.
+        .onChange(of: appState.plannerJump, initial: true) { _, jump in
+            guard let jump else { return }
+            day = jump.day
+            selection = jump.start
+            appState.plannerJump = nil
+        }
     }
 
     /// Changing day keeps the scrubber's wall time; a skipped time moves to the next
