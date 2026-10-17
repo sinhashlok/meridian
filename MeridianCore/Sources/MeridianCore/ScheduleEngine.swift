@@ -1,7 +1,7 @@
 import Foundation
 
 /// A wall-clock time of day in a schedule's zone (`02:00`).
-public struct ClockTime: Hashable, Comparable, Sendable {
+public struct ClockTime: Hashable, Comparable, Codable, Sendable {
     public let hour: Int
     public let minute: Int
 
