@@ -227,7 +227,7 @@ Rules:
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
 - App tests: `MeridianUITests` (UI audits, M8). No unit test target for app code.
 
-### Next up (as of 18 Oct 2026, M8 built and tested; iPhone checks left)
+### Next up (as of 18 Oct 2026, M8 done; M9 next)
 
 All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 `docs/notes/alarmkit.md` › M7 iPhone checks:
@@ -236,8 +236,8 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 2. After 2–3 days without opening the app: zoned alarms and job reminders still fire.
 3. Settings › Debug · AlarmKit from a Debug build: real alarm limit; `.relative` alarm
    across a device zone change.
-4. **M8 code and tests done** (plan approved 17 Oct: `docs/notes/m8-plan.md`; decisions
-   BQ–CE in `docs/decisions.md`). 319 Core tests, 7 UI tests green (18 Oct).
+4. **M8 done, iPhone checks passed 18 Oct** (plan: `docs/notes/m8-plan.md`; decisions
+   BQ–CF in `docs/decisions.md`). 321 Core tests, 7 UI tests green (18 Oct).
    - Done: step 1 `SettingsValues.swift` (WeekStart, Weekdays summary/spoken, hours range,
      `ZoneClock.dataVersion`), step 2 `Widget/WidgetSnapshot.swift`, step 3
      `Widget/WidgetText.swift` + `PlannerZone.spokenRow`. 318 Core tests green.
@@ -295,10 +295,11 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
      Open (owner's call): Dates field at AX5 shows `2026-10-…`; wrapping showed `2026-10-1`
      on its own line, so it was left single-line (options in the audit note).
    - Step 8 done (18 Oct): decisions BQ–CE in `docs/decisions.md`, spec §2 note, PLAN.md
-     M8 row, pushed. M8 left: iPhone checks (tinted/clear widgets, widget taps and
-     updates, VoiceOver walk).
-   - Noticed: Planner banner says "Weekend in all 1 cities" with one zone (M3 wording
-     bug, fix separately).
+     M8 row, pushed.
+   - iPhone review (18 Oct, decision CF): every Jobs widget run is the same row (no larger
+     first run), rows are a Grid so times never wrap; small widget's zone label keeps its
+     width. Planner banner counts cities ("Weekend in Mumbai", "both cities").
+5. **M9** (app icon, name, TestFlight): start in plan mode.
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
