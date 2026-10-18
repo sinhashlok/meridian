@@ -299,7 +299,10 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    - iPhone review (18 Oct, decision CF): every Jobs widget run is the same row (no larger
      first run), rows are a Grid so times never wrap; small widget's zone label keeps its
      width. Planner banner counts cities ("Weekend in Mumbai", "both cities").
-5. **M9** (app icon, name, TestFlight): start in plan mode.
+5. **M9** (app icon, name, TestFlight). Name kept: Meridian (decision CG; store name gets a
+   suffix, trademark check before upload). Icon: brief sent to Claude Design
+   (`docs/design/icon-brief.md`); waiting for its SVG layers, then Icon Composer clicks.
+   TestFlight needs the paid Apple Developer Program (owner deciding).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
