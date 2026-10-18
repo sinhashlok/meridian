@@ -60,8 +60,11 @@ struct JobRow: View {
             Text(" · \(Image(systemName: "clock")) \(countdown)")
                 .foregroundStyle(text.countdownIsSoon ? Color.accentText : .textSecondary)
         } ?? Text("")
+        // Spoken without the glyph's name ("Clock in 28 min"); the audit read that longer
+        // label as clipped text.
         return Text("\(Text(next).monospacedDigit().foregroundStyle(.textPrimary))\(countdown)")
             .meridianFont(.sub)
+            .accessibilityLabel(text.countdown.map { "\(next), \($0)" } ?? next)
     }
 
     /// Neutral outlined tag (spec §4.3: "Review", never a status colour).
