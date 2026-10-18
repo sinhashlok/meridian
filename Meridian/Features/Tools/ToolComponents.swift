@@ -41,10 +41,15 @@ struct ToolInputBox<Trailing: View>: View {
                     }
                 }
                 if showsClear, !text.isEmpty {
-                    Button("Clear", systemImage: "xmark.circle.fill") { text = "" }
-                        .labelStyle(.iconOnly)
-                        .foregroundStyle(.textTertiary)
-                        .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
+                    // The frame is inside the label: outside it, only the 20pt glyph is tappable.
+                    Button { text = "" } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.textTertiary)
+                            .frame(width: Spacing.minTapTarget, height: Spacing.minTapTarget)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear")
                 }
             }
             HStack(spacing: Spacing.s) { trailing() }
