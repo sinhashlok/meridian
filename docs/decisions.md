@@ -419,3 +419,12 @@ after launch, because `simctl openurl` stops at a confirmation alert.
 **CE. Widget text size** (new): Dynamic Type is capped at xxLarge on Home Screen widgets
 and xLarge on Lock Screen accessories. A widget can't grow, and above those sizes even one
 row doesn't fit. Checked in the debug gallery at default size and AX5.
+
+## 18 Oct 2026 · M8 iPhone review
+
+**CF. Jobs widgets show every run the same way** (owner, from the iPhone; overrides board
+JobsWidgetLarge). The large widget has no larger first run: up to five runs as identical
+rows (time, title and full schedule line, countdown; children under a run). Rows are a
+Grid, so the time column is as wide as the widest time (`1 Nov 10:30` stays on one line)
+and every title starts at the same x, in the medium widget too. Small widget: the zone
+label keeps its natural width beside the time (squeezed, `IST` showed as a sliver of dots).

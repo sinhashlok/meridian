@@ -332,91 +332,65 @@ struct JobsMediumView: View {
     }
 }
 
-/// Large: the next run large with its full schedule line, then rows with their children.
+/// Large: up to five runs as rows with their full schedule lines and children. Every run
+/// looks the same (decision CF: no larger first run).
 struct JobsLargeView: View {
     let jobs: JobsWidgetText
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.xs) {
+        VStack(alignment: .leading, spacing: 6) {
             WidgetHeader(title: "Next jobs", trailing: jobs.zoneName)
-            if let first = jobs.rows.first {
-                hero(first)
-                let rest = Array(jobs.rows.dropFirst())
-                if !rest.isEmpty {
-                    ViewThatFits(in: .vertical) {
-                        ForEach((0...min(4, rest.count)).reversed(), id: \.self) { count in
-                            JobRows(rows: Array(rest.prefix(count)), line: \.line, showsChildren: true)
-                        }
+            if jobs.rows.isEmpty {
+                WidgetMessage(text: "No upcoming jobs")
+            } else {
+                ViewThatFits(in: .vertical) {
+                    ForEach((1...min(5, jobs.rows.count)).reversed(), id: \.self) { count in
+                        JobRows(rows: Array(jobs.rows.prefix(count)), line: \.line, showsChildren: true)
                     }
                 }
-            } else {
-                WidgetMessage(text: "No upcoming jobs")
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .homeWidgetStyle()
     }
-
-    private func hero(_ row: JobWidgetRow) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(row.title)
-                .meridianFont(.headline)
-                .foregroundStyle(.textPrimary)
-                .lineLimit(2)
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
-                Text(dayTime(row))
-                    .meridianFont(.widgetHero)
-                    .foregroundStyle(.textPrimary)
-                    .lineLimit(1).minimumScaleFactor(0.6)
-                    .layoutPriority(1)
-                Text(jobs.zoneName)
-                    .meridianFont(.monoCaption)
-                    .foregroundStyle(.textSecondary)
-                Spacer(minLength: Spacing.xs)
-                WidgetCountdown(text: row.countdown, isSoon: row.isSoon)
-                    .meridianFont(.widgetTitle)
-            }
-            Text(row.line)
-                .meridianFont(.caption)
-                .foregroundStyle(.textSecondary)
-            JobChildren(children: row.children)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-    }
 }
 
-/// Rows split by hairlines: time, title and schedule line, countdown.
+/// Rows split by hairlines: time, title and schedule line, countdown. A Grid, so the time
+/// column is as wide as the widest time (`1 Nov 10:30` never wraps) and titles line up.
 private struct JobRows: View {
     let rows: [JobWidgetRow]
     let line: KeyPath<JobWidgetRow, String>
     let showsChildren: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        Grid(alignment: .leading, horizontalSpacing: Spacing.xs, verticalSpacing: 0) {
             ForEach(rows) { row in
+                // Views outside a GridRow span every column.
                 Rectangle().fill(Color.separatorLine).frame(height: 1)
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(alignment: .center, spacing: Spacing.xs) {
-                        Text(dayTime(row))
-                            .meridianFont(.widgetMono)
-                            .foregroundStyle(.textPrimary)
-                            .frame(width: 80, alignment: .leading)
-                        VStack(alignment: .leading, spacing: 0) {
-                            Text(row.title)
-                                .meridianFont(.widgetRowTitle)
-                                .foregroundStyle(.textPrimary)
-                                .lineLimit(1)
-                            Text(row[keyPath: line])
-                                .meridianFont(.widgetDetail)
-                                .foregroundStyle(.textSecondary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        WidgetCountdown(text: row.countdown, isSoon: row.isSoon)
+                GridRow {
+                    Text(dayTime(row))
+                        .meridianFont(.widgetMono)
+                        .foregroundStyle(.textPrimary)
+                        .fixedSize()
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(row.title)
                             .meridianFont(.widgetRowTitle)
+                            .foregroundStyle(.textPrimary)
+                            .lineLimit(1)
+                        Text(row[keyPath: line])
+                            .meridianFont(.widgetDetail)
+                            .foregroundStyle(.textSecondary)
                     }
-                    if showsChildren { JobChildren(children: row.children).padding(.leading, 40) }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    WidgetCountdown(text: row.countdown, isSoon: row.isSoon)
+                        .meridianFont(.widgetRowTitle)
                 }
                 .padding(.vertical, 5)
+                if showsChildren, !row.children.isEmpty {
+                    JobChildren(children: row.children)
+                        .padding(.leading, 40)
+                        .padding(.bottom, 5)
+                }
             }
         }
         .fixedSize(horizontal: false, vertical: true)
