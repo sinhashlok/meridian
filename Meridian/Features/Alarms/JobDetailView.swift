@@ -58,43 +58,53 @@ struct JobDetailView: View {
         let card = JobText.scheduleCard(job, now: now, display: display, device: device)
         let runs = job.nextRuns(after: now, count: 5)
 
-        return ScrollView {
-            VStack(alignment: .leading, spacing: Spacing.s) {
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    caption(job.category.title)
-                    Text(job.title)
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(.textPrimary)
-                        .accessibilityAddTraits(.isHeader)
-                    if !job.notes.isEmpty {
-                        Text(job.notes)
-                            .meridianFont(.body)
-                            .foregroundStyle(.textSecondary)
+        return ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: Spacing.s) {
+                    VStack(alignment: .leading, spacing: Spacing.xxs) {
+                        caption(job.category.title)
+                        Text(job.title)
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.textPrimary)
+                            .accessibilityAddTraits(.isHeader)
+                        if !job.notes.isEmpty {
+                            Text(job.notes)
+                                .meridianFont(.body)
+                                .foregroundStyle(.textSecondary)
+                        }
                     }
+                    if let banner = JobText.reviewBanner(job, today: today) {
+                        InlineBanner(title: "Check this still matches the real scheduler", detail: banner,
+                                     systemImage: "calendar.badge.checkmark",
+                                     action: ("Mark reviewed", { markReviewed(now: now) }))
+                    }
+                    scheduleCard(card, isPaused: job.isPaused)
+                    ForEach(ScheduleEngine.warnings(job.schedule, in: job.zone, runs: runs), id: \.message) { warning in
+                        NoteLine(systemImage: "clock.arrow.circlepath", text: warning.message)
+                    }
+                    if !runs.isEmpty {
+                        caption("Next \(runs.count) runs").padding(.top, Spacing.xs)
+                        RunTable(runs: runs, now: now)
+                    }
+                    if !job.children.isEmpty { children(job, now: now, display: display) }
+                    mirrorsCard(job, today: today, now: now)
+                    settingsCard(job)
+                    deleteButton.id(Self.lastRow)
                 }
-                if let banner = JobText.reviewBanner(job, today: today) {
-                    InlineBanner(title: "Check this still matches the real scheduler", detail: banner,
-                                 systemImage: "calendar.badge.checkmark",
-                                 action: ("Mark reviewed", { markReviewed(now: now) }))
-                }
-                scheduleCard(card, isPaused: job.isPaused)
-                ForEach(ScheduleEngine.warnings(job.schedule, in: job.zone, runs: runs), id: \.message) { warning in
-                    NoteLine(systemImage: "clock.arrow.circlepath", text: warning.message)
-                }
-                if !runs.isEmpty {
-                    caption("Next \(runs.count) runs").padding(.top, Spacing.xs)
-                    RunTable(runs: runs, now: now)
-                }
-                if !job.children.isEmpty { children(job, now: now, display: display) }
-                mirrorsCard(job, today: today, now: now)
-                settingsCard(job)
-                deleteButton
+                .padding(.horizontal, Spacing.screenMargin)
+                .padding(.bottom, Spacing.sectionGap)
             }
-            .padding(.horizontal, Spacing.screenMargin)
-            .padding(.bottom, Spacing.sectionGap)
+            // Debug `-MeridianBottom 1`: `defaultScrollAnchor` settles before the push knows the
+            // tab bar's inset and leaves the last rows under it, so scroll by id after the push.
+            .task {
+                guard DebugLaunch.startsAtBottom else { return }
+                try? await Task.sleep(for: .seconds(0.6))
+                proxy.scrollTo(Self.lastRow, anchor: .bottom)
+            }
         }
-        .defaultScrollAnchor(DebugLaunch.startsAtBottom ? .bottom : .top)
     }
+
+    private static let lastRow = "delete"
 
     // MARK: Parts
 
