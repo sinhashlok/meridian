@@ -207,8 +207,9 @@ Rules:
   'Time Profiler' --instrument Hangs` on a Release build (the phone must be on a cable).
 - Shared views (17 Oct cleanup): `App/SegmentedScreen.swift` (every segmented tab:
   header, picker, selection haptic; segments conform to `ScreenSegment`); DesignSystem
-  `NoteLine` (also the DSTNote), `CopyButton`, `RoundIconButton`, `.buttonStyle(.pill)`.
-  Use these instead of re-drawing them.
+  `NoteLine` (also the DSTNote), `CopyButton`, `RoundIconButton`, `.buttonStyle(.pill)`,
+  `RowOrStack` (row if it fits, else stacked; never ViewThatFits for that). Use these
+  instead of re-drawing them.
 - Design boards: `docs/design/boards/` (40 PNGs; read its README first: spec wins, fonts
   are substitutes, tab bar/segmented/sheets are system-drawn). M3 screens now match
   their six boards (16 Oct 2026, decisions M–U). Core texts for them: `PlannerText.swift`
@@ -224,9 +225,9 @@ Rules:
   that file. Appearance is forced Dark via `INFOPLIST_KEY_UIUserInterfaceStyle`.
 - M0.5 AlarmKit spike done; code kept only on branch `spike/alarmkit` (never merge it).
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
-- No app test target yet. Add one (Xcode clicks) when the first UI logic needs tests.
+- App tests: `MeridianUITests` (UI audits, M8). No unit test target for app code.
 
-### Next up (as of 17 Oct 2026, M8 started)
+### Next up (as of 18 Oct 2026, M8 built and tested; iPhone checks left)
 
 All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 `docs/notes/alarmkit.md` › M7 iPhone checks:
@@ -235,8 +236,8 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 2. After 2–3 days without opening the app: zoned alarms and job reminders still fire.
 3. Settings › Debug · AlarmKit from a Debug build: real alarm limit; `.relative` alarm
    across a device zone change.
-4. **M8 in progress** (plan approved 17 Oct, decisions BQ–CD: `docs/notes/m8-plan.md`;
-   not yet copied into `docs/decisions.md`).
+4. **M8 code and tests done** (plan approved 17 Oct: `docs/notes/m8-plan.md`; decisions
+   BQ–CE in `docs/decisions.md`). 319 Core tests, 7 UI tests green (18 Oct).
    - Done: step 1 `SettingsValues.swift` (WeekStart, Weekdays summary/spoken, hours range,
      `ZoneClock.dataVersion`), step 2 `Widget/WidgetSnapshot.swift`, step 3
      `Widget/WidgetText.swift` + `PlannerZone.spokenRow`. 318 Core tests green.
@@ -276,10 +277,26 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
      `-MeridianNotif off` no longer asks for notification permission.
    - Step 7 code done: Planner rows speak `spokenRow`; Reduce Motion helpers
      `movingAnimation`, `Motion.moving`, `numericTransition` (Tokens.swift); each widget
-     is one VoiceOver element. **Waiting on the owner's click 3** (UI Testing Bundle
-     `MeridianUITests`); then write the audits + Planner label test, fix findings.
-   - Step 8: decisions BQ–CE are in `docs/decisions.md`, spec §2 note done. Left:
-     PLAN.md M8 status, this section, push once UI tests pass.
+     is one VoiceOver element.
+   - Step 7 tests done (18 Oct): target `MeridianUITests` (XCTest, in the shared Meridian
+     scheme, not parallel): accessibility audits of 23 screens via launch args + Planner row
+     label test; all 7 pass. Run with `-only-testing:MeridianUITests` (~5 min). Findings print
+     as `AUDIT <screen> · …` (fail) or `SKIP … · no element` (don't fail). Every skip and its
+     reason: `ScreenLayout` in the test and `docs/notes/m8-ui-audit.md`. Fixes it drove:
+     `DesignSystem/RowOrStack.swift` replaces every ViewThatFits HStack/VStack pair (the audit
+     loses text that ViewThatFits swaps; use RowOrStack for new row-or-stack layouts), Epoch
+     Clear 44pt, JobRow spoken line, Cron field wraps (`ReturnEndsEditing`), best-window
+     caption `kerning`, Job detail `-MeridianBottom 1`. `DebugLaunch.suppressesPermissionPrompts`:
+     any `-MeridianNow` launch never shows AlarmKit/notification prompts.
+     Gotchas: an unanswered permission prompt makes every later audit fail with
+     "Invalid target app" (-902): reboot the Simulator and `xcrun simctl bootstatus
+     "iPhone 17" -b` before testing. `xcodebuild test` can hang after "Test Suite 'All tests'"
+     finishes: run it in the background, watch the log for that line, then kill it.
+     Open (owner's call): Dates field at AX5 shows `2026-10-…`; wrapping showed `2026-10-1`
+     on its own line, so it was left single-line (options in the audit note).
+   - Step 8 done (18 Oct): decisions BQ–CE in `docs/decisions.md`, spec §2 note, PLAN.md
+     M8 row, pushed. M8 left: iPhone checks (tinted/clear widgets, widget taps and
+     updates, VoiceOver walk).
    - Noticed: Planner banner says "Weekend in all 1 cities" with one zone (M3 wording
      bug, fix separately).
 
@@ -306,6 +323,8 @@ cd MeridianCore && swift test
 # App + tests in the simulator (pick a device from: xcrun simctl list devices available)
 xcodebuild -project Meridian.xcodeproj -scheme Meridian \
   -destination 'platform=iOS Simulator,name=<device name>' test
+# UI audits only (~5 min; run in the background, see M8 step 7 gotchas)
+xcodebuild ... -only-testing:MeridianUITests test
 
 # Screenshot the booted simulator
 xcrun simctl io booted screenshot /tmp/screen.png
