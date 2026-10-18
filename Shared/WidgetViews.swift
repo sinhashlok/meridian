@@ -291,10 +291,11 @@ struct JobsSmallView: View {
                     .meridianFont(.widgetTime)
                     .foregroundStyle(.textPrimary)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                    .layoutPriority(1)
+                // Natural width: squeezed, `IST` stacked its letters into a clipped sliver.
                 Text(jobs.zoneName)
                     .meridianFont(.monoCaption)
                     .foregroundStyle(.textSecondary)
+                    .fixedSize()
             }
             WidgetCountdown(text: row.countdown, isSoon: row.isSoon)
                 .meridianFont(.widgetRowTitle)
