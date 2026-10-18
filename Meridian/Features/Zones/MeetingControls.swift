@@ -13,10 +13,9 @@ struct BestWindowCard: View {
         Button(action: onSelect) {
             HStack(spacing: Spacing.s) {
                 VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text(best.window.isAllWork ? "Best time" : "Best compromise")
+                    Text((best.window.isAllWork ? "Best time" : "Best compromise").uppercased())
                         .meridianFont(.caption)
-                        .textCase(.uppercase)
-                        .tracking(0.8)
+                        .kerning(0.8)
                         .foregroundStyle(.textSecondary)
                     RowOrStack(alignment: .firstTextBaseline, stackSpacing: Spacing.xxs) {
                         range
