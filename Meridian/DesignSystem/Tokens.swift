@@ -101,6 +101,9 @@ enum FontToken {
     /// SF Pro 11 Semibold (.caption2). `NEXT JOBS`, `UTC` headers.
     case widgetHeader
 
+    /// Accessibility identifier of `.timeHero` text (see `MeridianFont`).
+    static let heroIdentifier = "timeHero"
+
     /// The font for every token except `.timeHero`, whose 64pt size is not a
     /// text-style default and needs `@ScaledMetric` (see `MeridianFont`).
     /// The system uses SF Pro Display automatically at 20pt and above.
@@ -141,9 +144,12 @@ private struct MeridianFont: ViewModifier {
     func body(content: Content) -> some View {
         if token == .timeHero {
             // The clamp sits outside HeroFont so HeroFont's @ScaledMetric sees the clamped size.
+            // The identifier lets UI tests skip the audit's Dynamic Type check here: a sized
+            // font looks fixed to it, though @ScaledMetric scales it (up to the AX2 clamp).
             content
                 .modifier(HeroFont())
                 .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                .accessibilityIdentifier(FontToken.heroIdentifier)
         } else {
             content.font(token.standardFont)
         }

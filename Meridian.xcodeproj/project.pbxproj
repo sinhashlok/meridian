@@ -22,6 +22,13 @@
 			remoteGlobalIDString = 302B095C3083455C00539511;
 			remoteInfo = MeridianWidgetsExtension;
 		};
+		3031946C3083C790004AF1F8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000000 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000100000000;
+			remoteInfo = Meridian;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +49,7 @@
 		302B095F3083455C00539511 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		302B09613083455C00539511 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeridianWidgetsExtensionDebug.entitlements; sourceTree = "<group>"; };
+		303194683083C790004AF1F8 /* MeridianUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeridianUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -91,6 +99,11 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		303194693083C790004AF1F8 /* MeridianUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MeridianUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +121,11 @@
 				302B09603083455C00539511 /* WidgetKit.framework in Frameworks */,
 			);
 		};
+		303194653083C790004AF1F8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -118,6 +136,7 @@
 				302B0976308346D700539511 /* Shared */,
 				000000000000000000000010 /* Meridian */,
 				302B09633083455C00539511 /* MeridianWidgets */,
+				303194693083C790004AF1F8 /* MeridianUITests */,
 				302B095E3083455C00539511 /* Frameworks */,
 				000000000000000000000020 /* Products */,
 			);
@@ -128,6 +147,7 @@
 			children = (
 				000000000000000000000120 /* Meridian.app */,
 				302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */,
+				303194683083C790004AF1F8 /* MeridianUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -192,6 +212,27 @@
 			productReference = 302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		303194673083C790004AF1F8 /* MeridianUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3031946E3083C790004AF1F8 /* Build configuration list for PBXNativeTarget "MeridianUITests" */;
+			buildPhases = (
+				303194643083C790004AF1F8 /* Sources */,
+				303194653083C790004AF1F8 /* Frameworks */,
+				303194663083C790004AF1F8 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3031946D3083C790004AF1F8 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				303194693083C790004AF1F8 /* MeridianUITests */,
+			);
+			name = MeridianUITests;
+			productName = MeridianUITests;
+			productReference = 303194683083C790004AF1F8 /* MeridianUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -207,6 +248,10 @@
 					};
 					302B095C3083455C00539511 = {
 						CreatedOnToolsVersion = 27.0;
+					};
+					303194673083C790004AF1F8 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 000000000000000100000000;
 					};
 				};
 			};
@@ -229,6 +274,7 @@
 			targets = (
 				000000000000000100000000 /* Meridian */,
 				302B095C3083455C00539511 /* MeridianWidgetsExtension */,
+				303194673083C790004AF1F8 /* MeridianUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -240,6 +286,11 @@
 			);
 		};
 		302B095B3083455C00539511 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		303194663083C790004AF1F8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -257,6 +308,11 @@
 			files = (
 			);
 		};
+		303194643083C790004AF1F8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -264,6 +320,11 @@
 			isa = PBXTargetDependency;
 			target = 302B095C3083455C00539511 /* MeridianWidgetsExtension */;
 			targetProxy = 302B096D3083455D00539511 /* PBXContainerItemProxy */;
+		};
+		3031946D3083C790004AF1F8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000100000000 /* Meridian */;
+			targetProxy = 3031946C3083C790004AF1F8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -567,6 +628,49 @@
 			};
 			name = Release;
 		};
+		3031946F3083C790004AF1F8 /* Debug configuration for PBXNativeTarget "MeridianUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W4D7987B7J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.MeridianUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Meridian;
+			};
+			name = Debug;
+		};
+		303194703083C790004AF1F8 /* Release configuration for PBXNativeTarget "MeridianUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = W4D7987B7J;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.MeridianUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Meridian;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -591,6 +695,14 @@
 			buildConfigurations = (
 				302B09713083455D00539511 /* Debug configuration for PBXNativeTarget "MeridianWidgetsExtension" */,
 				302B09723083455D00539511 /* Release configuration for PBXNativeTarget "MeridianWidgetsExtension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		3031946E3083C790004AF1F8 /* Build configuration list for PBXNativeTarget "MeridianUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3031946F3083C790004AF1F8 /* Debug configuration for PBXNativeTarget "MeridianUITests" */,
+				303194703083C790004AF1F8 /* Release configuration for PBXNativeTarget "MeridianUITests" */,
 			);
 			defaultConfigurationName = Release;
 		};
