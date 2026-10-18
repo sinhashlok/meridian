@@ -12,7 +12,7 @@ import UserNotifications
     /// Asks for Alarms permission if `needed` and not yet asked. `true` if denied.
     static func alarmsDenied(askingIf needed: Bool) async -> Bool {
         let manager = AlarmManager.shared
-        if manager.authorizationState == .notDetermined, needed {
+        if manager.authorizationState == .notDetermined, needed, !DebugLaunch.suppressesPermissionPrompts {
             _ = try? await manager.requestAuthorization()
         }
         return manager.authorizationState == .denied
@@ -113,7 +113,8 @@ import UserNotifications
     /// Asks for notification permission if `needed` and not yet asked. `true` if denied.
     static func notificationsDenied(askingIf needed: Bool) async -> Bool {
         let center = UNUserNotificationCenter.current()
-        if await center.notificationSettings().authorizationStatus == .notDetermined, needed {
+        if await center.notificationSettings().authorizationStatus == .notDetermined, needed,
+           !DebugLaunch.suppressesPermissionPrompts {
             _ = try? await center.requestAuthorization(options: [.alert, .sound])
         }
         return await center.notificationSettings().authorizationStatus == .denied

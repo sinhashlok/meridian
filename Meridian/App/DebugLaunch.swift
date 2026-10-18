@@ -90,6 +90,11 @@ enum DebugLaunch {
     /// tap (`simctl openurl` stops at an "Open in Meridian?" alert nobody can tap).
     static var openURL: URL? { string("MeridianOpenURL").flatMap { URL(string: $0) } }
 
+    /// A `-MeridianNow` launch is a screenshot or UI test, so it never shows a system
+    /// permission prompt: the prompt covers the screen, blocks accessibility audits, and
+    /// SpringBoard keeps it up across relaunches.
+    static var suppressesPermissionPrompts: Bool { string("MeridianNow") != nil }
+
     /// `-MeridianNotif off`: show the Jobs "Notifications are off" banner (board JobsNotifOff).
     static var notificationsOff: Bool { string("MeridianNotif") == "off" }
 
