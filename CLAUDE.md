@@ -1,4 +1,4 @@
-# CLAUDE.md — Meridian (working name)
+# CLAUDE.md — Meridian
 
 Native iOS clock app for developers, data engineers, analysts and remote tech workers.
 Full replacement for the iOS Clock app (world clock, alarms, timers, stopwatch) plus

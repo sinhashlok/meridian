@@ -5,7 +5,7 @@ Status: **frozen 16 Oct 2026**. Source: the Claude Design canvas
 disagree, this file wins. Known stale board text: the Components and IA boards still
 say "Keep local time" for alarms; the correct label is "Keep <zone> time" (§4.2).
 
-"Meridian" is a placeholder name (decision Q8 open).
+The app is named "Meridian" (decision CG).
 
 ---
 
@@ -270,6 +270,5 @@ Server skew (v1.1), Calendar overlay (v1.1, opt-in), holiday markers (v1.1),
 JWT/UUIDv7 decoders (v1.1), iPad, light mode, cloud sync.
 
 ## 9. Open items
-- Q8 app name.
 - R17: whether the Alarms tab should be labelled "Schedule" (validate in a 5-user test).
 - Accent on glass: check UTC pill and tab tint legibility over the Planner on device.

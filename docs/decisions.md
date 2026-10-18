@@ -428,3 +428,10 @@ rows (time, title and full schedule line, countdown; children under a run). Rows
 Grid, so the time column is as wide as the widest time (`1 Nov 10:30` stays on one line)
 and every title starts at the same x, in the medium widget too. Small widget: the zone
 label keeps its natural width beside the time (squeezed, `IST` showed as a sliver of dots).
+
+**CG. The app is named Meridian** (owner, 18 Oct; closes Q8). Checked against the App
+Store (US, India, UK): an app named exactly "Meridian" exists and about seven are
+Meridian-named world clocks or time-zone apps, so the store name gets a suffix that sets
+it apart, e.g. "Meridian: Dev Clock & Cron" (final wording in M9). The Home Screen shows
+"Meridian". Bundle ID `com.shloksinha.meridian` and App Group stay. Before the first
+upload: check Indian and US trademark registers for "Meridian" in software.
