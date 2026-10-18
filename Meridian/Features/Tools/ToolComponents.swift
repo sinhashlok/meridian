@@ -18,6 +18,7 @@ struct ToolInputBox<Trailing: View>: View {
     @ViewBuilder var trailing: () -> Trailing
 
     @Environment(\.dynamicTypeSize) private var typeSize
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         // At accessibility sizes the trailing controls move under the field.
@@ -26,7 +27,8 @@ struct ToolInputBox<Trailing: View>: View {
             : AnyLayout(HStackLayout(spacing: Spacing.s))
         layout {
             HStack(spacing: Spacing.s) {
-                // Wraps long epochs; a single-line field (Dates) scrolls instead.
+                // Wraps long epochs. Dates stays one line and scrolls: wrapped at large text,
+                // `2026-10-15` would show `2026-10-1` on its own line, a different date.
                 VStack(alignment: .leading, spacing: 2) {
                     TextField(placeholder, text: $text, axis: showsClear ? .vertical : .horizontal)
                         .meridianFont(.monoTime)
@@ -34,6 +36,8 @@ struct ToolInputBox<Trailing: View>: View {
                         .keyboardType(keyboard)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .focused($isFocused)
+                        .modifier(ReturnEndsEditing(text: $text, isFocused: $isFocused))
                     if let caption, !caption.isEmpty {
                         Text(caption)
                             .meridianFont(.caption)
@@ -62,6 +66,21 @@ struct ToolInputBox<Trailing: View>: View {
         .overlay {
             RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
                 .strokeBorder(isInvalid ? Color.statusDanger : Color.separatorLine, lineWidth: isInvalid ? 1.5 : 1)
+        }
+    }
+}
+
+/// Wrapping tool inputs (`axis: .vertical`) keep long mono values in view, but Return should
+/// end editing, not start a second line: a typed or pasted newline is removed.
+struct ReturnEndsEditing: ViewModifier {
+    @Binding var text: String
+    var isFocused: FocusState<Bool>.Binding
+
+    func body(content: Content) -> some View {
+        content.onChange(of: text) { _, new in
+            guard new.contains(where: \.isNewline) else { return }
+            text = new.filter { !$0.isNewline }
+            isFocused.wrappedValue = false
         }
     }
 }

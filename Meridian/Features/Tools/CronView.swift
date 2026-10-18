@@ -78,13 +78,15 @@ struct CronView: View {
     /// keyboard (decision AF).
     private func expressionBox(isInvalid: Bool) -> some View {
         VStack(alignment: .leading, spacing: Spacing.xxs) {
-            TextField(isQuartz ? "0 0 2 ? * MON-FRI" : "0 2 * * *", text: $input)
+            TextField(isQuartz ? "0 0 2 ? * MON-FRI" : "0 2 * * *", text: $input, axis: .vertical)
                 .meridianFont(.monoTime)
                 .foregroundStyle(.textPrimary)
                 .keyboardType(.numbersAndPunctuation)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
                 .focused($isEditing)
+                .modifier(ReturnEndsEditing(text: $input, isFocused: $isEditing))
+                .accessibilityLabel("Cron expression")
             if !isInvalid {
                 Text(CronText.fieldLabels(dialect))
                     .meridianFont(.sub)
