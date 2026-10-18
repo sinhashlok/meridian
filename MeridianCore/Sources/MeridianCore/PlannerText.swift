@@ -28,9 +28,10 @@ extension PlannerDay {
     /// cities`, or `No hour works for all 3 cities` with the first reason found, a zone
     /// with no work hours that day or a pair whose work hours never meet.
     public var banner: PlannerBanner? {
+        guard !rows.isEmpty else { return nil }
         let working = rows.map { row in row.segments.filter { $0.kind == .work }.map(\.interval) }
         if working.allSatisfy(\.isEmpty) {
-            return PlannerBanner(title: "Weekend in all \(rows.count) cities", detail: nil)
+            return PlannerBanner(title: "Weekend in \(everyCity)", detail: nil)
         }
         guard overlap(of: working) == nil else { return nil }
 
@@ -45,7 +46,16 @@ extension PlannerDay {
                 }
             }
         }
-        return PlannerBanner(title: "No hour works for all \(rows.count) cities", detail: detail)
+        return PlannerBanner(title: "No hour works for \(everyCity)", detail: detail)
+    }
+
+    /// `all 3 cities`, `both cities`, or the one city's name.
+    private var everyCity: String {
+        switch rows.count {
+        case 1: rows[0].zone.name
+        case 2: "both cities"
+        default: "all \(rows.count) cities"
+        }
     }
 
     /// `IST · Thu 15`; the reference's name when it changes clocks that day (`London · Sun 25`).

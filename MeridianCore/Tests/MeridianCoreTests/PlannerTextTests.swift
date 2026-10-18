@@ -53,7 +53,21 @@ struct PlannerTextTests {
         // Work days Sun–Thu: Friday has no work hours there.
         let dubai = PlannerZone(zone: Zone("Asia/Dubai")!, name: "Dubai", workDays: [7, 1, 2, 3, 4])
         let banner = Self.day(CivilDate(2026, 10, 16), home: Self.london, [Self.londonZone, dubai]).banner
-        #expect(banner == PlannerBanner(title: "No hour works for all 2 cities", detail: "Dubai is on its weekend."))
+        #expect(banner == PlannerBanner(title: "No hour works for both cities", detail: "Dubai is on its weekend."))
+    }
+
+    @Test("Weekend banner counts like English: one city by name, two as both")
+    func bannerWeekendCounts() {
+        let sunday = CivilDate(2026, 10, 25)
+        #expect(Self.day(sunday, home: Self.ist, [Self.mumbai]).banner
+                == PlannerBanner(title: "Weekend in Mumbai", detail: nil))
+        #expect(Self.day(sunday, home: Self.ist, [Self.mumbai, Self.londonZone]).banner
+                == PlannerBanner(title: "Weekend in both cities", detail: nil))
+    }
+
+    @Test("No zones, no banner")
+    func bannerNoZones() {
+        #expect(Self.day(CivilDate(2026, 10, 25), home: Self.ist, []).banner == nil)
     }
 
     @Test("Pairs are judged on the home day only")
