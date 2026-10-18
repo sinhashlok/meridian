@@ -18,16 +18,9 @@ struct BestWindowCard: View {
                         .textCase(.uppercase)
                         .tracking(0.8)
                         .foregroundStyle(.textSecondary)
-                    ViewThatFits(in: .horizontal) {
-                        HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
-                            range
-                            Spacer(minLength: 0)
-                            counts.multilineTextAlignment(.trailing)
-                        }
-                        VStack(alignment: .leading, spacing: Spacing.xxs) {
-                            range
-                            counts
-                        }
+                    RowOrStack(alignment: .firstTextBaseline, stackSpacing: Spacing.xxs) {
+                        range
+                        counts
                     }
                     if let skip = best.skipNote {
                         Text(skip)
@@ -90,16 +83,9 @@ struct MeetingCard: View {
     var body: some View {
         let tags = MeetingText.tags(start: selection, minutes: minutes, zones: zones)
         VStack(alignment: .leading, spacing: Spacing.m) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .top, spacing: Spacing.s) {
-                    heading
-                    Spacer(minLength: 0)
-                    steppers
-                }
-                VStack(alignment: .leading, spacing: Spacing.s) {
-                    heading
-                    steppers
-                }
+            RowOrStack(alignment: .top, stackSpacing: Spacing.s) {
+                heading
+                steppers
             }
 
             // One zone per row (owner's choice, decision V): name, then times in one aligned

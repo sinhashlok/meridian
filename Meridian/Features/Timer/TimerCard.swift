@@ -23,32 +23,18 @@ struct TimerCard: View {
         VStack(alignment: .leading, spacing: Spacing.s) {
             header(text)
             if timer.isDuration {
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .center, spacing: Spacing.s) {
-                        durationInfo(text, status: status)
-                        Spacer(minLength: 0)
-                        controls(status)
-                    }
-                    VStack(alignment: .leading, spacing: Spacing.s) {
-                        durationInfo(text, status: status)
-                        controls(status)
-                    }
+                RowOrStack(stackSpacing: Spacing.s) {
+                    durationInfo(text, status: status)
+                    controls(status)
                 }
                 if let progress = timer.progress(at: now) {
                     ProgressBar(fraction: progress, isActive: status == .running)
                 }
             } else {
                 untilInfo(text)
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: Spacing.s) {
-                        remaining(text)
-                        Spacer(minLength: 0)
-                        controls(status)
-                    }
-                    VStack(alignment: .leading, spacing: Spacing.s) {
-                        remaining(text)
-                        controls(status)
-                    }
+                RowOrStack(stackSpacing: Spacing.s) {
+                    remaining(text)
+                    controls(status)
                 }
                 if let line = text.status {
                     Text(line).meridianFont(.sub).foregroundStyle(.textSecondary)
@@ -66,16 +52,9 @@ struct TimerCard: View {
     // MARK: Parts
 
     private func header(_ text: TimerCardText) -> some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
-                title(text)
-                Spacer(minLength: 0)
-                tag(text)
-            }
-            VStack(alignment: .leading, spacing: Spacing.xxs) {
-                title(text)
-                tag(text)
-            }
+        RowOrStack(alignment: .firstTextBaseline, stackSpacing: Spacing.xxs) {
+            title(text)
+            tag(text)
         }
     }
 
@@ -135,7 +114,7 @@ struct TimerCard: View {
                 case .running, .paused:
                     Button("+1 min") { perform(.addMinute) }
                         .buttonStyle(.pill)
-                        .fixedSize()    // natural width, so ViewThatFits stacks instead of squeezing
+                        .fixedSize()    // natural width, so the row stacks instead of squeezing
                         .accessibilityLabel("Add 1 minute")
                         .accessibilityShowsLargeContentViewer()
                     if status == .running {

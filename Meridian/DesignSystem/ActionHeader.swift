@@ -8,16 +8,9 @@ struct ActionHeader<Summary: View>: View {
     @ViewBuilder let summary: () -> Summary
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: Spacing.s) {
-                summary().fixedSize()
-                Spacer(minLength: 0)
-                button.fixedSize()
-            }
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                button
-                summary()
-            }
+        RowOrStack(stacksLastFirst: true) {
+            summary()
+            button
         }
         .padding(.vertical, Spacing.xxs)
     }

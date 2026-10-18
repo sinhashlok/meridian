@@ -102,9 +102,9 @@ struct EpochView: View {
     /// Unit chip (with the override menu), Paste and Now.
     private func controls(chip: (digits: String, unit: String)?, now: Date) -> some View {
         let tooLong = chip?.unit == "no unit fits"
-        return ViewThatFits(in: .horizontal) {
-            HStack(spacing: Spacing.xs) { unitMenu(chip, tooLong: tooLong); Spacer(minLength: 0); pasteAndNow(now) }
-            VStack(alignment: .leading, spacing: Spacing.xs) { unitMenu(chip, tooLong: tooLong); pasteAndNow(now) }
+        return RowOrStack(spacing: Spacing.xs) {
+            unitMenu(chip, tooLong: tooLong)
+            pasteAndNow(now)
         }
     }
 
@@ -118,9 +118,8 @@ struct EpochView: View {
                 }
             } label: {
                 // Side by side; stacked when it can't fit (large text), so words never break.
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: Spacing.xxs) { chipParts(chip, tooLong: tooLong) }
-                    VStack(alignment: .leading, spacing: 2) { chipParts(chip, tooLong: tooLong) }
+                RowOrStack(spacing: Spacing.xxs, stackSpacing: 2, pushesLast: false) {
+                    chipParts(chip, tooLong: tooLong)
                 }
                 .padding(.horizontal, Spacing.s)
                 .frame(minHeight: Spacing.minTapTarget)
@@ -287,16 +286,9 @@ struct EpochView: View {
     private func zonelessContent(_ local: LocalInput, now: Date) -> some View {
         let zone = Zone(zoneID) ?? .utc
         let reading = EpochText.zoneless(local, in: zone, zoneName: ToolZoneMenu.name(for: zoneID, zones: zones))
-        ViewThatFits(in: .horizontal) {
-            HStack {
-                zonelessLabel
-                Spacer(minLength: Spacing.xs)
-                ToolZoneMenu(prefix: "Interpret as", zoneID: $zoneID, zones: zones)
-            }
-            VStack(alignment: .leading, spacing: Spacing.xs) {
-                zonelessLabel
-                ToolZoneMenu(prefix: "Interpret as", zoneID: $zoneID, zones: zones)
-            }
+        RowOrStack {
+            zonelessLabel
+            ToolZoneMenu(prefix: "Interpret as", zoneID: $zoneID, zones: zones)
         }
         if reading.options.count == 2 {
             HStack(spacing: Spacing.s) {

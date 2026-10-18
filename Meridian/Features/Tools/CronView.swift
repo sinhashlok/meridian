@@ -48,11 +48,10 @@ struct CronView: View {
     // MARK: Input
 
     private var header: some View {
-        HStack {
+        RowOrStack {
             Text("Expression")
                 .meridianFont(.sub)
                 .foregroundStyle(.textSecondary)
-            Spacer()
             Menu {
                 Picker("Dialect", selection: $isQuartz) {
                     Text("Unix 5-field").tag(false)
@@ -132,16 +131,9 @@ struct CronView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             Rectangle().fill(Color.separatorLine).frame(height: 1)
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    Text("Evaluate in").meridianFont(.body).foregroundStyle(.textPrimary)
-                    Spacer(minLength: Spacing.s)
-                    ToolZoneMenu(prefix: "", zoneID: $zoneID, zones: zones)
-                }
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    Text("Evaluate in").meridianFont(.body).foregroundStyle(.textPrimary)
-                    ToolZoneMenu(prefix: "", zoneID: $zoneID, zones: zones)
-                }
+            RowOrStack {
+                Text("Evaluate in").meridianFont(.body).foregroundStyle(.textPrimary)
+                ToolZoneMenu(prefix: "", zoneID: $zoneID, zones: zones)
             }
             if let note = CronText.phoneNote(runs: runs, evaluateIn: zone, device: .device) {
                 Text(note)

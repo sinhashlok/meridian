@@ -116,16 +116,16 @@ struct JobDetailView: View {
                 Text(phone).meridianFont(.body).monospacedDigit().foregroundStyle(.textSecondary)
             }
             Rectangle().fill(Color.separatorLine).frame(height: 1).padding(.vertical, Spacing.xxs)
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("Next run").meridianFont(.body).foregroundStyle(.textPrimary)
-                    Spacer(minLength: Spacing.s)
-                    nextRun(card, isPaused: isPaused, alignment: .trailing)
-                }
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    Text("Next run").meridianFont(.body).foregroundStyle(.textPrimary)
-                    nextRun(card, isPaused: isPaused, alignment: .leading)
-                }
+            // Not RowOrStack: the value's lines align trailing in a row and leading when
+            // stacked. AnyLayout keeps the same views either way (see RowOrStack).
+            let stacked = typeSize.isAccessibilitySize
+            let layout = stacked
+                ? AnyLayout(VStackLayout(alignment: .leading, spacing: Spacing.xxs))
+                : AnyLayout(HStackLayout(alignment: .firstTextBaseline))
+            layout {
+                Text("Next run").meridianFont(.body).foregroundStyle(.textPrimary)
+                if !stacked { Spacer(minLength: Spacing.s) }
+                nextRun(card, isPaused: isPaused, alignment: stacked ? .leading : .trailing)
             }
         }
         .padding(Spacing.m)

@@ -46,15 +46,9 @@ struct TimezoneRow: View {
         let badge = ZoneClock.dstBadgeText(zone, now: now)
         let relation = saved.isHome ? "Home" : ZoneClock.dayOffsetText(zone, relativeTo: home ?? zone, at: now)
         return VStack(alignment: .leading, spacing: 2) {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: Spacing.xs) {
-                    name
-                    if let badge { DSTBadge(text: badge, action: onShowChanges) }
-                }
-                VStack(alignment: .leading, spacing: Spacing.xxs) {
-                    name
-                    if let badge { DSTBadge(text: badge, action: onShowChanges) }
-                }
+            RowOrStack(spacing: Spacing.xs, stackSpacing: Spacing.xxs, pushesLast: false) {
+                name
+                if let badge { DSTBadge(text: badge, action: onShowChanges) }
             }
             Text("\(ZoneClock.label(zone, at: now)) · \(relation)")
                 .meridianFont(.sub)

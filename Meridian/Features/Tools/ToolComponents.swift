@@ -103,15 +103,9 @@ struct CopyRow: View {
     var body: some View {
         HStack(spacing: Spacing.s) {
             if inline {
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .firstTextBaseline, spacing: Spacing.s) {
-                        labelText
-                        Spacer(minLength: Spacing.s)
-                        valueText.multilineTextAlignment(.trailing)
-                    }
-                    VStack(alignment: .leading, spacing: 2) { labelText; valueText }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+                // In a row both fit unwrapped, so the value needs no trailing text alignment.
+                RowOrStack(alignment: .firstTextBaseline, stackSpacing: 2) { labelText; valueText }
+                    .frame(maxWidth: .infinity, alignment: .leading)
             } else {
                 VStack(alignment: .leading, spacing: 2) { labelText; valueText }
                     .frame(maxWidth: .infinity, alignment: .leading)

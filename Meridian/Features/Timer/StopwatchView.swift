@@ -98,16 +98,9 @@ struct StopwatchView: View {
             let count = Text(completed.isEmpty ? "No laps yet" : completed.count == 1 ? "1 lap" : "\(completed.count) laps")
                 .meridianFont(.sub)
                 .foregroundStyle(.textSecondary)
-            ViewThatFits(in: .horizontal) {
-                HStack {
-                    count.fixedSize()
-                    Spacer()
-                    if !completed.isEmpty { copyButton(completed).fixedSize() }
-                }
-                VStack(alignment: .leading, spacing: Spacing.xs) {
-                    count
-                    if !completed.isEmpty { copyButton(completed) }
-                }
+            RowOrStack {
+                count
+                if !completed.isEmpty { copyButton(completed) }
             }
 
             VStack(spacing: 0) {

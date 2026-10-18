@@ -38,10 +38,7 @@ struct AlarmRow: View {
 
     private var info: some View {
         VStack(alignment: .leading, spacing: Spacing.xxs) {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) { time; tag }
-                VStack(alignment: .leading, spacing: 0) { time; tag }
-            }
+            RowOrStack(alignment: .firstTextBaseline, spacing: Spacing.xs, stackSpacing: 0, pushesLast: false) { time; tag }
             if let phoneLine = text.phoneLine {
                 FlowLayout(spacing: Spacing.xs) {
                     phone(phoneLine)
