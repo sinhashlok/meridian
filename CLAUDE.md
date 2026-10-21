@@ -302,8 +302,8 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
 5. **M9** (app icon, name, TestFlight). Name kept: Meridian (decision CG; store name gets a
    suffix, trademark check before upload). Icon "Now-line" done (21 Oct):
    `Meridian/AppIcon.icon` (app target only; Primary App Icon Set Name = `AppIcon`), source
-   layers in `docs/design/icon/`, notes in `docs/design/icon-brief.md`. Left: check its four
-   appearances on the phone.
+   layers in `docs/design/icon/`, notes in `docs/design/icon-brief.md`. Four appearances
+   checked on the phone (21 Oct).
    TestFlight needs the paid Apple Developer Program (owner deciding).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).

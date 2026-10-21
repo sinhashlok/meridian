@@ -13,8 +13,8 @@ orange now-line through the one window where all their work hours overlap).
   empty `AppIcon.appiconset` is unused (the first version of this note said both targets).
 - Meridian target › Build Settings › Primary App Icon Set Name = `AppIcon` (Debug and
   Release). Background is the icon's solid fill `#1F1E1D`, not a `background.svg` layer.
-- Builds (actool compiles it, `CFBundleIconName = AppIcon`). Next: check Light, Dark,
-  Tinted and Clear on the phone's Home Screen; the Simulator can't judge the glass.
+- Builds (actool compiles it, `CFBundleIconName = AppIcon`). Light, Dark, Tinted and
+  Clear checked on the iPhone's Home Screen (21 Oct, Release build): all fine.
 
 ```
 Design the app icon for Meridian, continuing from this canvas and its design system.
