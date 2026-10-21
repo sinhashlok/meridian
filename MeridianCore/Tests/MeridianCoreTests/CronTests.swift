@@ -203,6 +203,17 @@ struct CronTests {
         #expect(fall.map(\.kind) == [.repeated, .exact])
     }
 
+    /// Chile falls back at 24:00 on Sat 4 Apr 2026 (03:00Z, exactly 24 h after local
+    /// midnight), so 23:00–23:59 happens twice on a 25-hour day (Python zoneinfo).
+    @Test("A clock change at midnight still marks that evening's run as repeated (Santiago)")
+    func dstAtMidnight() throws {
+        let santiago = Zone("America/Santiago")!
+        let runs = try CronExpression.parse("30 23 * * *", dialect: .unix)
+            .nextRuns(after: Self.utc("2026-04-04T12:00:00Z"), in: santiago, count: 2)
+        #expect(runs.map(\.instant) == Self.instants(["2026-04-05T02:30:00Z", "2026-04-06T03:30:00Z"]))
+        #expect(runs.map(\.kind) == [.repeated, .exact])
+    }
+
     @Test("Hourly across both clock changes: no duplicate at 03:00, no second 01:00")
     func dstHourly() throws {
         let ny = Zone("America/New_York")!

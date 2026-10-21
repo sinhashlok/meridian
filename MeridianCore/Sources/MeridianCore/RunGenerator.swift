@@ -39,14 +39,20 @@ enum RunGenerator {
         // Start a day early: a run on the previous local day can still be in the future
         // relative to the zone's offset changing.
         var day = ZoneClock.local(instant, in: zone).date.adding(days: -1)
+        // A matching day's end is the next day's start: kept for when that day matches too.
+        var knownStart: (day: CivilDate, start: Date)?
 
         for _ in 0..<horizonDays {
             if let lastYear, day.year > lastYear { break }
             if matchesDay(day) {
-                let start = ZoneClock.startOfDay(day, in: zone)
-                // Most days have no clock change: plain arithmetic from local midnight.
-                let isPlainDay = ZoneClock.transitions(in: zone, from: start,
-                                                       to: start.addingTimeInterval(86_400)).isEmpty
+                let start = if let knownStart, knownStart.day == day { knownStart.start }
+                            else { ZoneClock.startOfDay(day, in: zone) }
+                let next = day.adding(days: 1)
+                let end = ZoneClock.startOfDay(next, in: zone)
+                knownStart = (next, end)
+                // Most days have no clock change: plain arithmetic from local midnight. The
+                // day's true end (not 24 h) also catches a change at midnight (Chile).
+                let isPlainDay = ZoneClock.transitions(in: zone, from: start, to: end).isEmpty
                 for time in times {
                     let wall = LocalDateTime(date: day, hour: time.hour, minute: time.minute)
                     let candidate: Date
