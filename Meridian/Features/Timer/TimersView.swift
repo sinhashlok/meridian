@@ -22,6 +22,7 @@ struct TimersView: View {
             let display: Zone = appState.isUTCMode ? .utc : .device
             let pairs = TimerStore.timers(from: saved)
             let sorted = TimerText.sorted(pairs.map(\.timer), now: now)
+            let rows = Dictionary(pairs.map { ($0.timer.id, $0.row) }, uniquingKeysWith: { first, _ in first })
 
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.s) {
@@ -33,7 +34,7 @@ struct TimersView: View {
                         PlaceholderBox(text: "No timers. Start a countdown, or one that ends at a time in any zone.")
                     }
                     ForEach(sorted) { timer in
-                        if let row = pairs.first(where: { $0.timer.id == timer.id })?.row {
+                        if let row = rows[timer.id] {
                             TimerCard(timer: timer, now: now, display: display, displayIsPhone: !appState.isUTCMode) {
                                 perform($0, on: row, now: now)
                             }

@@ -37,6 +37,7 @@ struct AlarmsView: View {
             let display: Zone = appState.isUTCMode ? .utc : device
             let pairs = AlarmStore.alarms(from: saved)
             let sorted = AlarmText.sorted(pairs.map(\.alarm), now: now, device: device)
+            let rows = Dictionary(pairs.map { ($0.alarm.id, $0.row) }, uniquingKeysWith: { first, _ in first })
 
             ScrollView {
                 VStack(alignment: .leading, spacing: Spacing.s) {
@@ -55,7 +56,7 @@ struct AlarmsView: View {
                     } else {
                         ToolCard {
                             ForEach(sorted) { alarm in
-                                if let row = pairs.first(where: { $0.alarm.id == alarm.id })?.row {
+                                if let row = rows[alarm.id] {
                                     AlarmRow(text: AlarmText.row(alarm, now: now, device: device), isOn: alarm.isOn,
                                              onToggle: { isOn in toggle(row, isOn) },
                                              onEdit: { editing = .existing(row) },
