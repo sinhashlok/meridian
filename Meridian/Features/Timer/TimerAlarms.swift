@@ -18,8 +18,9 @@ import SwiftData
     /// Notifications denied too: timers won't alert at all.
     private(set) var notificationsDenied = false
 
-    /// One sync at a time, so two quick taps can't schedule two alarms.
-    @ObservationIgnored private var running: Task<Void, Never>?
+    /// One sync at a time, so two quick taps can't schedule two alarms; a burst of taps
+    /// shares one follow-up sync.
+    @ObservationIgnored private let queue = SyncQueue()
 
     /// Alarm ids we scheduled for timers. AlarmKit's list doesn't say what an alarm is
     /// for, and M7's wake-up alarms will share it, so reconcile only touches these.
@@ -34,13 +35,7 @@ import SwiftData
     /// task to know the alarms and activity are done.
     @discardableResult
     func sync(in context: ModelContext) -> Task<Void, Never> {
-        let previous = running
-        let task = Task {
-            await previous?.value
-            await reconcile(in: context)
-        }
-        running = task
-        return task
+        queue.enqueue { await self.reconcile(in: context) }
     }
 
     // MARK: Private

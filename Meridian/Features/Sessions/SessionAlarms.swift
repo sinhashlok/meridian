@@ -12,8 +12,9 @@ import Observation
     private(set) var alarmsDenied = false
     private(set) var notificationsDenied = false
 
-    /// One sync at a time, so quick taps can't schedule twice.
-    @ObservationIgnored private var running: Task<Void, Never>?
+    /// One sync at a time, so quick taps can't schedule twice; a burst of taps shares
+    /// one follow-up sync.
+    @ObservationIgnored private let queue = SyncQueue()
 
     /// Alarm (or fallback notification) id → fire date, for this session only.
     /// Dates are kept as seconds since 2001 (`Date`'s own reference), which round-trips
@@ -37,13 +38,7 @@ import Observation
     /// Queues a reconcile; await the task to know the alarms and activity are done.
     @discardableResult
     func sync() -> Task<Void, Never> {
-        let previous = running
-        let task = Task {
-            await previous?.value
-            await reconcile()
-        }
-        running = task
-        return task
+        queue.enqueue { await self.reconcile() }
     }
 
     private func reconcile() async {

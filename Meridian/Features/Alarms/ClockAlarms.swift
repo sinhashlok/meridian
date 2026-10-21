@@ -15,8 +15,9 @@ import SwiftData
     /// Alarms permission denied: alarms can't ring (banner on the Alarms list).
     private(set) var alarmsDenied = false
 
-    /// One sync at a time, so quick toggles can't schedule twice.
-    @ObservationIgnored private var running: Task<Void, Never>?
+    /// One sync at a time, so quick toggles can't schedule twice; a burst of toggles
+    /// shares one follow-up sync.
+    @ObservationIgnored private let queue = SyncQueue()
 
     /// Every AlarmKit id scheduled for alarms. Timers and sessions share AlarmKit's list,
     /// so this only ever cancels its own ids; an id no row claims (a deleted alarm) goes.
@@ -30,13 +31,7 @@ import SwiftData
     /// Queues a reconcile of every saved alarm; await the task to know it's done.
     @discardableResult
     func sync(in context: ModelContext) -> Task<Void, Never> {
-        let previous = running
-        let task = Task {
-            await previous?.value
-            await reconcile(in: context)
-        }
-        running = task
-        return task
+        queue.enqueue { await self.reconcile(in: context) }
     }
 
     // MARK: Private

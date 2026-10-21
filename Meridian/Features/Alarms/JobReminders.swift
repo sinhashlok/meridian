@@ -13,19 +13,14 @@ import SwiftData
     /// Notifications denied: the Jobs list says reminders won't arrive.
     private(set) var notificationsDenied = DebugLaunch.notificationsOff
 
-    @ObservationIgnored private var running: Task<Void, Never>?
+    /// One sync at a time; a burst of job edits shares one follow-up sync.
+    @ObservationIgnored private let queue = SyncQueue()
 
     private init() {}
 
     @discardableResult
     func sync(in context: ModelContext) -> Task<Void, Never> {
-        let previous = running
-        let task = Task {
-            await previous?.value
-            await reconcile(in: context)
-        }
-        running = task
-        return task
+        queue.enqueue { await self.reconcile(in: context) }
     }
 
     /// Turn on: ask if never asked; otherwise the caller opens Settings. `true` if allowed.
