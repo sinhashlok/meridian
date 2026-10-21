@@ -114,15 +114,8 @@ public struct BestWindow: Equatable, Sendable {
     /// Stretches where every zone is in work hours that day (empty if none).
     public let allWorkRanges: [DateInterval]
     public let skippedWeekend: Bool
-    let zoneCount: Int
 
     public var countsText: String { window.countsText }
-
-    /// `No hour works for all 3 cities` when there is no all-work overlap (then the
-    /// window is the "Best compromise").
-    public var noOverlapBanner: String? {
-        allWorkRanges.isEmpty ? "No hour works for all \(zoneCount) cities" : nil
-    }
 
     /// `Skipping the weekend · Mon 26 Oct`.
     public var skipNote: String? {
@@ -197,7 +190,7 @@ public enum OverlapEngine {
             guard let best = candidates.min(by: { $0.score < $1.score }) else { continue }
 
             return BestWindow(day: day, window: best, allWorkRanges: allWorkRanges(slots: slots, axis: axis, zones: zones),
-                              skippedWeekend: skipped, zoneCount: zones.count)
+                              skippedWeekend: skipped)
         }
         return nil
     }

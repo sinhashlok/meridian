@@ -33,7 +33,6 @@ struct OverlapEngineTests {
         #expect(result.window.isAllWork == false)
         #expect(result.allWorkRanges.isEmpty)
         #expect(result.countsText == "3 of 3 awake · Mumbai in stretch")
-        #expect(result.noOverlapBanner == "No hour works for all 3 cities")
         #expect(result.skipNote == nil)
     }
 
@@ -102,7 +101,6 @@ struct OverlapEngineTests {
         #expect(result.window.isAllWork)
         #expect(result.countsText == "2 of 2 in work hours")
         #expect(result.allWorkRanges == [Self.interval("2026-10-15T16:00:00Z", "2026-10-15T17:00:00Z")])
-        #expect(result.noOverlapBanner == nil)
     }
 
     // MARK: Weekend (decision E) and defaults (decision G)
