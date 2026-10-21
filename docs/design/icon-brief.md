@@ -2,8 +2,19 @@
 
 Sent to the Claude Design canvas "Meridian — iOS Clock for Tech Workers" on 18 Oct 2026.
 No icon existed before M9: the app target has no icon set and the widget extension's
-`AppIcon.appiconset` is Xcode's empty template. Next: assemble the delivered SVG layers in
-Icon Composer, add the `.icon` file to both targets, check all four appearances on the phone.
+`AppIcon.appiconset` is Xcode's empty template.
+
+**Delivered 21 Oct 2026: direction "Now-line"** (three zones as rows of hour bars, the
+orange now-line through the one window where all their work hours overlap).
+
+- Source layers, previews and the flat PNG: `docs/design/icon/` (see its README; not built).
+- The real icon: `Meridian/AppIcon.icon` (Icon Composer), in the app target only. App
+  extensions show the containing app's icon, so the widget extension needs no copy; its
+  empty `AppIcon.appiconset` is unused (the first version of this note said both targets).
+- Meridian target › Build Settings › Primary App Icon Set Name = `AppIcon` (Debug and
+  Release). Background is the icon's solid fill `#1F1E1D`, not a `background.svg` layer.
+- Builds (actool compiles it, `CFBundleIconName = AppIcon`). Next: check Light, Dark,
+  Tinted and Clear on the phone's Home Screen; the Simulator can't judge the glass.
 
 ```
 Design the app icon for Meridian, continuing from this canvas and its design system.
