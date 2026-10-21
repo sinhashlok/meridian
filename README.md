@@ -12,6 +12,80 @@ this timestamp, when does this job run in my time zone, what fiscal week is it?*
   <img src="docs/screenshots/cron.png" width="200" alt="Tools › Cron: an expression described in English with its next runs in UTC and local time">
 </p>
 
+## Why Meridian
+
+Meridian started from a data engineer's working day. Pipelines, notebooks and dashboard
+refreshes run on schedules at different times of the day. The schedulers (Airflow,
+Azure Data Factory, Microsoft Fabric, Databricks) usually think in UTC, the logs speak
+in epoch timestamps, and the people who rely on the data sit in other time zones.
+
+The iPhone's Clock app answers "what time is it in London?", but not the questions that
+actually come up in that day:
+
+- When does tonight's NetSuite pipeline run, on *my* clock?
+- What moment is `1792060800000` in this log line?
+- Is there any hour this week when Mumbai, London and San Francisco are all at work?
+- Which fiscal week is it, and does this ISO week belong to last year or this one?
+
+Answering them meant juggling a world-clock app, an epoch-converter website, a cron
+explainer, a calendar and mental arithmetic, and the arithmetic is where the mistakes
+happen. Meridian puts those answers in one native app. It also replaces the Clock app,
+so there is still only one clock app on the phone.
+
+## The problems it solves
+
+**Time zones that never line up.** A world clock lists times; it doesn't show overlap.
+A Mumbai working day (03:30–12:30 UTC) and a San Francisco one (16:00–01:00 UTC) never
+meet, and three clocks in a list won't tell you that. The **Planner** draws every city's
+work, stretch and sleep hours on one real timeline, finds the best window, and says
+plainly when the best is only a compromise.
+
+**Clocks that change on different dates.** Europe and the US move their clocks on
+different weekends, so for about four weeks a year the London–San Francisco gap is 7
+hours instead of 8, and recurring meetings and alarms quietly shift. Meridian applies
+daylight saving automatically everywhere, shows a badge 14 days before a change, draws
+23- and 25-hour days at their true length, and adds a one-line note whenever a result
+moves.
+
+**Schedules written in UTC, lived in local time.** `0 2 * * *` on a UTC server is 07:30
+in India. Cron dialects disagree (Unix counts Sunday as 0, Quartz, used by Databricks,
+as 1), and a local-time schedule can land on a time that doesn't exist (02:30 on
+spring-forward day) or happens twice. The **Cron** tool explains an expression in
+English, lists the next runs in UTC and local time side by side, and warns when a clock
+change skips or repeats a run.
+
+**Nobody remembers when every job runs.** Pipelines, notebook runs and dashboard
+refreshes live in different tools, each with its own schedule screen. **Jobs** is a
+personal schedule book: each job's schedule in its own zone, child steps with their
+expected start times, a "Mirrors" note pointing at the real DAG or pipeline, and
+optional reminders. It deliberately shows no run status: a phone can't know whether a
+run succeeded, so it doesn't pretend to.
+
+**Timestamps without context.** Logs, APIs and Kafka use epoch values in seconds,
+milliseconds, microseconds or nanoseconds, and reading a 13-digit value as seconds (or
+the reverse) is a classic bug: suddenly everything happened on 21 Jan 1970. Bare
+abbreviations are no better: `IST` is India, Ireland or Israel, and `CST` is Central US,
+China or Cuba. The **Epoch** tool detects the unit, converts exactly to the nanosecond
+in both directions, asks which zone a zone-less date means, and every copied time
+carries its offset: `17:00 BST (UTC+1)`.
+
+**Alarms that should follow another clock.** A New York market open or a 02:00 UTC
+deploy window is a time in someone else's zone, but the Clock app only knows the
+phone's. Meridian's alarms can keep another zone's time or UTC, ring through Silent and
+Focus, and tell you in advance when a clock change will move them.
+
+**Reporting calendars.** Analysts report in ISO weeks and fiscal periods, and both have
+traps. Mon 29 Dec 2025 belongs to ISO week `2026-W01`, so pairing a calendar year with
+an ISO week number (Spark's `year()` with `weekofyear()`) gives wrong keys at every year
+boundary. Fiscal years start in different months (India's on 1 April), and retail 4-4-5
+calendars add a 53rd week every few years. The **Dates** tool shows ISO week, day of
+year, quarter and fiscal period for any date, works backwards from a week or period to
+its dates, and supports up to three fiscal calendars.
+
+**Focus between calls.** Deep work happens in the gaps between meetings across zones.
+**Sessions** runs a Pomodoro timer that knows when your next shared meeting window
+starts, so you can finish a focus block before the call begins.
+
 ## Features
 
 - **Zones.** Clocks for any IANA zone, with `BST (UTC+1)` labels, day offsets and a
