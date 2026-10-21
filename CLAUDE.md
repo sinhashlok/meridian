@@ -226,6 +226,18 @@ Rules:
 - M0.5 AlarmKit spike done; code kept only on branch `spike/alarmkit` (never merge it).
 - Remote: `origin` = github.com/sinhashlok/meridian (public). `gh` CLI is logged in.
 - App tests: `MeridianUITests` (UI audits, M8). No unit test target for app code.
+- Code review (21 Oct): Core is fast (Planner recompute 0.15–1.3 ms, zone search 1.2 ms,
+  50-job reminder plan 4.4 ms on the Mac, Release) and idle CPU is ~0% on every screen,
+  so no Core algorithm rewrites; measure on the phone before any perf change. Core
+  `SyncQueue` runs the timer/alarm/session/job-reminder syncs (one running, at most one
+  waiting; a burst of requests shares the waiting run). New sync services use it.
+  `RunGenerator` checks a day for clock changes up to the next day's start (Chile's
+  midnight fall-back). `README.md` has screenshots in `docs/screenshots/` (590 px wide,
+  board times; retake with `shoot.sh` + `sips --resampleWidth 590`). 326 Core tests.
+  **Open:** since Xcode 27.1 the UI audits fail 3 of 7 (Alarms, Settings, Tools) with
+  contrast findings on Job detail (bottom), Settings' notifications footnote and Cron's
+  UTC note. The pre-review commit `ff9cdf7` fails the same way, so it isn't from the
+  review; all 7 passed on 18 Oct with Xcode 27.0. Not yet judged real or audit change.
 
 ### Next up (as of 18 Oct 2026, M8 done; M9 next)
 
