@@ -12,6 +12,8 @@
 # [zones]:  "Asia/Kolkata=Mumbai,Europe/London=London,..."; the first is home
 # Env:      UTC=1 for UTC mode, WAIT=<seconds> before the shot, OUT=<dir> for the PNGs,
 #           EXTRA="-MeridianDay 2026-10-25 -MeridianSelect 2026-10-15T15:00:00Z -MeridianWarn 1"
+#           BUNDLE_ID=<id> to launch another id (default: <MERIDIAN_ID_PREFIX>.meridian,
+#           the prefix read from Config/Signing.xcconfig and Signing.local.xcconfig)
 #
 # Build and install first:
 #   xcodebuild -project Meridian.xcodeproj -scheme Meridian \
@@ -23,8 +25,13 @@ OUT=${OUT:-${TMPDIR:-/tmp}/meridian-shots}
 mkdir -p "$OUT"
 NOW=${3:-2026-10-15T15:32:00Z}
 ZONES=${4:-Asia/Kolkata=Mumbai,Europe/London=London,America/Los_Angeles=SF}
-xcrun simctl terminate booted com.shloksinha.meridian >/dev/null 2>&1 || true
-xcrun simctl launch booted com.shloksinha.meridian \
+# The last MERIDIAN_ID_PREFIX wins, as in Xcode: the local file is included last.
+CONFIG=${0:A:h:h}/Config
+PREFIX=$(sed -nE 's/^[[:space:]]*MERIDIAN_ID_PREFIX[[:space:]]*=[[:space:]]*([^[:space:]]+).*/\1/p' \
+  "$CONFIG/Signing.xcconfig" "$CONFIG/Signing.local.xcconfig" 2>/dev/null | tail -1)
+BUNDLE_ID=${BUNDLE_ID:-$PREFIX.meridian}
+xcrun simctl terminate booted "$BUNDLE_ID" >/dev/null 2>&1 || true
+xcrun simctl launch booted "$BUNDLE_ID" \
   -MeridianNow "$NOW" -MeridianZones "$ZONES" -MeridianScreen "$2" -MeridianUTC "${UTC:-0}" ${=EXTRA} >/dev/null
 sleep ${WAIT:-3}
 xcrun simctl io booted screenshot "$OUT/$1.png" >/dev/null 2>&1
