@@ -311,12 +311,14 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    - iPhone review (18 Oct, decision CF): every Jobs widget run is the same row (no larger
      first run), rows are a Grid so times never wrap; small widget's zone label keeps its
      width. Planner banner counts cities ("Weekend in Mumbai", "both cities").
-5. **M9** (app icon, name, TestFlight). Name kept: Meridian (decision CG; store name gets a
+5. **M9** (app icon, name, open-source release). Name kept: Meridian (decision CG; store name gets a
    suffix, trademark check before upload). Icon "Now-line" done (21 Oct):
    `Meridian/AppIcon.icon` (app target only; Primary App Icon Set Name = `AppIcon`), source
    layers in `docs/design/icon/`, notes in `docs/design/icon-brief.md`. Four appearances
    checked on the phone (21 Oct).
-   TestFlight needs the paid Apple Developer Program (owner deciding).
+   Release (decision CH, 22 Oct): open source under MIT, no App Store/TestFlight. Users
+   build it with a free Apple ID (README › Run it yourself). Bundle ids, team and App
+   Group are still hard-coded to the owner's; anyone cloning must change them.
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 

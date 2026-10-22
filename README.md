@@ -122,22 +122,55 @@ Correctness is the product, so every screen follows the same rules:
 
 The full rules are in [spec §5](docs/design/spec.md).
 
-## Requirements
+## Run it yourself
 
-- Xcode 27 (iOS 27 SDK)
-- iPhone with iOS 26.0 or later (AlarmKit arrived in iOS 26). Portrait, dark mode.
-- No third-party dependencies.
+Meridian isn't on the App Store. It's open source: you build it from this repo and
+install it on your own iPhone with Xcode. A free Apple ID is enough; you don't need the
+paid Apple Developer Program.
 
-## Build and run
+### What you need
 
-1. Open `Meridian.xcodeproj` and pick the **Meridian** scheme.
-2. To sign with your own team: in each target's **Signing & Capabilities**, set your
-   team, change the bundle id (`com.shloksinha.meridian`) and the App Group
-   (`group.com.shloksinha.meridian`), which the app and widget extension share.
-3. Run on a Simulator or an iPhone. For anything that judges speed, use a Release build:
-   Debug is unoptimised.
+- A Mac with **Xcode 27** (iOS 27 SDK).
+- An iPhone with **iOS 26.0 or later** (AlarmKit arrived in iOS 26), and a cable.
+- An Apple ID. No third-party dependencies, nothing else to install.
 
-Alarms, Live Activities, widgets and haptics need a real iPhone to check properly.
+### Try it in the Simulator
+
+1. `git clone https://github.com/sinhashlok/meridian.git` and open `Meridian.xcodeproj`.
+2. Pick the **Meridian** scheme and an iPhone Simulator, then Run (⌘R). If Xcode reports
+   a signing error, do step 2 of the next section first.
+
+Alarms, Live Activities, widgets and haptics need a real iPhone to judge properly.
+
+### Install it on your iPhone
+
+Each bundle id belongs to one Apple team, so you need your own ids before Xcode will
+sign the app for you.
+
+1. **Xcode › Settings › Accounts:** add your Apple ID. It appears as a "Personal Team".
+2. Select the **Meridian** project, then for each of the targets **Meridian**,
+   **MeridianWidgetsExtension** and **MeridianUITests**, open **Signing & Capabilities**:
+   - **Team:** your Personal Team.
+   - **Bundle Identifier:** replace `com.shloksinha` with your own reverse-domain
+     prefix, e.g. `com.yourname.meridian` and `com.yourname.meridian.MeridianWidgets`
+     (the widget's id must start with the app's).
+   - **App Groups** (app and widget): remove `group.com.shloksinha.meridian` and add
+     `group.com.yourname.meridian`, ticked in both targets.
+3. Put the same group id in `Shared/SharedDefaults.swift` (`appGroup`). Without it the
+   app still runs, but widgets show no data.
+4. Choose **Product › Scheme › Edit Scheme › Run › Build Configuration: Release**
+   (Debug is unoptimised and feels slow), connect the iPhone and Run.
+5. **On the iPhone:** turn on **Settings › Privacy & Security › Developer Mode** when
+   asked (it restarts), then trust your Apple ID under **Settings › General › VPN &
+   Device Management**.
+6. Allow alarms and notifications when Meridian asks.
+
+Free Apple ID limits: the app stops opening after **7 days** (connect the phone and Run
+again; your data stays), and you can have at most 3 such apps on a device at once. A
+paid developer account raises this to a year.
+
+`scripts/shoot.sh` and a few comments use the bundle id `com.shloksinha.meridian`;
+change them too if you use those scripts.
 
 ## Tests
 
@@ -181,10 +214,15 @@ everywhere" stays true.
 
 ## Status
 
-Milestones M0–M8 are done and checked on an iPhone. M9 (app icon, name, TestFlight) is
-in progress: the icon is in; TestFlight comes next.
+Milestones M0–M9 are done and checked on an iPhone. Meridian is released as open source
+to build and run yourself; there are no App Store or TestFlight builds. Known open items
+are in `CLAUDE.md` (Current state).
 
 ## Licence
 
-Copyright © 2026 Shlok Sinha. All rights reserved. The source is public to read; no
-licence is granted to copy, modify or redistribute it.
+[MIT](LICENSE) © 2026 Shlok Sinha. You may use, copy, modify and share it, including in
+your own apps, as long as the copyright notice stays with it.
+
+Issues and pull requests are welcome. Before changing time logic, read the
+[time rules](docs/design/spec.md) and add a test to `MeridianCore`; every change must keep
+`swift test` green.

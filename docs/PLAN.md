@@ -56,7 +56,7 @@ what to check on the phone.
 | M6 | Sessions: Pomodoro, meeting line, Live Activity + Dynamic Island | Session survives app kill; Island shows countdown | Done 17 Oct 2026; iPhone checks passed |
 | M7 | Alarms (AlarmKit, zone + DST policy) and Jobs (list, detail, edit, reminders) | Alarm rings when locked; reminders stay within 64 | Done 17 Oct 2026; iPhone checks passed. Still to check: DST crossing (26 Oct), background refresh over days, Debug · AlarmKit |
 | M8 | Widgets, Lock Screen accessories, Settings complete, accessibility pass | Tinted mode readable; VoiceOver reads Planner rows | Done 18 Oct 2026 (decisions BQ–CF); UI audits in `MeridianUITests`; iPhone checks passed |
-| M9 | App icon, name, TestFlight | Build installed via TestFlight |  |
+| M9 | App icon, name, open-source release (decision CH; was TestFlight) | Anyone can clone, build and run it with a free Apple ID | Icon done 21 Oct 2026; MIT licence and README build guide 22 Oct 2026 |
 
 M3 is the riskiest UI (≈ 265pt track, gestures). M7 is the riskiest platform work.
 Do M0.5 early so any AlarmKit surprise changes the plan before M7.

@@ -435,3 +435,12 @@ Meridian-named world clocks or time-zone apps, so the store name gets a suffix t
 it apart, e.g. "Meridian: Dev Clock & Cron" (final wording in M9). The Home Screen shows
 "Meridian". Bundle ID `com.shloksinha.meridian` and App Group stay. Before the first
 upload: check Indian and US trademark registers for "Meridian" in software.
+
+## 22 Oct 2026 · M9 Release
+
+**CH. Open source instead of the App Store** (owner, 22 Oct; replaces the TestFlight goal
+of M9). No paid Apple Developer Program, so no TestFlight or App Store builds. The repo
+(already public) is licensed MIT, and the README explains how to build and install it
+with a free Apple ID: own team, own bundle id prefix and App Group, 7-day re-install.
+Decision CG's store-name suffix and trademark check apply only if the app is ever
+published to the store.
