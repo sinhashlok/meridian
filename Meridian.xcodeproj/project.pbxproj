@@ -45,6 +45,7 @@
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Meridian.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Meridian.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3016F778308A56A800EBF4AD /* Signing.local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.local.xcconfig; sourceTree = "<group>"; };
 		302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MeridianWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		302B095F3083455C00539511 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		302B09613083455C00539511 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -132,6 +133,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				3016F778308A56A800EBF4AD /* Signing.local.xcconfig */,
 				3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */,
 				302B0976308346D700539511 /* Shared */,
 				000000000000000000000010 /* Meridian */,

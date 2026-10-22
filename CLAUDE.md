@@ -319,6 +319,20 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    Release (decision CH, 22 Oct): open source under MIT, no App Store/TestFlight. Users
    build it with a free Apple ID (README › Run it yourself). Bundle ids, team and App
    Group are still hard-coded to the owner's; anyone cloning must change them.
+   **In progress (22 Oct): configurable signing.** Plan approved: `Config/Signing.xcconfig`
+   (`MERIDIAN_TEAM`, `MERIDIAN_ID_PREFIX`, derived `DEVELOPMENT_TEAM`, `MERIDIAN_APP_GROUP`,
+   `#include? "Signing.local.xcconfig"`), gitignored local file (owner's: W4D7987B7J,
+   com.shloksinha) + committed `.example`. Step 1 done (`32e3435`). Next: step 2 owner's
+   Xcode clicks (add the xcconfig to the project with no target; base configuration
+   "Signing" for all 3 targets, Debug + Release; delete project-level Development Team;
+   bundle ids `$(MERIDIAN_ID_PREFIX).meridian`, `.meridian.MeridianWidgets`,
+   `.MeridianUITests`), then verify pbxproj. Step 3: entitlements + Info.plists use
+   `$(MERIDIAN_APP_GROUP)` / `$(PRODUCT_BUNDLE_IDENTIFIER)`, key `MeridianAppGroup` in both
+   plists, `SharedDefaults.appGroup` and `BackgroundRefresh.identifier` read Info.plist.
+   Step 4: `shoot.sh` reads the prefix from the xcconfigs (`BUNDLE_ID` override). Step 5:
+   README install steps, decision CI. Step 6: Core tests, fresh-clone Simulator build
+   (empty team), Simulator + iPhone Release build, check signed ids, push. Skip UI tests;
+   don't install on the phone unless asked.
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
