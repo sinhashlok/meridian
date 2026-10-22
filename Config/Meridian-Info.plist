@@ -4,19 +4,21 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.shloksinha.meridian.refresh</string>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER).refresh</string>
 	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.shloksinha.meridian</string>
+			<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>meridian</string>
 			</array>
 		</dict>
 	</array>
+	<key>MeridianAppGroup</key>
+	<string>$(MERIDIAN_APP_GROUP)</string>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Meridian uses alarms so your wake-ups and reminders ring even when your phone is on Silent or in a Focus.</string>
 	<key>UIBackgroundModes</key>

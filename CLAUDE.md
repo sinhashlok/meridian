@@ -326,10 +326,11 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    clicks, verified with `-showBuildSettings`): all 3 targets × Debug/Release are based on
    `Signing.xcconfig` (never the `.local` one: it lacks `DEVELOPMENT_TEAM`/app group and
    is gitignored), no project-level team, bundle ids `$(MERIDIAN_ID_PREFIX).meridian`,
-   `.meridian.MeridianWidgets`, `.MeridianUITests`. Next: step 3: entitlements + Info.plists use
+   `.meridian.MeridianWidgets`, `.MeridianUITests`. Step 3 done: entitlements + Info.plists use
    `$(MERIDIAN_APP_GROUP)` / `$(PRODUCT_BUNDLE_IDENTIFIER)`, key `MeridianAppGroup` in both
-   plists, `SharedDefaults.appGroup` and `BackgroundRefresh.identifier` read Info.plist.
-   Step 4: `shoot.sh` reads the prefix from the xcconfigs (`BUNDLE_ID` override). Step 5:
+   plists, `SharedDefaults.appGroup` and `BackgroundRefresh.identifier` read Info.plist
+   (`preconditionFailure` if missing). Checked in a Simulator build's plists and `.xcent`.
+   Next: step 4: `shoot.sh` reads the prefix from the xcconfigs (`BUNDLE_ID` override). Step 5:
    README install steps, decision CI. Step 6: Core tests, fresh-clone Simulator build
    (empty team), Simulator + iPhone Release build, check signed ids, push. Skip UI tests;
    don't install on the phone unless asked.

@@ -6,7 +6,15 @@ import MeridianCore
 /// An App Group is like a shared folder two processes may both open: the app writes,
 /// widgets only read.
 enum SharedDefaults {
-    static let appGroup = "group.com.shloksinha.meridian"
+    /// `MeridianAppGroup` in each target's Info.plist, filled in at build time from
+    /// `MERIDIAN_APP_GROUP` in `Config/Signing.xcconfig`, so a clone uses its own group.
+    static let appGroup: String = {
+        guard let id = Bundle.main.object(forInfoDictionaryKey: "MeridianAppGroup") as? String,
+              !id.isEmpty else {
+            preconditionFailure("MeridianAppGroup is missing from Info.plist")
+        }
+        return id
+    }()
 
     /// The group's `UserDefaults` (falls back to the app's own if the group is missing).
     static let store = UserDefaults(suiteName: appGroup) ?? .standard

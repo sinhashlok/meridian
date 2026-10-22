@@ -6,8 +6,16 @@ import SwiftData
 /// (decision BD) and the 48-hour job reminder window (decision BK) when the app hasn't been
 /// opened. iOS decides when it actually runs; launch and `.active` still sync too.
 @MainActor enum BackgroundRefresh {
-    /// Listed under `BGTaskSchedulerPermittedIdentifiers` in `Config/Meridian-Info.plist`.
-    static let identifier = "com.shloksinha.meridian.refresh"
+    /// The one id under `BGTaskSchedulerPermittedIdentifiers` in `Config/Meridian-Info.plist`
+    /// (`<bundle id>.refresh`, filled in at build time), read back so the two can't differ.
+    static let identifier: String = {
+        guard let ids = Bundle.main.object(forInfoDictionaryKey: "BGTaskSchedulerPermittedIdentifiers")
+                as? [String],
+              let id = ids.first else {
+            preconditionFailure("BGTaskSchedulerPermittedIdentifiers is missing from Info.plist")
+        }
+        return id
+    }()
 
     /// Asks iOS for the next refresh, no sooner than in 4 hours. Called whenever the app
     /// goes to the background and after each refresh.
