@@ -317,23 +317,19 @@ All M3–M7 iPhone checks passed on 17 Oct (Release build). Left over, all in
    layers in `docs/design/icon/`, notes in `docs/design/icon-brief.md`. Four appearances
    checked on the phone (21 Oct).
    Release (decision CH, 22 Oct): open source under MIT, no App Store/TestFlight. Users
-   build it with a free Apple ID (README › Run it yourself). Bundle ids, team and App
-   Group are still hard-coded to the owner's; anyone cloning must change them.
-   **In progress (22 Oct): configurable signing.** Plan approved: `Config/Signing.xcconfig`
-   (`MERIDIAN_TEAM`, `MERIDIAN_ID_PREFIX`, derived `DEVELOPMENT_TEAM`, `MERIDIAN_APP_GROUP`,
-   `#include? "Signing.local.xcconfig"`), gitignored local file (owner's: W4D7987B7J,
-   com.shloksinha) + committed `.example`. Step 1 done (`32e3435`). Step 2 done (Xcode
-   clicks, verified with `-showBuildSettings`): all 3 targets × Debug/Release are based on
-   `Signing.xcconfig` (never the `.local` one: it lacks `DEVELOPMENT_TEAM`/app group and
-   is gitignored), no project-level team, bundle ids `$(MERIDIAN_ID_PREFIX).meridian`,
-   `.meridian.MeridianWidgets`, `.MeridianUITests`. Step 3 done: entitlements + Info.plists use
-   `$(MERIDIAN_APP_GROUP)` / `$(PRODUCT_BUNDLE_IDENTIFIER)`, key `MeridianAppGroup` in both
-   plists, `SharedDefaults.appGroup` and `BackgroundRefresh.identifier` read Info.plist
-   (`preconditionFailure` if missing). Checked in a Simulator build's plists and `.xcent`.
-   Next: step 4: `shoot.sh` reads the prefix from the xcconfigs (`BUNDLE_ID` override). Step 5:
-   README install steps, decision CI. Step 6: Core tests, fresh-clone Simulator build
-   (empty team), Simulator + iPhone Release build, check signed ids, push. Skip UI tests;
-   don't install on the phone unless asked.
+   build it with a free Apple ID (README › Run it yourself).
+   Configurable signing done (22 Oct, decision CI): every target (Debug + Release) is based on
+   `Config/Signing.xcconfig`, never the `.local` one. Each builder sets `MERIDIAN_TEAM` and
+   `MERIDIAN_ID_PREFIX` in gitignored `Config/Signing.local.xcconfig` (owner's: W4D7987B7J,
+   com.shloksinha; template `.example`); bundle ids, `DEVELOPMENT_TEAM` and
+   `MERIDIAN_APP_GROUP` derive from them. Entitlements/Info.plists use `$(MERIDIAN_APP_GROUP)`
+   and `$(PRODUCT_BUNDLE_IDENTIFIER)`; `SharedDefaults.appGroup` (key `MeridianAppGroup`) and
+   `BackgroundRefresh.identifier` read Info.plist. `shoot.sh` reads the prefix too
+   (`BUNDLE_ID=` overrides). Never pick a team in Signing & Capabilities: it writes
+   `DEVELOPMENT_TEAM` into the target and overrides the xcconfig. Checked: fresh clone builds
+   and runs in the Simulator as `com.example.meridian` with no team; owner's Release device
+   build signs with unchanged ids, group in both signatures and profiles. Not yet installed
+   on the phone (ids unchanged, so data stays).
 
 Test on the phone with a Release build (Debug is unoptimised and feels slow).
 
