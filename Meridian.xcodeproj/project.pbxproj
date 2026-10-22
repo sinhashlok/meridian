@@ -45,12 +45,12 @@
 
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Meridian.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Meridian.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3016F778308A56A800EBF4AD /* Signing.local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.local.xcconfig; sourceTree = "<group>"; };
 		302B095D3083455C00539511 /* MeridianWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MeridianWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		302B095F3083455C00539511 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		302B09613083455C00539511 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeridianWidgetsExtensionDebug.entitlements; sourceTree = "<group>"; };
 		303194683083C790004AF1F8 /* MeridianUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeridianUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		30CD86CB308A67A700F75A79 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Signing.xcconfig; path = Config/Signing.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -133,7 +133,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				3016F778308A56A800EBF4AD /* Signing.local.xcconfig */,
+				30CD86CB308A67A700F75A79 /* Signing.xcconfig */,
 				3031944C3083BD50004AF1F8 /* MeridianWidgetsExtensionDebug.entitlements */,
 				302B0976308346D700539511 /* Shared */,
 				000000000000000000000010 /* Meridian */,
@@ -367,7 +367,6 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = W4D7987B7J;
 				DRIVERKIT_DEPLOYMENT_TARGET = 27.0;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -438,7 +437,6 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = W4D7987B7J;
 				DRIVERKIT_DEPLOYMENT_TARGET = 27.0;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -467,6 +465,7 @@
 		};
 		000000000000000111000000 /* Debug configuration for PBXNativeTarget "Meridian" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -494,7 +493,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).meridian";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -512,6 +511,7 @@
 		};
 		000000000000000112000000 /* Release configuration for PBXNativeTarget "Meridian" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
@@ -539,7 +539,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).meridian";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
@@ -557,6 +557,7 @@
 		};
 		302B09713083455D00539511 /* Debug configuration for PBXNativeTarget "MeridianWidgetsExtension" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
@@ -575,7 +576,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian.MeridianWidgets;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).meridian.MeridianWidgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -595,6 +596,7 @@
 		};
 		302B09723083455D00539511 /* Release configuration for PBXNativeTarget "MeridianWidgetsExtension" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
@@ -613,7 +615,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.meridian.MeridianWidgets;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).meridian.MeridianWidgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = iphoneos;
@@ -634,12 +636,13 @@
 		};
 		3031946F3083C790004AF1F8 /* Debug configuration for PBXNativeTarget "MeridianUITests" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.MeridianUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).MeridianUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -654,12 +657,13 @@
 		};
 		303194703083C790004AF1F8 /* Release configuration for PBXNativeTarget "MeridianUITests" */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 30CD86CB308A67A700F75A79 /* Signing.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.shloksinha.MeridianUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(MERIDIAN_ID_PREFIX).MeridianUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
