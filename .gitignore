@@ -15,4 +15,4 @@ DerivedData/
 *.swo
 
 # Personal signing values (see Config/Signing.local.xcconfig.example)
-Config/Signing.local.xcconfig
+Signing.local.xcconfig
