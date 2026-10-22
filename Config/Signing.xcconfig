@@ -1,0 +1,14 @@
+// Signing and ids for every target (set as each target's base configuration).
+// Don't edit this file to sign the app yourself: copy Signing.local.xcconfig.example
+// to Signing.local.xcconfig (gitignored) and set your own values there.
+
+// Your Apple team id. Empty builds for the Simulator only.
+MERIDIAN_TEAM =
+// Reverse-domain prefix for every id: the app is $(MERIDIAN_ID_PREFIX).meridian.
+MERIDIAN_ID_PREFIX = com.example
+
+DEVELOPMENT_TEAM = $(MERIDIAN_TEAM)
+// Shared by the app and the widget extension (entitlements and both Info.plists).
+MERIDIAN_APP_GROUP = group.$(MERIDIAN_ID_PREFIX).meridian
+
+#include? "Signing.local.xcconfig"

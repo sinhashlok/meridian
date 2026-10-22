@@ -13,3 +13,6 @@ DerivedData/
 # Editor swap files
 *.swp
 *.swo
+
+# Personal signing values (see Config/Signing.local.xcconfig.example)
+Config/Signing.local.xcconfig
