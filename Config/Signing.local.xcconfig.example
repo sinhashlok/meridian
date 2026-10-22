@@ -1,9 +1,10 @@
 // Copy to Signing.local.xcconfig (gitignored) and set your own values.
 // Signing.xcconfig includes it, so these override its defaults.
 
-// Your 10-character team id. To find it: in Xcode pick your team once in any target's
-// Signing & Capabilities, then Build Settings › Development Team shows the id. Or open
-// Keychain Access › your "Apple Development" certificate › Organizational Unit.
+// Your 10-character team id: the OU= value printed by
+//   security find-certificate -c "Apple Development" -p | openssl x509 -noout -subject
+// (README › Install it on your iPhone). Don't pick a team in Signing & Capabilities:
+// that writes it into the target and overrides this file.
 MERIDIAN_TEAM = ABCDE12345
 // Your reverse-domain prefix, e.g. com.yourname. Bundle ids become
 // com.yourname.meridian and com.yourname.meridian.MeridianWidgets.

@@ -444,3 +444,18 @@ of M9). No paid Apple Developer Program, so no TestFlight or App Store builds. T
 with a free Apple ID: own team, own bundle id prefix and App Group, 7-day re-install.
 Decision CG's store-name suffix and trademark check apply only if the app is ever
 published to the store.
+
+**CI. Signing from one xcconfig** (22 Oct). All three targets (Debug and Release) are based
+on `Config/Signing.xcconfig`: `MERIDIAN_TEAM` sets `DEVELOPMENT_TEAM`, `MERIDIAN_ID_PREFIX`
+builds the bundle ids (`<prefix>.meridian`, `.meridian.MeridianWidgets`, `.MeridianUITests`)
+and `MERIDIAN_APP_GROUP` (`group.<prefix>.meridian`). It ends with
+`#include? "Signing.local.xcconfig"`, a gitignored file where each builder sets their own
+two values (template `.example`; the owner's keeps `W4D7987B7J` / `com.shloksinha`, so the
+installed app keeps its ids and data). The entitlements and Info.plists use
+`$(MERIDIAN_APP_GROUP)` and `$(PRODUCT_BUNDLE_IDENTIFIER)`; code reads the group (Info.plist
+key `MeridianAppGroup`) and the refresh id back from Info.plist instead of hard-coding them.
+Without a local file the team is empty and the prefix is `com.example`, which still builds
+for the Simulator. The targets must be based on `Signing.xcconfig`, never the local file:
+it lacks the derived settings and isn't in a clone. Rejected: a script that rewrites ids
+in place (dirty working tree), and `DEVELOPMENT_TEAM` on the command line (Xcode's Run
+button can't pass it).

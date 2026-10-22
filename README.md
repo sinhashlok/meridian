@@ -137,27 +137,40 @@ paid Apple Developer Program.
 ### Try it in the Simulator
 
 1. `git clone https://github.com/sinhashlok/meridian.git` and open `Meridian.xcodeproj`.
-2. Pick the **Meridian** scheme and an iPhone Simulator, then Run (⌘R). If Xcode reports
-   a signing error, do step 2 of the next section first.
+2. Pick the **Meridian** scheme and an iPhone Simulator, then Run (⌘R). No signing
+   setup is needed for the Simulator.
 
 Alarms, Live Activities, widgets and haptics need a real iPhone to judge properly.
 
 ### Install it on your iPhone
 
-Each bundle id belongs to one Apple team, so you need your own ids before Xcode will
-sign the app for you.
+Each bundle id belongs to one Apple team, so you need your own team and ids before
+Xcode will sign the app. They all live in one file, `Config/Signing.local.xcconfig`
+(gitignored), which `Config/Signing.xcconfig` reads for all three targets. The bundle
+ids, the App Group and the background refresh id are all built from it.
 
 1. **Xcode › Settings › Accounts:** add your Apple ID. It appears as a "Personal Team".
-2. Select the **Meridian** project, then for each of the targets **Meridian**,
-   **MeridianWidgetsExtension** and **MeridianUITests**, open **Signing & Capabilities**:
-   - **Team:** your Personal Team.
-   - **Bundle Identifier:** replace `com.shloksinha` with your own reverse-domain
-     prefix, e.g. `com.yourname.meridian` and `com.yourname.meridian.MeridianWidgets`
-     (the widget's id must start with the app's).
-   - **App Groups** (app and widget): remove `group.com.shloksinha.meridian` and add
-     `group.com.yourname.meridian`, ticked in both targets.
-3. Put the same group id in `Shared/SharedDefaults.swift` (`appGroup`). Without it the
-   app still runs, but widgets show no data.
+   Select it, click **Manage Certificates…**, then **+ › Apple Development** (skip this if
+   one is already listed).
+2. Find your 10-character team id:
+   ```bash
+   security find-certificate -c "Apple Development" -p | openssl x509 -noout -subject
+   ```
+   It's the `OU=` value.
+3. Create your signing file and set both values:
+   ```bash
+   cp Config/Signing.local.xcconfig.example Config/Signing.local.xcconfig
+   ```
+   ```
+   MERIDIAN_TEAM = ABCDE12345
+   MERIDIAN_ID_PREFIX = com.yourname
+   ```
+   The app becomes `com.yourname.meridian`, the widget
+   `com.yourname.meridian.MeridianWidgets` and the App Group
+   `group.com.yourname.meridian`. Xcode registers them the first time it signs.
+   Don't pick a team in **Signing & Capabilities**: that writes it into the target and
+   overrides this file. If you did, select the target, open **Build Settings**, find
+   **Development Team** and choose **Edit › Delete**.
 4. Choose **Product › Scheme › Edit Scheme › Run › Build Configuration: Release**
    (Debug is unoptimised and feels slow), connect the iPhone and Run.
 5. **On the iPhone:** turn on **Settings › Privacy & Security › Developer Mode** when
@@ -169,8 +182,7 @@ Free Apple ID limits: the app stops opening after **7 days** (connect the phone 
 again; your data stays), and you can have at most 3 such apps on a device at once. A
 paid developer account raises this to a year.
 
-`scripts/shoot.sh` and a few comments use the bundle id `com.shloksinha.meridian`;
-change them too if you use those scripts.
+`scripts/shoot.sh` reads the same file, so screenshots launch your bundle id.
 
 ## Tests
 
